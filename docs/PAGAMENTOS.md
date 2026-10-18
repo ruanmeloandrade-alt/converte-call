@@ -74,3 +74,11 @@ Revisão de preço Equipe: lookup/idempotência dos novos preços usam `0150-v1`
 Checkout: https://convertecall.pro/checkout. Configuração: https://adm.convertecall.pro/admin/pagamentos.
 BRL padrão; USD e EUR selecionáveis antes da compra. Bases USD6.98/mês e USD16.58/trimestre; funcionário adicional USD1.50/mês ou USD4.50/trimestre, até sete pessoas incluindo titular. Câmbio inicial autorizado USD1=BRL5.50/EUR1.17. ADM muda novas cotações; revisão evita compra usando cotação antiga. Assinaturas existentes preservam preço contratado.
 Alterações de plano são confirmadas no portal hospedado; redução programada para fim do período, upgrade com ajuste de cobrança. Nunca liberar assentos pelo redirecionamento. Troca de moeda de assinatura ativa exige suporte por enquanto. Pix manual mantém valores próprios aprovados; indicados de parceiro não recebem opção Pix.
+
+## 18/10/2026 — diagnóstico de chave restrita no checkout
+
+Falha real reproduzida em uma conta de teste existente: POST /v1/prices devolveu HTTP403, código more_permissions_required. O servidor usava preços novos para BRL/EUR/equipe, mas Prices estava sem acesso na chave restrita. O preço USD já cadastrado abriu a sessão normalmente. Após Prices → Gravação, sessões reais BRL e EUR foram criadas; a página hospedada BRL exibiu R$38,39/mês. Nenhum cartão foi preenchido e nenhuma compra foi concluída.
+
+Mínimos para este fluxo: Prices/Preços → Gravação; Customers → Gravação; Checkout Sessions → Gravação; Subscriptions → Gravação (inclui migração do formato antigo de equipe); Customer Portal → Gravação; Invoices, Payment Intents, Charges and Refunds e Balance → Leitura para confirmação e conciliação. Não é necessário conceder criação de estornos, transferências ou repasses automáticos. Não confundir acesso do conector Codex com a chave restrita do processo Railway.
+
+Billing.api registra somente método, rota com IDs ocultos, status, código e identificador da solicitação Stripe. Chaves, corpo, query string e dados do cliente não são registrados. Teste de regressão verifica essa proteção. Sem alterações na extensão e sem anúncio de atualização por este ajuste no servidor. Uma sessão criada não comprova compra aprovada nem concessão por webhook.
