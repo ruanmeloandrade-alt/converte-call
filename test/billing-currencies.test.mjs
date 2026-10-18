@@ -9,7 +9,7 @@ test('fixed ADM rates, three currencies, immutable prices and hosted upgrade/dow
   if(path==='/v1/subscriptions/sub_fixture'&&method==='POST'){assert.equal(form.proration_behavior,'none');assert.equal(form['items[1][deleted]'],'true');currentPrice=form['items[0][price]'];legacy=false;}
   if(path==='/v1/subscriptions/sub_fixture')return Response.json({id:'sub_fixture',customer:wrongCustomer?'cus_other':'cus_fixture',status:'active',metadata:{workspaceId:ws,application:'converte-call',plan:'monthly',seats:'2'},items:{data:legacy?[{id:'si_base',price:{id:'price_monthly'},quantity:1},{id:'si_team',price:{id:'price_team_monthly'},quantity:1}]:[{id:'si_fixture',price:{id:currentPrice},quantity:1}]}});
   if(path==='/v1/invoices/in_fixture')return Response.json({id:'in_fixture_'+currentPlan,status:'paid',billing_reason:currentPlan==='monthly'?'subscription_create':'subscription_update',amount_paid:invoiceAmount,total:invoiceAmount,currency:'brl',customer:'cus_fixture',parent:{subscription_details:{subscription:'sub_fixture'}},lines:{data:[{quantity:1,pricing:{price_details:{price:currentPrice}},period:{end}}]}});
-  if(path.startsWith('/v1/billing_portal/configurations/'))return Response.json({id:'bpc_fixture'});
+  if(path.startsWith('/v1/billing_portal/configurations/')){assert.equal(Object.keys(form).some(key=>key.includes('[restrictions]')),false,'portal request excludes unsupported Stripe parameters');return Response.json({id:'bpc_fixture'});}
   if(path==='/v1/billing_portal/sessions')return Response.json({url:'https://billing.stripe.com/confirm_fixture'});
   throw Error('Unexpected payment fixture '+path);
  };
