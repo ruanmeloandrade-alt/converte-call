@@ -81,6 +81,7 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
   });return send(res,201,session(user));
  }
  const user=webUser||authenticate(req),ws=user.workspace_id;if(req.headers['x-workspace-id']&&req.headers['x-workspace-id']!==ws)throw error(409,'A conta mudou durante a operação. Atualize o painel.');pathPermissions(store,user,path,req.method);limit('account:'+user.id,300);
+ if(req.method==='POST'&&path==='/v1/auth/admin-web-session'){if(origin!==new URL(billing.publicUrl||'https://convertecall.pro').origin)throw error(403,'Abra o administrador pelo endereço oficial.');return send(res,200,adminSession(user));}
  if(req.method==='GET'&&path==='/v1/academy/settings')return send(res,200,{settings:academySettings(store)});
  if(req.method==='PUT'&&path==='/v1/academy/settings')return send(res,200,{settings:saveAcademySettings(store,user,await body(req,200000))});
  if(path==='/v1/academy/forums'&&req.method==='GET')return send(res,200,{forums:forums(store)});
@@ -101,7 +102,7 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
  if(req.method==='POST'&&path==='/v1/billing/checkout'){limit('checkout:'+user.id,10);const b=await body(req,2000);return send(res,200,await billing.checkout(user,b.plan,b.locale,b.seats??1));}
  if(req.method==='POST'&&path==='/v1/billing/portal'){limit('portal:'+user.id,10);return send(res,200,await billing.portal(user));}
  if(req.method==='POST'&&path==='/v1/account/web-access')return send(res,200,accountWeb.link(user,billing.publicUrl));
- if(req.method==='GET'&&path==='/v1/account/license')return send(res,200,{role:roleOf(store,user.id),license:subscription(store,ws),email:user.email,userId:user.id,workspaceId:ws,membership:membership(store,user),profile:accountProfile(store,user.id)});
+ if(req.method==='GET'&&path==='/v1/account/license')return send(res,200,{role:roleOf(store,user.id),sessionAudience:user.sessionAudience||'extension',license:subscription(store,ws),email:user.email,userId:user.id,workspaceId:ws,membership:membership(store,user),profile:accountProfile(store,user.id)});
  if(req.method==='GET'&&path==='/v1/account/marketing-link')return send(res,200,marketingFor(store,user));
  if(req.method==='GET'&&path==='/v1/account/support-link'){const state=subscription(store,ws),paid=state.status==='active'||state.status==='admin',message=(paid?'#SCc-cP':'#SCc-cC')+' | Olá, vim da Converte Call e preciso de suporte☝🙂';return send(res,200,{url:'https://wa.me/5522992888971?text='+encodeURIComponent(message)});}
  if(req.method==='PATCH'&&path==='/v1/account/profile')return send(res,200,{profile:updateAccountProfile(store,user.id,await body(req,10000))});
