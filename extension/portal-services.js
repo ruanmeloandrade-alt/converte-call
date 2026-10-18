@@ -12,7 +12,7 @@ globalThis.CCPortal=(()=>{
   if(r.status===401){await CCCredentials.remove('ccAccountToken');await CCCredentials.remove('ccRefreshToken');}
   if(!r.ok)throw Object.assign(Error(data.error?.message||'Não foi possível acessar sua conta.'),{status:r.status});return data;
  }
- async function syncKey(){const workspace=(await chrome.storage.local.get('converteCallWorkspace')).converteCallWorkspace;let synced=false;for(const [provider,name]of Object.entries({openai:'ccOpenAIKey',gemini:'ccGeminiKey',anthropic:'ccAnthropicKey'})){const apiKey=await CCCredentials.get(name);if(!apiKey)continue;const profile=workspace?.providers?.profiles?.[provider]||{},selected=String(workspace?.providers?.ai||'openai').toLowerCase()===provider;await request('/v1/ai/credentials',{method:'PUT',body:{provider,apiKey,model:profile.model||(selected?workspace?.providers?.model:undefined),transcriptionModel:profile.transcriptionModel}});synced=true;}return synced;}
+ async function syncKey(){const status=await request('/v1/ai/credentials'),workspace=(await chrome.storage.local.get('converteCallWorkspace')).converteCallWorkspace;let synced=false;for(const [provider,name]of Object.entries({openai:'ccOpenAIKey',gemini:'ccGeminiKey',anthropic:'ccAnthropicKey'})){const apiKey=await CCCredentials.get(name);if(!apiKey)continue;if(!status.profiles?.[provider]?.configured){const profile=workspace?.providers?.profiles?.[provider]||{};await request('/v1/ai/credentials',{method:'PUT',body:{provider,apiKey,model:profile.model,transcriptionModel:profile.transcriptionModel,select:false}});synced=true;}await CCCredentials.remove(name);}return synced;}
 
  async function handle(message,sender){
   if(!String(message.type||'').startsWith('portal-'))return;
@@ -56,9 +56,6 @@ globalThis.CCPortal=(()=>{
   if(message.type==='portal-academy')return {ok:true,...await request('/v1/academy')};
   if(message.type==='portal-progress')return {ok:true,...await request('/v1/academy/'+encodeURIComponent(message.id)+'/progress',{method:'PUT',body:{completed:message.completed}})};
   if(message.type==='portal-support'){
-   const key=await CCCredentials.get('ccOpenAIKey');
-   const workspace=(await chrome.storage.local.get('converteCallWorkspace')).converteCallWorkspace;
-   if(key&&workspace?.providers?.model)try{await request('/v1/ai/credentials',{method:'PUT',body:{apiKey:key,model:workspace.providers.model}});}catch(error){if(error.status!==402)throw error;}
    return {ok:true,...await request('/v1/support/ask',{method:'POST',body:{question:String(message.question||'').slice(0,2001)}})};
   }
   return {ok:false,error:'Ação da conta não encontrada.'};

@@ -8,7 +8,7 @@ test('integration card refreshes live state and pairing persists without a secon
  const listener={addListener(){}},sandbox=vm.createContext({URL,AbortSignal,structuredClone,console,
   CCCore:{migrate:d=>d,merge:(base,next,latest)=>({...latest,...next}),now:()=>new Date().toISOString()},
   CCCredentials:{get:async()=>null},CCDeployment:{accountUrl:'https://account.example'},
-  CCPortal:{request:async path=>{if(path==='/v1/google/status')return {configured:true,calendar:true,gmail:false};if(unavailable)throw Error('Network unavailable');assert.equal(path,'/v1/whatsapp/session');return {status:live,phone:'5511999999999'};}},
+  CCPortal:{request:async path=>{if(path==='/v1/google/status')return {configured:true,calendar:true,gmail:false};if(unavailable)throw Error('Network unavailable');if(path==='/v1/ai/credentials')return {configured:false,provider:'openai',profiles:{}};assert.equal(path,'/v1/whatsapp/session');return {status:live,phone:'5511999999999'};}},
   chrome:{runtime:{getURL:p=>'chrome-extension://test/'+p,onStartup:listener},storage:{local:{get:async()=>({converteCallWorkspace:structuredClone(workspace)}),set:async v=>{workspace=v.converteCallWorkspace;},onChanged:listener},onChanged:listener},alarms:{create(){},onAlarm:listener},notifications:{onClicked:listener}}
  });
  vm.runInContext(readFileSync(new URL('../extension/services.js',import.meta.url),'utf8'),sandbox);
