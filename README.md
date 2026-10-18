@@ -1,6 +1,6 @@
 # Converte Call — servidor em preparação
 
-Servidor próprio para a extensão Chrome, com deploy na Railway. **Não usar GitHub Actions.** Repositório público: [ruanmeloandrade-alt/converte-call](https://github.com/ruanmeloandrade-alt/converte-call). Desenvolvimento na branch `feat/railway-server`. O projeto Railway foi criado e os serviços estão preparados, ainda sem implantação. A Evolution será uma instalação nova e separada.
+Servidor próprio para a extensão Chrome, com deploy na Railway. **Não usar GitHub Actions.** Repositório público: [ruanmeloandrade-alt/converte-call](https://github.com/ruanmeloandrade-alt/converte-call). Código e documentação publicados na branch `feat/railway-server`. O projeto Railway e sua ligação a esta branch estão preparados, ainda sem implantação: a ferramenta cancelou a ativação por falta de aprovação. A Evolution será uma instalação nova e separada.
 
 ## Estado real
 

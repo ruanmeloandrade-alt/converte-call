@@ -67,3 +67,6 @@ Confirmar o README inicial na main conforme pergunta pendente, ou usar login de 
 
 ## Inicialização autorizada e concluída
 Proprietário autorizou expressamente criar README na main. Commit inicial ef5e9414c53781aa671ffb8167c2768791e501ee publicado; branch feat/railway-server criada a partir dele. Demais arquivos serão publicados somente na branch de desenvolvimento. Sem GitHub Actions.
+
+## Código publicado e deploy cancelado pela ferramenta
+180 arquivos enviados, sem workflows, .env, dados ou node_modules. Tree c7088e1184734f4fd3894e78aaa3de4642535fca; commit 4edc877ea6e7cd8ef49fb2e93c88db49c7473adf na feat/railway-server. Três testes nativos passaram novamente. Fonte GitHub ligada de forma staged ao converte-api; 83 alterações pendentes, sem exclusões. accept-deploy foi cancelado pela ferramenta: the user did not approve this action. No changes were made. Nenhum serviço está rodando; não há domínio público, QR nem teste real de WhatsApp. Não repetir o deploy sem resolver a aprovação. O proprietário pode revisar e aplicar o patch no painel Railway. Não declarar implantação completa.

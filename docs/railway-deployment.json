@@ -3,7 +3,11 @@
   "environmentId": "70d17a61-a2c7-49ca-a2e0-fe687d37240c",
   "projectUrl": "https://railway.com/project/dbb2c8cf-3545-4291-9c40-1fd83d8a05e6",
   "patchId": "6d7ae35f-1fa9-4b4c-9a5e-345ae2cb9a88",
-  "state": "STAGED_NOT_RUNNING",
+  "state": "STAGED_DEPLOY_APPROVAL_REQUIRED",
+  "repository": "ruanmeloandrade-alt/converte-call",
+  "branch": "feat/railway-server",
+  "sourceCommit": "4edc877ea6e7cd8ef49fb2e93c88db49c7473adf",
+  "deployAttempt": "Cancelled by tool: the user did not approve this action. No changes were made.",
   "services": {
     "api": "f56840a2-58b9-4e8a-b980-6a350174d11f",
     "evolution": "6c27e131-01f2-4d50-ba27-57e7c58b20c0",
