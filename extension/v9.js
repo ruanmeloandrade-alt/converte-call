@@ -1,5 +1,5 @@
 'use strict';
-const portalOrigin='https://converte-api-production.up.railway.app',humanSupport='https://wa.me/5522992888971';
+const portalOrigin='https://convertecall.pro',humanSupport='https://wa.me/5522992888971';
 let facultyLessons=[],facultyError='',facultyLoading=false,supportAnswers=[],supportBusy=false,portalIdentity=null;
 const accountItems=groupsV4.find(g=>g[0]==='Conta')[1];
 accountItems.splice(accountItems.findIndex(item=>item[0]==='integrations'),0,['academy','Faculdade','workflow']);
@@ -23,8 +23,8 @@ forms['support-question-form']=async f=>{if(supportBusy)return false;const quest
 let portalAccountStatus='loading',portalAccountError='',portalAccountPending,portalAccountEpoch=0;
 function portalAccountControl(){return portalIdentity?`<span class="badge green">✓ ${esc(portalIdentity.profile?.firstName||portalIdentity.email||'Conta conectada')}${portalIdentity.role==='admin'?' · Administrador':''}</span>`:portalAccountStatus==='loading'?'<span class="badge gray">Verificando conta…</span>':button('Entrar na conta','portal-login');}
 async function restorePortalAccount(){
- if(portalAccountPending)return portalAccountPending,portalAccountEpoch=0;
- const epoch=portalAccountEpoch;portalAccountPending=(async()=>{try{const identity=await service('portal-account');if(epoch===portalAccountEpoch){portalIdentity=identity;portalAccountStatus='connected';portalAccountError='';}}catch(error){if(epoch===portalAccountEpoch){portalAccountError=error.message;portalAccountStatus='disconnected';portalIdentity=null;}}finally{if(data&&!document.querySelector('.modal,dialog[open]')&&!document.activeElement?.matches('input,textarea,select'))render();}})().finally(()=>portalAccountPending=null);return portalAccountPending,portalAccountEpoch=0;
+ if(portalAccountPending)return portalAccountPending;
+ const epoch=portalAccountEpoch;portalAccountPending=(async()=>{try{const identity=await service('portal-account');if(epoch===portalAccountEpoch){portalIdentity=identity;portalAccountStatus='connected';portalAccountError='';}}catch(error){if(epoch===portalAccountEpoch){portalAccountError=error.message;portalAccountStatus='disconnected';portalIdentity=null;}}finally{if(data&&!document.querySelector('.modal,dialog[open]')&&!document.activeElement?.matches('input,textarea,select'))render();}})().finally(()=>portalAccountPending=null);return portalAccountPending;
 }
 const settingsBeforePortal=views.settings;views.settings=()=>settingsBeforePortal()+`<section class="card spaced account-profile"><div class="row"><div><span class="eyebrow">MINHA CONTA</span><h2 class="spaced">Sua conta Converte Call</h2></div>${portalAccountControl()}</div>${portalIdentity?`<p><strong>${esc(portalIdentity.email||'')}</strong></p><p class="muted">${portalIdentity.role==='admin'?'Administrador':portalIdentity.license?.plan||'Teste gratuito'}${portalIdentity.license?.expiresAt?' · Validade: '+new Date(portalIdentity.license.expiresAt).toLocaleString('pt-BR'):''}</p><div class="head-actions spaced">${button('Editar meu perfil','portal-profile','primary')}${button('Sair da conta','portal-logout')}</div>`:`<p>${portalAccountStatus==='loading'?'Recuperando sua sessão salva…':'Entre para acessar sua conta e completar seu perfil.'}</p>${portalAccountError?`<p class="muted">${esc(portalAccountError)}</p>`:''}<div class="head-actions spaced">${portalAccountStatus==='loading'?'':button('Criar conta','portal-register')}${button('Verificar conexão','portal-account-refresh')}</div>`}</section>`;
 actions['portal-account-refresh']=restorePortalAccount;

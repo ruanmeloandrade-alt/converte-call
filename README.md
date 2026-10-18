@@ -1,6 +1,6 @@
 # Converte Call — servidor em preparação
 
-Servidor próprio para a extensão Chrome, com deploy na Railway. **Não usar GitHub Actions.** Repositório público: [ruanmeloandrade-alt/converte-call](https://github.com/ruanmeloandrade-alt/converte-call). Código e documentação publicados na branch `feat/railway-server`. API, Evolution, PostgreSQL e Redis online em 18/10/2026. Saúde pública: https://converte-api-production.up.railway.app/health/ready . A Evolution é uma instalação nova e separada. Conta administrativa inicial criada pelo proprietário. A versão 0.10 adiciona cadastro automático de 7 dias sem documentos, Faculdade e suporte; a conexão integral do CRM e o vínculo real do WhatsApp ainda estão pendentes.
+Servidor próprio para a extensão Chrome, com deploy na Railway. **Não usar GitHub Actions.** Repositório público: [ruanmeloandrade-alt/converte-call](https://github.com/ruanmeloandrade-alt/converte-call). Código e documentação publicados na branch `feat/railway-server`. API, Evolution, PostgreSQL e Redis online em 18/10/2026. Saúde pública: https://convertecall.pro/health/ready . A Evolution é uma instalação nova e separada. Conta administrativa inicial criada pelo proprietário. A versão 0.10 adiciona cadastro automático de 7 dias sem documentos, Faculdade e suporte; a conexão integral do CRM e o vínculo real do WhatsApp ainda estão pendentes.
 
 ## Estado real
 
@@ -67,3 +67,11 @@ Atualizações de ZIP exigem `manifest.json` MV3 na raiz, nome Converte Call e v
 Pixel Call: instale o código no `head`, configure eventos na conta e use o seletor visual para botões. Compras externas precisam disparar `PixelCall.track('Nome cadastrado', {orderId:'pedido_123', valueMinor:2990, currency:'BRL'})` após confirmação do checkout. Esse evento é analítico, não libera assinatura nem comissão. Vídeo nativo HTML5 tem play/progresso/conclusão; players de terceiros requerem integração própria.
 
 Limitações operacionais atuais: o motor completo de bots/agentes, recursos avançados de mídia no Inbox e saque de parceiros ainda não estão liberados. Teste de contrato não substitui cobrança/consentimento/pareamento reais. SMS permanece pendente. Deploy por conexão da branch Railway; sem GitHub Actions.
+
+### Endereços e navegação 0.13.1
+
+Domínio público: https://convertecall.pro . Administração: https://adm.convertecall.pro/admin . Conta: https://convertecall.pro/account . Checkout: https://convertecall.pro/checkout (exige conta de cliente). O host legado continua permitido para preservar acessos e callbacks existentes durante a migração.
+
+Administração separada em páginas: /admin, /admin/clientes, /admin/pagamentos, /admin/atualizacoes, /admin/equipe, /admin/faculdade, /admin/historico. Conta: /account, /account/assinatura, /account/integracoes, /account/tracking. Sessão administrativa web independente da extensão.
+
+Não confundir deploy com teste real de compra/pareamento/consentimento. Consulte docs/CODEX_STATUS.md para pendências funcionais e autorizações. Subdomínios pay/parceiros aguardam solução do limite do plano; não contratado upgrade.
