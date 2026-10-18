@@ -1,6 +1,6 @@
 # Converte Call — servidor em preparação
 
-Servidor próprio para a extensão Chrome, com deploy na Railway. **Não usar GitHub Actions.** Repositório público: [ruanmeloandrade-alt/converte-call](https://github.com/ruanmeloandrade-alt/converte-call). Código e documentação publicados na branch `feat/railway-server`. O projeto Railway e sua ligação a esta branch estão preparados, ainda sem implantação: a ferramenta cancelou a ativação por falta de aprovação. A Evolution será uma instalação nova e separada.
+Servidor próprio para a extensão Chrome, com deploy na Railway. **Não usar GitHub Actions.** Repositório público: [ruanmeloandrade-alt/converte-call](https://github.com/ruanmeloandrade-alt/converte-call). Código e documentação publicados na branch `feat/railway-server`. API, Evolution, PostgreSQL e Redis online em 18/10/2026. Saúde pública: https://converte-api-production.up.railway.app/health/ready . A Evolution é uma instalação nova e separada. Cadastro inicial e vínculo do WhatsApp ainda pendentes; a extensão local ainda não está conectada ao servidor.
 
 ## Estado real
 
