@@ -1,7 +1,7 @@
 (() => {
  'use strict';
  const ID='converte-call-native-root',old=document.getElementById(ID);
- if(old){old.dispatchEvent(new Event('cc-show'));return;}
+ if(old)return;
  const host=document.createElement('div');host.id=ID;host.style.cssText='all:initial!important;position:fixed!important;inset:0!important;z-index:2147483646!important;pointer-events:none!important;';
  const sh=host.attachShadow({mode:'closed'}),origin=chrome.runtime.getURL('').replace(/\/$/,'');
  const style=document.createElement('style');style.textContent=`
@@ -13,23 +13,35 @@
  for(const [name,label] of [['pipeline','Funil de vendas'],['record','Gravar call'],['inbox','Abrir WhatsApp Web'],['sale','Registrar venda'],['tracking','Tracking'],['menu','Mais módulos']]){const b=document.createElement('button');b.dataset.action=name;b.setAttribute('aria-label',label);b.title=label;b.innerHTML=icon(name)+`<span class="tip">${label}</span>`;if(name==='sale')b.className='sale';dock.append(b);}
  const menu=document.createElement('div');menu.className='menu hidden';menu.innerHTML='<h3>SEU CRM, NESTA PÁGINA</h3>';
  for(const [view,label] of [['home','Visão geral'],['pipeline','Funil de vendas'],['workflow','Workflow da call'],['agenda','Agenda'],['calls','Gravações e histórico'],['projects','Projetos'],['automations','Central de automações'],['brain','Cérebro da IA'],['email','Email marketing'],['sms','SMS marketing'],['groups','Grupos'],['integrations','Integrações'],['settings','Conta e configurações']]){const b=document.createElement('button');b.textContent=label;b.onclick=()=>openCRM(view);menu.append(b);}
- let surface=null,crm=null,context={name:'',phone:''},barHost=null,lastHeader=null,observer,scheduled=false,disposed=false;
+ let surface=null,crm=null,lessonCard=null,context={name:'',phone:''},barHost=null,lastHeader=null,observer,scheduled=false,disposed=false,suspended=false,followingMode='dock',crmView='home';
  function notice(text){const n=document.createElement('div');n.className='notice';n.textContent=text;sh.append(n);setTimeout(()=>n.remove(),5000);}
  function hideMenu(){menu.classList.add('hidden');}
- function publishSurface(mode,view){chrome.runtime.sendMessage({channel:'cc',type:'surface-location',mode,view}).catch(()=>{});}
- function openCRM(view='home'){publishSurface('crm',view);hideMenu();dock.classList.add('hidden');if(surface)surface.classList.add('hidden');if(!crm){crm=document.createElement('iframe');crm.className='crm';crm.allow='clipboard-write';crm.title='Converte Call • CRM';sh.append(crm);}crm.src=chrome.runtime.getURL('panel.html')+'#'+encodeURIComponent(view);crm.classList.remove('hidden');}
- function openSurface(view='recorder',intent=''){
-  publishSurface('surface',view);hideMenu();dock.classList.remove('hidden');if(crm)crm.classList.add('hidden');if(surface)surface.remove();surface=document.createElement('iframe');surface.className='surface '+(view==='hud'?'hud':view==='customer'?'customer':'');surface.title=view==='hud'?'Converte Call • Apoio da reunião':view==='customer'?'Ficha do cliente':'Converte Call • Gravação';surface.allow='microphone; display-capture; clipboard-write';surface.src=chrome.runtime.getURL('surface.html')+'#'+new URLSearchParams({view,context:JSON.stringify(context),intent});const frame=surface,snapshot=intent==='reply'?conversationSnapshot():null;frame.addEventListener('load',()=>frame.contentWindow.postMessage({channel:'cc-host',type:'inbox-context',intent,context,snapshot},origin),{once:true});sh.append(frame);
+ function publishSurface(mode,view){followingMode=mode;lessonCard?.remove();lessonCard=null;if(!suspended)chrome.runtime.sendMessage({channel:'cc',type:'surface-location',mode,view}).catch(()=>{});}
+ function showLesson(lesson){
+  if(lessonCard?.isConnected&&lessonCard.dataset.lessonId===lesson?.id)return;
+  lessonCard?.remove();lessonCard=null;
+  if(!['www.youtube.com','youtube.com'].includes(location.hostname)||new URL(location.href).searchParams.get('v')!==lesson?.videoId)return;
+  const card=document.createElement('section');card.dataset.lessonId=lesson.id;card.setAttribute('aria-label','Acompanhamento da aula Converte Call');card.style.cssText='position:fixed;right:80px;bottom:24px;width:300px;max-width:calc(100vw - 100px);padding:20px;border:1px solid #ded5f6;border-radius:18px;background:white;color:#29213f;box-shadow:0 12px 45px #15192e26;pointer-events:auto;font-size:13px;line-height:1.5';
+  const label=document.createElement('small');label.textContent='FACULDADE CONVERTE CALL';label.style.color='#6852e8';
+  const title=document.createElement('h3');title.textContent=lesson.title;title.style.margin='8px 0';
+  const message=document.createElement('p');message.textContent='Inscreva-se no canal e deixe seu comentário no YouTube. Comente sua dúvida: ela será respondida em até 24 horas.';
+  const back=document.createElement('button');back.dataset.ccAction='academy-return';back.textContent='← Voltar para a Faculdade';back.style.cssText='width:100%;border:0;border-radius:999px;padding:12px;background:#6852e8;color:white;font-weight:600';back.onclick=()=>openCRM('academy');
+  card.append(label,title,message,back);sh.append(card);lessonCard=card;
+ }
+ function openCRM(view='home',publish=true){if(publish)publishSurface('crm',view);hideMenu();dock.classList.add('hidden');if(surface)surface.classList.add('hidden');if(!crm){crm=document.createElement('iframe');crm.className='crm';crm.allow='clipboard-write';crm.title='Converte Call • CRM';sh.append(crm);}if(!crm.src||crmView!==view)crm.src=chrome.runtime.getURL('panel.html')+'#'+encodeURIComponent(view);crmView=view;crm.classList.remove('hidden');}
+ function openSurface(view='recorder',intent='',publish=true){
+  if(publish)publishSurface('surface',view);hideMenu();dock.classList.remove('hidden');if(crm)crm.classList.add('hidden');if(!publish&&surface?.dataset.view===view){surface.classList.remove('hidden');return;}if(surface)surface.remove();surface=document.createElement('iframe');surface.dataset.view=view;surface.className='surface '+(view==='hud'?'hud':view==='customer'?'customer':'');surface.title=view==='hud'?'Converte Call • Apoio da reunião':view==='customer'?'Ficha do cliente':'Converte Call • Gravação';surface.allow='microphone; display-capture; clipboard-write';surface.src=chrome.runtime.getURL('surface.html')+'#'+new URLSearchParams({view,context:JSON.stringify(context),intent});const frame=surface,snapshot=intent==='reply'?conversationSnapshot():null;frame.addEventListener('load',()=>frame.contentWindow.postMessage({channel:'cc-host',type:'inbox-context',intent,context,snapshot},origin),{once:true});sh.append(frame);
  }
  async function record(){const r=await chrome.runtime.sendMessage({channel:'cc',type:'capture-status'});if(r?.recording)openSurface('hud');else{const opened=await chrome.runtime.sendMessage({channel:'cc',type:'open-recorder'});if(!opened.ok)notice(opened.error);}}
  async function perform(action){if(action==='pipeline')return openCRM('pipeline');if(action==='record')return record();if(action==='inbox'){hideMenu();const access=await chrome.runtime.sendMessage({channel:'cc',type:'open-inbox'});if(!access?.ok){notice(access?.error||'Entre na sua conta.');return;}if(access.employee){openCRM('employee-inbox');return;}if(location.hostname==='web.whatsapp.com'){if(crm)crm.classList.add('hidden');if(surface)surface.classList.add('hidden');findWhatsApp();notice('Selecione uma conversa. Os controles aparecem no cabeçalho e acima da caixa de mensagem.');}return;}if(action==='sale')return openCRM('orders');if(action==='tracking')return openCRM('tracking');if(action==='menu')menu.classList.toggle('hidden');}
  dock.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)perform(b.dataset.action).catch(()=>notice('A extensão foi atualizada. Recarregue a página para continuar.'));});
  const onMessage=e=>{if(e.origin!==origin||![surface?.contentWindow,crm?.contentWindow].includes(e.source)||e.data?.channel!=='cc-ui')return;const m=e.data;
-  if(m.action==='navigation'){publishSurface('crm',m.view);return;}
+  if(suspended)return;
+  if(m.action==='navigation'){crmView=m.view;publishSurface(followingMode==='inbox'&&m.view==='employee-inbox'?'inbox':'crm',m.view);return;}
   if(m.action==='hide'||m.action==='close'){publishSurface('dock','home');dock.classList.remove('hidden');if(e.source===crm?.contentWindow)crm.classList.add('hidden');else surface.classList.add('hidden');}
   if(m.action==='crm')openCRM(m.view||'home');if(m.action==='surface')openSurface(m.view||'hud');if(m.action==='inbox')perform('inbox');if(m.action==='resize-surface'&&surface){surface.style.height=Math.max(230,Math.min(innerHeight-32,Number(m.height)||390))+'px';}
   if(m.action==='move-surface'&&surface){const r=surface.getBoundingClientRect();surface.style.right='auto';surface.style.bottom='auto';surface.style.left=Math.max(6,Math.min(innerWidth-r.width-6,r.left+(Number(m.dx)||0)))+'px';surface.style.top=Math.max(6,Math.min(innerHeight-r.height-6,r.top+(Number(m.dy)||0)))+'px';}
-  if(m.action==='compact'&&crm){crm.classList.add('hidden');dock.classList.remove('hidden');}if(m.action==='expand'&&crm){crm.classList.remove('hidden');}
+  if(m.action==='compact'&&crm){publishSurface(location.hostname==='web.whatsapp.com'&&crmView==='employee-inbox'?'inbox':'dock',crmView);crm.classList.add('hidden');dock.classList.remove('hidden');}if(m.action==='expand'&&crm){publishSurface('crm',crmView);crm.classList.remove('hidden');}
  };
  window.addEventListener('message',onMessage);
  const nativeMounts=new Map();let nativeData=null;const composerResize=new ResizeObserver(()=>positionComposer());
@@ -67,17 +79,32 @@
   let sideHeader=sidebarHeader();if(sideHeader===header)sideHeader=null;
   const tags=[...new Set([...(lead?.tags||[]),...(lead?.tag?[lead.tag]:[])])];mountNative('tags',headerWord(sideHeader),'compact tags',[{label:'Tags do lead'+(tags.length?' ('+tags.length+')':''),action:'tags'}]);positionInline();
  }
- let nativeOwner=false;async function checkNativeOwner(){try{const result=await chrome.runtime.sendMessage({channel:'cc',type:'native-inbox-access'});nativeOwner=result?.ok===true&&result.owner===true;}catch{nativeOwner=false;}findWhatsApp();}if(location.hostname==='web.whatsapp.com')checkNativeOwner();
+ let nativeOwner=false;async function checkNativeOwner(){try{const result=await chrome.runtime.sendMessage({channel:'cc',type:'native-inbox-access'});nativeOwner=result?.ok===true&&result.owner===true;}catch{nativeOwner=false;}if(!suspended&&followingMode==='inbox'&&nativeOwner){crm?.classList.add('hidden');surface?.classList.add('hidden');dock.classList.remove('hidden');}findWhatsApp();}if(location.hostname==='web.whatsapp.com')checkNativeOwner();
  chrome.storage.local.get('converteCallWorkspace').then(r=>{nativeData=r.converteCallWorkspace;findWhatsApp();});
  chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.converteCallWorkspace){nativeData=changes.converteCallWorkspace.newValue;findWhatsApp();}});
  function findWhatsApp(){
-  if(disposed||location.hostname!=='web.whatsapp.com')return;if(!nativeOwner){for(const key of [...nativeMounts.keys()])removeNative(key);return;}applyWhatsAppBrand();
+  if(disposed||location.hostname!=='web.whatsapp.com')return;if(suspended||!nativeOwner){for(const key of [...nativeMounts.keys()])removeNative(key);return;}applyWhatsAppBrand();
   const main=document.querySelector('#main');const header=main?.querySelector('header');if(!header){for(const key of [...nativeMounts.keys()])removeNative(key);context={name:'',phone:''};return;}
   const titleEl=header.querySelector('[data-testid="conversation-info-header-chat-title"]')||[...header.querySelectorAll('span[title]')].find(n=>!n.closest('#converte-call-whatsapp-actions'));
   const title=(titleEl?.getAttribute('title')||titleEl?.textContent||'').trim().slice(0,160);const phone=/^\+?[\d\s().-]{7,}$/.test(title)?title.replace(/[^\d+]/g,''):'';
   const next={name:title,phone};if(title!==context.name||phone!==context.phone){context=next;surface?.contentWindow.postMessage({channel:'cc-host',type:'conversation',context},origin);}nativeButtons(header);
  }
- const runtimeListener=(m)=>{if(m?.channel!=='cc')return;if(m.type==='surface-ping')return;if(m.type==='surface-suspend'){crm?.remove();crm=null;surface?.remove();surface=null;hideMenu();dock.classList.remove('hidden');return;}if(m.type==='surface-restore'){const state=m.state;if(state.mode==='crm')openCRM(state.view);else if(state.mode==='surface')openSurface(state.view);else{dock.classList.remove('hidden');hideMenu();}return;}if(m.type==='open')openSurface(m.view);if(m.type==='state-changed'){refreshState();if(location.hostname==='web.whatsapp.com')checkNativeOwner();surface?.contentWindow.postMessage({channel:'cc-host',type:'refresh'},origin);}};
+ const runtimeListener=(m,sender,reply)=>{if(m?.channel!=='cc')return;
+  if(m.type==='surface-ping'){reply({ok:true});return;}
+  if(m.type==='surface-toggle'){host.dispatchEvent(new Event('cc-show'));reply({ok:true});return;}
+  if(m.type==='surface-suspend'){suspended=true;host.style.setProperty('display','none','important');for(const key of [...nativeMounts.keys()])removeNative(key);hideMenu();reply({ok:true});return;}
+  if(m.type==='surface-restore'){
+   const state=m.state;if(!state?.enabled){reply({ok:false});return;}
+   suspended=false;host.style.removeProperty('display');followingMode=state.mode;
+   if(state.mode!=='lesson'){lessonCard?.remove();lessonCard=null;}
+   if(state.mode==='crm')openCRM(state.view,false);
+   else if(state.mode==='surface')openSurface(state.view,'',false);
+   else if(state.mode==='inbox'&&(location.hostname!=='web.whatsapp.com'||!nativeOwner))openCRM('employee-inbox',false);
+   else{crm?.classList.add('hidden');surface?.classList.add('hidden');dock.classList.remove('hidden');hideMenu();if(state.mode==='lesson')showLesson(state.lesson);}
+   findWhatsApp();reply({ok:true});return;
+  }
+  if(m.type==='open')openSurface(m.view);if(m.type==='state-changed'){refreshState();if(location.hostname==='web.whatsapp.com')checkNativeOwner();surface?.contentWindow.postMessage({channel:'cc-host',type:'refresh'},origin);}
+ };
  chrome.runtime.onMessage.addListener(runtimeListener);
  async function refreshState(){try{const s=await chrome.runtime.sendMessage({channel:'cc',type:'capture-status'});dock.querySelector('[data-action=record]').classList.toggle('recording',!!s.recording);}catch{}}
  let dragState=null;
@@ -86,10 +113,10 @@
  drag.addEventListener('pointerup',()=>{if(dragState?.moved)chrome.storage.local.set({ccDock:{x:parseFloat(dock.style.left),y:parseFloat(dock.style.top)}});dragState=null;});
  const clamp=()=>{if(dock.style.left){dock.style.left=Math.max(6,Math.min(innerWidth-58,parseFloat(dock.style.left)))+'px';dock.style.top=Math.max(6,Math.min(innerHeight-dock.offsetHeight-6,parseFloat(dock.style.top)))+'px';}};
  window.addEventListener('resize',()=>{clamp();positionComposer();positionInline();});window.addEventListener('scroll',()=>{positionComposer();positionInline();},true);
- host.addEventListener('cc-show',()=>{publishSurface('dock','home');dock.classList.remove('hidden');menu.classList.toggle('hidden');});
+ host.addEventListener('cc-show',()=>{suspended=false;host.style.removeProperty('display');publishSurface('dock','home');crm?.classList.add('hidden');surface?.classList.add('hidden');dock.classList.remove('hidden');menu.classList.toggle('hidden');});
  sh.append(style,dock,menu);document.documentElement.append(host);
  chrome.storage.local.get('ccDock').then(({ccDock:p})=>{if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){dock.style.right='auto';dock.style.left=p.x+'px';dock.style.top=p.y+'px';clamp();}});
  if(location.hostname==='web.whatsapp.com'){observer=new MutationObserver(()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;findWhatsApp();});});observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['title']});findWhatsApp();}
  refreshState();
- if(location.hostname==='meet.google.com'||location.hostname.endsWith('.zoom.us'))openSurface('hud');
+ chrome.runtime.sendMessage({channel:'cc',type:'surface-ready'}).then(result=>{if(result?.suspended){suspended=true;host.style.setProperty('display','none','important');findWhatsApp();}}).catch(()=>{});
 })();

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Converte Call",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "minimum_chrome_version": "116",
   "description": "CRM no WhatsApp Web, funis, bots, agentes, projetos Kanban, UTMs e gravação local.",
   "permissions": [
@@ -106,17 +106,7 @@
     "extension_pages": "script-src 'self'; object-src 'none'; connect-src https:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline'; frame-src 'self' https://www.youtube-nocookie.com"
   },
   "host_permissions": [
-    "https://web.whatsapp.com/*",
-    "https://meet.google.com/*",
-    "https://*.zoom.us/*",
-    "https://api.openai.com/*",
-    "https://www.googleapis.com/*",
-    "https://gmail.googleapis.com/*",
-    "https://converte-api-production.up.railway.app/*",
-    "https://convertecall.pro/*",
-    "https://*.convertecall.pro/*"
-  ],
-  "optional_host_permissions": [
+    "http://*/*",
     "https://*/*"
   ]
 }

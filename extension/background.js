@@ -16,14 +16,22 @@ chrome.downloads.onChanged.addListener(delta=>{if(['complete','interrupted'].inc
 async function notify(){for(const tab of await chrome.tabs.query({})){if(tab.id)chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'state-changed'}).catch(()=>{});}}
 async function downloadRecording(id){const result=await media({type:'media-url',id});if(!result.ok)throw Error(result.error);try{const downloadId=await chrome.downloads.download({url:result.url,filename:'Converte Call/'+result.filename,saveAs:false});downloads.set(downloadId,result.token);return {ok:true,downloadId};}catch(e){await media({type:'release-url',token:result.token});throw e;}}
 async function handle(m,sender){
- if(m.type==='surface-location'&&sender.tab){const key='ccSurface:'+sender.tab.windowId;await chrome.storage.session.set({[key]:{enabled:true,mode:['crm','surface','dock'].includes(m.mode)?m.mode:'dock',view:String(m.view||'home').slice(0,80)}});return {ok:true};}
+ if(m.type==='surface-location'&&sender.tab){const active=(await chrome.tabs.query({active:true,windowId:sender.tab.windowId}))[0];if(active?.id!==sender.tab.id||!(await chrome.windows.get(sender.tab.windowId)).focused)return {ok:false};await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:['crm','surface','dock','inbox'].includes(m.mode)?m.mode:'dock',view:String(m.view||'home').slice(0,80)}});return {ok:true};}
+ if(m.type==='surface-ready'&&sender.tab){const sourceWindow=await chrome.windows.get(sender.tab.windowId);if(!sender.tab.active||!sourceWindow.focused||sourceWindow.type!=='normal')return {ok:true,suspended:true};let state=(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState;if(!state){const active=(await chrome.tabs.query({active:true,windowId:sender.tab.windowId}))[0];if(active?.id!==sender.tab.id)return {ok:true,suspended:true};state={enabled:true,mode:/^https:\/\/(meet\.google\.com|[^/]*\.zoom\.us)\//.test(sender.tab.url||'')?'surface':'dock',view:'hud'};await chrome.storage.session.set({ccSurfaceState:state});}queueSurfaceFollow(sender.tab.id,sender.tab.windowId);return {ok:true};}
  if(m.type==='open-recorder')return openRecorder(sender);
+ if(m.type==='open-academy-lesson'){
+  const content=await CCPortal.request('/v1/academy'),lesson=content.lessons?.find(item=>item.id===m.id);
+  if(!lesson||!/^[-\w]{11}$/.test(lesson.videoId||''))throw Error('Aula não disponível para sua conta.');
+  await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:'lesson',view:'academy',lesson:{id:lesson.id,title:String(lesson.title||'Sua aula').slice(0,160),videoId:lesson.videoId}}});
+  await chrome.tabs.create({url:'https://www.youtube.com/watch?v='+lesson.videoId,active:true});return {ok:true};
+ }
  if(m.type==='capture-engine-started'){const recordingContext=await recorderContext();if(recordingContext?.tabId>=0){const recordingTab=await chrome.tabs.get(recordingContext.tabId);await chrome.windows.update(recordingTab.windowId,{state:'minimized'});}const host=(await chrome.storage.session.get('ccRecorderHostTab')).ccRecorderHostTab;if(host){await chrome.tabs.update(host,{active:true}).catch(()=>{});await chrome.tabs.sendMessage(host,{channel:'cc',type:'open',view:'hud'}).catch(()=>{});}await notify();return {ok:true};}
  const portal=await CCPortal.handle(m,sender);if(portal!==undefined)return portal;
  const service=await CCServices.handle(m,sender);if(service!==undefined)return service;
  if(m.type==='native-inbox-access'){if(!sender.url?.startsWith('https://web.whatsapp.com/'))throw Error('Abra o WhatsApp Web.');const identity=await CCPortal.request('/v1/account/license');return {ok:true,owner:identity.membership?.role==='owner'};}
  if(m.type==='open-inbox'){
   const identity=await CCPortal.request('/v1/account/license');if(identity.membership?.role==='member'){if(!identity.membership.permissions.includes('inbox'))throw Error('Seu usuário não tem acesso ao Inbox.');return {ok:true,employee:true};}
+  await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:'inbox',view:'employee-inbox'}});
   const tabs=await chrome.tabs.query({url:'https://web.whatsapp.com/*'});const tab=tabs[0]||await chrome.tabs.create({url:'https://web.whatsapp.com/'});
   await chrome.tabs.update(tab.id,{active:true});if(tab.windowId)await chrome.windows.update(tab.windowId,{focused:true});return {ok:true};
  }
@@ -57,11 +65,26 @@ chrome.runtime.onMessage.addListener((m,sender,reply)=>{
 });
 chrome.action.onClicked.addListener(async tab=>{
  if(!tab.id)return;
- try{await chrome.scripting.executeScript({target:{tabId:tab.id},files:['content.js']});await chrome.action.setBadgeText({tabId:tab.id,text:''});}
+ try{await chrome.scripting.executeScript({target:{tabId:tab.id},files:['content.js']});await chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'surface-toggle'});await chrome.action.setBadgeText({tabId:tab.id,text:''});}
  catch{await chrome.action.setBadgeBackgroundColor({tabId:tab.id,color:'#CA4962'});await chrome.action.setBadgeText({tabId:tab.id,text:'!'});await chrome.action.setTitle({tabId:tab.id,title:'Abra o WhatsApp Web, Meet ou outro site comum para usar os controles.'});}
 });
 
 let surfaceSwitch=Promise.resolve();
-async function followActiveTab(tabId,windowId){const key='ccSurface:'+windowId,state=(await chrome.storage.session.get(key))[key];if(!state?.enabled)return;const active=(await chrome.tabs.query({active:true,windowId}))[0];if(active?.id!==tabId)return;const tab=await chrome.tabs.get(tabId);if(!/^https?:/.test(tab.url||''))return;for(const other of await chrome.tabs.query({windowId}))if(other.id!==tabId)await chrome.tabs.sendMessage(other.id,{channel:'cc',type:'surface-suspend'}).catch(()=>{});try{await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-ping'});}catch{try{await chrome.scripting.executeScript({target:{tabId},files:['content.js']});}catch{return;}}const latest=(await chrome.tabs.query({active:true,windowId}))[0];if(latest?.id!==tabId)return;await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-restore',state}).catch(()=>{});}
-chrome.tabs.onActivated.addListener(({tabId,windowId})=>{surfaceSwitch=surfaceSwitch.catch(()=>{}).then(()=>followActiveTab(tabId,windowId));});
-chrome.tabs.onUpdated.addListener((tabId,change,tab)=>{if(change.status==='complete'&&tab.active)surfaceSwitch=surfaceSwitch.catch(()=>{}).then(()=>followActiveTab(tabId,tab.windowId));});
+function queueSurfaceFollow(tabId,windowId){surfaceSwitch=surfaceSwitch.catch(()=>{}).then(()=>followActiveTab(tabId,windowId));}
+async function followActiveTab(tabId,windowId){
+ let state=(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState;
+ if(!state?.enabled)return;
+ const win=await chrome.windows.get(windowId);if(win.type!=='normal'||!win.focused)return;
+ const active=(await chrome.tabs.query({active:true,windowId}))[0];if(active?.id!==tabId)return;
+ const tab=await chrome.tabs.get(tabId);
+ for(const other of await chrome.tabs.query({}))if(other.id!==tabId)await chrome.tabs.sendMessage(other.id,{channel:'cc',type:'surface-suspend'}).catch(()=>{});
+ // Chrome blocks injection into internal pages, its store and other extensions.
+ if(!/^https?:/.test(tab.url||''))return;
+ try{await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-ping'});}catch{try{await chrome.scripting.executeScript({target:{tabId},files:['content.js']});}catch{return;}}
+ const latest=(await chrome.tabs.query({active:true,windowId}))[0];if(latest?.id!==tabId||!(await chrome.windows.get(windowId)).focused)return;
+ state=(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState;
+ await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-restore',state}).catch(()=>{});
+}
+chrome.tabs.onActivated.addListener(({tabId,windowId})=>queueSurfaceFollow(tabId,windowId));
+chrome.tabs.onUpdated.addListener((tabId,change,tab)=>{if(change.status==='complete'&&tab.active)queueSurfaceFollow(tabId,tab.windowId);});
+chrome.windows.onFocusChanged.addListener(async windowId=>{if(windowId<0)return;try{const tab=(await chrome.tabs.query({active:true,windowId}))[0];if(tab)queueSurfaceFollow(tab.id,windowId);}catch{}});
