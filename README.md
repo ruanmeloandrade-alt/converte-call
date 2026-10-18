@@ -39,6 +39,7 @@ Não basta o healthcheck passar: os fluxos de bots, agentes, mídia, OAuth e aut
 - [Contratos e limites](docs/ARQUITETURA.md)
 - [Pixel Call](docs/PIXEL-CALL.md)
 - [Andamento e solicitações](docs/CODEX_STATUS.md)
+- [Licenças de 7 dias e administração de assinaturas](docs/LICENCAS.md)
 
 Referências oficiais: [Railway autodeploy](https://docs.railway.com/deployments/github-autodeploys), [Evolution OpenAPI v2](https://github.com/evolution-foundation/docs-evolution/blob/main/openapi/openapi-v2.json), [SQLite no Node 24](https://nodejs.org/docs/latest-v24.x/api/sqlite.html).
 

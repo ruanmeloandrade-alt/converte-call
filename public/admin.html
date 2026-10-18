@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Converte Call · Administração</title><link rel="stylesheet" href="/admin.css"><script src="/admin.js" defer></script></head>
+<body>
+ <header><a class="brand" href="/admin"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Converte Call</a><span>Administração</span><button id="logout" class="secondary" hidden>Sair</button></header>
+ <main>
+  <section id="login-panel" class="panel login">
+   <p class="eyebrow">ACESSO DO ADMINISTRADOR</p><h1>Gerencie seus clientes e licenças.</h1><p class="muted">Entre com a conta criada no cadastro inicial do Converte Call.</p>
+   <form id="login"><label>E-mail<input name="email" type="email" required autocomplete="username"></label><label>Senha<input name="password" type="password" required autocomplete="current-password"></label><button>Entrar</button></form>
+  </section>
+  <section id="dashboard" hidden>
+   <div class="page-heading"><div><p class="eyebrow">SEU NEGÓCIO</p><h1>Clientes e assinaturas</h1><p class="muted">Libere o teste e ajuste a validade depois do pagamento.</p></div><button id="refresh" class="secondary">Atualizar</button></div>
+   <div class="metrics"><article><span>Clientes</span><strong id="total">0</strong></article><article><span>Em teste</span><strong id="trial">0</strong></article><article><span>Assinaturas ativas</span><strong id="paid">0</strong></article><article><span>Vencidos ou suspensos</span><strong id="expired">0</strong></article></div>
+   <div class="columns">
+    <section class="panel accounts"><div class="section-title"><h2>Seus clientes</h2><input id="search" type="search" placeholder="Buscar por e-mail" aria-label="Buscar clientes"></div><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Plano</th><th>Situação</th><th>Validade</th><th>Ações</th></tr></thead><tbody id="accounts"></tbody></table></div><p id="empty-accounts" class="muted" hidden>Os clientes aparecem aqui quando ativarem uma licença.</p></section>
+    <aside class="panel issue"><span class="badge">7 DIAS GRÁTIS</span><h2>Nova licença de teste</h2><p class="muted">Uso único. Os 7 dias começam quando o cliente ativa a licença e cria a conta.</p><form id="issue"><label>E-mail do cliente <span class="muted">(opcional)</span><input name="email" type="email" autocomplete="off" placeholder="cliente@exemplo.com"></label><p class="small muted">Se informar um e-mail, somente ele poderá usar esta licença.</p><button>Gerar licença</button></form>
+     <div id="issued" class="issued" hidden><strong>Licença criada</strong><p class="small">Copie agora para enviar ao cliente.</p><label>Código<input id="license-key" readonly></label><button id="copy-key" class="secondary">Copiar código</button><label>Link de ativação<input id="activation-url" readonly></label><button id="copy-link" class="secondary">Copiar link</button></div>
+    </aside>
+   </div>
+   <section class="panel"><h2>Licenças emitidas</h2><p class="muted small">Revogar uma licença disponível impede sua ativação. Para clientes já cadastrados, use “Suspender”.</p><div class="table-wrap"><table><thead><tr><th>Identificação</th><th>E-mail autorizado</th><th>Emissão</th><th>Situação</th><th>Ação</th></tr></thead><tbody id="invites"></tbody></table></div></section>
+   <details class="panel"><summary>Histórico de alterações</summary><div class="table-wrap"><table><thead><tr><th>Data</th><th>Ação</th><th>Conta</th></tr></thead><tbody id="audit"></tbody></table></div></details>
+  </section>
+  <p id="status" role="status" aria-live="polite"></p>
+ </main>
+ <dialog id="subscription-dialog"><form id="subscription-form"><div class="section-title"><h2>Editar assinatura</h2><button type="button" id="close-dialog" class="secondary">Fechar</button></div><p id="customer-email" class="muted"></p><label>Nome do plano<input name="plan" list="plans" required maxlength="80" value="Mensal"></label><datalist id="plans"><option value="Mensal"><option value="Semestral"><option value="Personalizado"></datalist><label>Como deseja liberar?<select name="mode"><option value="days">Acrescentar dias</option><option value="date">Definir data de vencimento</option></select></label><label id="days-label">Quantidade de dias<input name="days" type="number" min="1" max="3650" step="1" value="30"></label><p id="days-hint" class="muted small">Se a assinatura ainda estiver ativa, os dias são acrescentados ao vencimento atual. Se estiver vencida, contam a partir de agora.</p><label id="date-label" hidden>Vencimento no seu horário local<input name="expiresAt" type="datetime-local"></label><button>Salvar e liberar acesso</button></form></dialog>
+</body></html>

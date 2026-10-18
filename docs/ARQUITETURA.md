@@ -14,6 +14,8 @@ vendor/core.js e core-v4.js preservam o motor de projetos da extensão. vendor/r
 
 ## API implementada
 
+O servidor 0.9 acrescenta o painel `/admin`, ativação `/activate` e licenciamento por workspace. A migração aditiva 2 cria account_roles, subscriptions, license_invites e license_audit. A conta inicial existente recebe papel administrativo; clientes são cadastrados apenas com licença e têm operações bloqueadas no servidor após vencer. Detalhes, contratos e limites em [LICENCAS.md](LICENCAS.md).
+
 - `/health/ready`: saúde e configuração, sem valores secretos.
 - `POST /v1/auth/bootstrap`: conta inicial com token de instalação de uso único.
 - `POST /v1/auth/session`, `POST /v1/auth/logout`: sessão única, expiração de 12 horas.
