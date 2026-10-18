@@ -1,6 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {latestRelease} from './release-uploads.mjs';
 const files={
+ '/story-portraits.png':['story-portraits.png','image/png'],
  '/':['sales.html','text/html'],'/sales':['sales.html','text/html'],'/sales.css':['sales.css','text/css'],'/sales.js':['sales.js','text/javascript'],'/experience-base.css':['experience-base.css','text/css'],'/brand.svg':['brand.svg','image/svg+xml'],
  '/download':['download.html','text/html'],'/download.css':['download.css','text/css'],'/download.js':['download.js','text/javascript'],'/install.js':['install.js','text/javascript'],
  '/account/module.css':['mobile-module.css','text/css'],'/account/app':['mobile.html','text/html'],'/account/mobile.css':['mobile.css','text/css'],'/account/mobile.js':['mobile.js','text/javascript'],'/account/manifest.webmanifest':['app.webmanifest','application/manifest+json'],'/account/sw.js':['app-sw.js','text/javascript'],'/account/offline':['offline.html','text/html'],

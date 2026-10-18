@@ -483,3 +483,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Preservados: CTA7dias, UTMs/ref, ZIP da publicação ADM, tutorial, conta, módulos e PWA. Sem mudanças de integrações, preços, dados ou versão da extensão.
 - Validação: jornada real desktop/Android passou (sem overflow/erros JS, pausa da animação, seleção/próximo/anterior dos stories, downloadZIP/tutorial e módulosPWA); teste de publicação deZIP com página já aberta passou. Screenshots revisados.
 - Arquivos alterados: public/sales.html, public/sales.css, public/sales.js, test/public-experience.browser.mjs, docs/CODEX_STATUS.md.
+
+## 2026-10-18 — Rostos e histórias individuais
+- Sete retratos sintéticos em sprite local substituem todas as iniciais dos stories. Cada retrato seleciona título, relato, perfil e composição visual distintos; mantém identificação de exemplo. Variações de cores, padrões e adesivos por história.
+- Validado em navegador: clique nos sete rostos, sete textos e posições de retrato únicos, imagem decodificada e proporção correta, conteúdo dentro do telefone; mantém testes desktop/Android, navegação, pausa, download, tutorial e módulosPWA.
+- Arquivos: public/sales.html, public/sales.css, public/sales.js, public/story-portraits.png, src/public-experience.mjs (somente rota estática do PNG), test/public-experience.browser.mjs e docs/CODEX_STATUS.md. Sem dependências, alteração de integrações ou versão da extensão.
