@@ -1,6 +1,6 @@
 # Cadastro direto e assinatura — 0.10.0
 
-Cada conta começa com 7 dias grátis, sem cartão, documento ou convite. O prazo começa na criação da conta e usa o relógio do servidor. O administrador libera a assinatura manualmente em /admin: acrescenta dias, define vencimento e suspende/reativa. Não existe cobrança automática.
+Cada conta começa com 7 dias grátis, sem cartão, documento ou convite. O prazo começa na criação da conta e usa o relógio do servidor. O administrador mantém liberação manual em /admin por dias/data. A versão 0.11 adiciona confirmação manual do Pix e fluxo Stripe recorrente por webhook, que depende da conexão real da conta Stripe. Veja PAGAMENTOS.md.
 
 /register pede nome, sobrenome, nascimento, e-mail, senha, WhatsApp principal e segundo WhatsApp opcional. CPF, CNPJ e documentos de outros países não são solicitados nem armazenados. E-mail é normalizado para minúsculas e sem espaços nas extremidades; a unicidade também é imposta no banco.
 

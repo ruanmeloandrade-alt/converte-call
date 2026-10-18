@@ -8,7 +8,7 @@ Implementado e testado localmente: HTTP, login com senha scrypt, sessão única 
 
 Preparado, ainda sem teste de conexão real: adaptador Evolution com instância exclusiva por conta, QR, status, webhook autenticado e envio de texto. Não toca instâncias da Saúde Slim.
 
-**Não está pronto para produção ou para testar todas as automações.** O despacho de bots/agentes retorna HTTP 503 enquanto o port do executor original é concluído. Jobs sem executor geram falha auditável, nunca sucesso falso. Também faltam upload segmentado das gravações, transcrição hospedada, indexação PDF/DOCX, RAG semântico, OAuth Google/Gmail e cobrança. A busca de conhecimento implementada é lexical, sem embeddings.
+**Não está pronto para produção ou para testar todas as automações.** O despacho de bots/agentes retorna HTTP 503 enquanto o port do executor original é concluído. Jobs sem executor geram falha auditável, nunca sucesso falso. Também faltam upload segmentado das gravações, transcrição hospedada, indexação PDF/DOCX, RAG semântico, OAuth Google/Gmail e ativação/validação da cobrança real Stripe. A busca de conhecimento implementada é lexical, sem embeddings.
 
 ## Desenvolvimento
 
@@ -41,9 +41,13 @@ Não basta o healthcheck passar: os fluxos de bots, agentes, mídia, OAuth e aut
 - [Andamento e solicitações](docs/CODEX_STATUS.md)
 - [Cadastro de 7 dias e administração de assinaturas](docs/LICENCAS.md)
 - [Suporte, Faculdade e idiomas](docs/SUPORTE-FACULDADE.md)
+- [Pagamentos Stripe e Pix](docs/PAGAMENTOS.md)
 
 Referências oficiais: [Railway autodeploy](https://docs.railway.com/deployments/github-autodeploys), [Evolution OpenAPI v2](https://github.com/evolution-foundation/docs-evolution/blob/main/openapi/openapi-v2.json), [SQLite no Node 24](https://nodejs.org/docs/latest-v24.x/api/sqlite.html).
 
 ## Código da extensão
 
 extension/ contém a extensão pronta para carregar no Chrome. ui-source/ contém os fontes e o build dos componentes originais reutilizados, sem node_modules. Veja ui-source/REPRODUZIR.txt.
+
+## Pagamentos 0.11
+Mensal US$6,98 e Trimestral US$16,58; sem semestral. Pix em português R$29,90/R$67,90 via WhatsApp e confirmação manual em /admin. Código de Checkout/assinaturas/webhooks e configuração Stripe no administrador implementados; ativação e validação com a conta real pendentes da reconexão/credencial Stripe. Ver PAGAMENTOS.md.

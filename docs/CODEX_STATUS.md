@@ -129,3 +129,38 @@ Arquivos alterados nesta entrega:
 - test/licensing.test.mjs
 - test/portal.browser.mjs
 - test/portal.test.mjs
+
+## Pagamentos 0.11 — 18/10/2026
+Escopo exclusivo de pagamentos autorizado: mensal USD698centavos e trimestral USD1658centavos; semestral removido da oferta, histórico preservado. Pix pt-BR/pt-PT usa WhatsApp5522992888971 e mensagens EXATAS do usuário; registros manuais BRL2990/6790 e 1/3 meses de calendário por confirmação expressa do admin. Histórico/idempotência; assinatura vigente soma prazo, trial/vencida começa agora, pagamento manual reativa suspensão explicitamente. Confirmação automática preserva suspensão administrativa.
+Servidor: Checkout e portal autenticados, associação de cliente/workspace, proteção contra assinatura duplicada, reutilização/expiração de Checkout, preços definidos no servidor, webhook bruto assinado com tolerância/ambiente, reconsulta na Stripe, fatura paga e deduplicação de invoice/event. Falha de renovação não estende; cancelar mantém período pago. Migração aditiva5, sem dependências novas e sem Actions. Chave restrita/segredo ficam cifrados no servidor; configuração segura em /admin cria recursos Stripe e salva IDs por etapa.
+Conexão Stripe do Codex retornou UNAUTHORIZED/requires reauthentication em listagem, busca de documentação e gerenciamento de contas. Solicitada reconexão ao proprietário; não recebida nesta execução. Sem seleção de conta real, sem provisionamento real, sem cobrança real. Documentação pública oficial consultada como fallback. O painel permite ao proprietário configurar a chave restrita diretamente por HTTPS, sem enviar pelo chat. Cobrança real permanece bloqueada até conectar e validar conta/ambiente.
+PASS:12 testes nativos e2 testes Chrome, sem modificar conta real. Billing testa HTTP/SQLite reais com provedor controlado; não é prova de pagamento Stripe aprovado. Testados mensagens Pix/idioma, liberação manual, datas, dedupe, assinatura, preço/valor, tentativa inválida, redirecionamento sem concessão, portal e nova assinatura após cancelamento. Os demais módulos e sua dívida técnica anterior foram preservados. Não anunciar Stripe conectada sem configuração e teste real.
+Arquivos alterados:
+- README.md
+- docs/CODEX_STATUS.md
+- docs/LICENCAS.md
+- docs/PAGAMENTOS.md
+- extension/ALTERACOES.md
+- extension/LEIA-ME.txt
+- extension/VALIDACAO.md
+- extension/billing-catalog.js
+- extension/locale-catalog.js
+- extension/manifest.json
+- extension/native.js
+- extension/panel.html
+- extension/portal-services.js
+- extension/v10.css
+- extension/v10.js
+- extension/v4.js
+- extension/v9.js
+- package.json
+- public/admin.html
+- public/admin.js
+- public/billing.html
+- src/billing.mjs
+- src/learning.mjs
+- src/server.mjs
+- test/billing.test.mjs
+- test/licensing.browser.mjs
+- test/portal.browser.mjs
+- vendor/billing-catalog.js

@@ -1,3 +1,7 @@
+# Validação — 0.11.0
+
+12 testes nativos passaram, incluindo preços/Pix, permissões, recebimento/idempotência, webhook assinado, fatura paga, renovação falha, cancelamento/portal e nova assinatura. Dois testes de Chrome passaram, incluindo liberação manual Pix e mensagens exatas; Pix não aparece em inglês. Stripe foi substituída por respostas controladas SOMENTE NOS TESTES. A implementação de produção faz requisições reais, sem simular sucesso quando desconectada. Conta Stripe exige reconexão/credencial; pagamento real/sandbox real não validados.
+
 # Validação — 0.10.0
 
 Dez testes nativos passaram: HTTP/SQLite, telefones numéricos, unicidade de e-mail e dos dois telefones, perfil cifrado, teste automático de 7 dias, permissões, vencimento, assinatura manual, Faculdade, progresso por usuário, FAQ/contrato da IA e transporte da conta da extensão.

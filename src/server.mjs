@@ -1,4 +1,5 @@
 import http from 'node:http';
+import {Billing} from './billing.mjs';
 import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {randomUUID} from 'node:crypto';
@@ -15,8 +16,8 @@ import {validateProfile,requireAvailablePhones,startAccountTrial,accountProfile}
 import {lessons,saveLesson,deleteLesson,markLesson,answerSupport,SUPPORT_URL} from './learning.mjs';
 const contract=JSON.parse(readFileSync(new URL('../vendor/rpc-contract.json',import.meta.url)));
 const error=(status,message)=>Object.assign(Error(message),{status});
-export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.ENCRYPTION_KEY,bootstrap=process.env.BOOTSTRAP_TOKEN,evolutionOptions,supportOptions}={}){
- const store=new Store(dir,master),evolution=new Evolution(store,evolutionOptions),worker=new Worker(store,evolution),limits=new Map();installPixelSchema(store);
+export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.ENCRYPTION_KEY,bootstrap=process.env.BOOTSTRAP_TOKEN,evolutionOptions,supportOptions,billingOptions}={}){
+ const store=new Store(dir,master),evolution=new Evolution(store,evolutionOptions),worker=new Worker(store,evolution),limits=new Map(),billing=new Billing(store,billingOptions);installPixelSchema(store);
  function limit(key,max,ms=60000){const now=Date.now();let r=limits.get(key);if(!r||r.until<now){r={n:0,until:now+ms};limits.set(key,r);}if(++r.n>max)throw error(429,'Muitas tentativas. Aguarde um minuto.');if(limits.size>10000)for(const [k,v]of limits)if(v.until<now)limits.delete(k);}
  function send(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
  async function body(req,max=30*1024*1024){const chunks=[];let size=0;for await(const c of req){size+=c.length;if(size>max)throw error(413,'Arquivo ou requisição excede o limite.');chunks.push(c);}try{return cleanJSON(JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}'));}catch(e){if(e.status)throw e;throw error(400,'JSON inválido.');}}
@@ -25,7 +26,9 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
  async function handle(req,res){const url=new URL(req.url,'http://localhost'),path=url.pathname;res.setHeader('Referrer-Policy','no-referrer');const origin=String(req.headers.origin||'');if(origin.startsWith('chrome-extension://')||origin===process.env.PUBLIC_URL?.replace(/\/$/,'')){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Headers','Authorization,Content-Type,Idempotency-Key');res.setHeader('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE,OPTIONS');}if(req.method==='OPTIONS'&&!path.startsWith('/p/')){res.writeHead(204);res.end();return;}
  if(req.method==='GET'&&/^\/p\/[a-f0-9]{40}\.js$/.test(path)){const key=path.split('/').at(-1).slice(0,-3),pixel=store.one('SELECT id,workspace_id FROM pixels WHERE public_key=? AND enabled=1',key);if(!pixel)throw error(404,'Pixel não encontrado.');requireSubscription(store,pixel.workspace_id);res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'public, max-age=300','X-Content-Type-Options':'nosniff'});return res.end(pixelScript(process.env.PUBLIC_URL,key));}
  if(/^\/p\/[a-f0-9]{40}\/events$/.test(path)){const key=path.split('/')[2],pixel=store.one('SELECT origin,workspace_id FROM pixels WHERE public_key=? AND enabled=1',key);if(pixel?.origin===origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST,OPTIONS');}if(req.method==='OPTIONS'){res.writeHead(204);return res.end();}if(req.method!=='POST')throw error(405,'Método inválido.');if(pixel)requireSubscription(store,pixel.workspace_id);limit('pixel:'+key+':'+req.socket.remoteAddress,240);return send(res,202,ingestPixel(store,key,origin,await body(req,5000)));}
- if(req.method==='GET'&&path==='/health/ready'){store.one('SELECT 1');return send(res,200,{status:'ready',version:'0.10.0',storage:'persistent-sqlite',evolutionConfigured:!!evolution.baseUrl&&!!evolution.key});}
+ if(req.method==='GET'&&path==='/health/ready'){store.one('SELECT 1');return send(res,200,{status:'ready',version:'0.11.0',storage:'persistent-sqlite',evolutionConfigured:!!evolution.baseUrl&&!!evolution.key});}
+ if(req.method==='POST'&&path==='/v1/hooks/stripe'){limit('stripe-hook:'+req.socket.remoteAddress,240);const chunks=[];let bytes=0;for await(const c of req){bytes+=c.length;if(bytes>1024*1024)throw error(413,'Evento excede o limite.');chunks.push(c);}return send(res,200,await billing.webhook(Buffer.concat(chunks),req.headers['stripe-signature']));}
+ if(req.method==='GET'&&['/billing/success','/billing/cancel','/billing/return'].includes(path)){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; style-src 'self'; base-uri 'none'; frame-ancestors 'none'"});return res.end(readFileSync(new URL('../public/billing.html',import.meta.url)));}
  if(req.method==='GET'&&['/','/setup','/register','/activate','/admin'].includes(path)){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'",'Cache-Control':'no-store'});return res.end(readFileSync(new URL(path==='/admin'?'../public/admin.html':'../public/setup.html',import.meta.url)));}
  if(req.method==='GET'&&['/setup.js','/setup.css'].includes(path)){res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript; charset=utf-8':'text/css; charset=utf-8'});return res.end(readFileSync(new URL('../public'+path,import.meta.url)));}
  if(req.method==='GET'&&['/admin.js','/admin.css'].includes(path)){res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript; charset=utf-8':'text/css; charset=utf-8','X-Content-Type-Options':'nosniff','Cache-Control':'no-store'});return res.end(readFileSync(new URL('../public'+path,import.meta.url)));}
@@ -47,6 +50,9 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
   });return send(res,201,session(user));
  }
  const user=authenticate(req),ws=user.workspace_id;limit('account:'+user.id,300);
+ if(req.method==='GET'&&path==='/v1/billing')return send(res,200,billing.state(user));
+ if(req.method==='POST'&&path==='/v1/billing/checkout'){limit('checkout:'+user.id,10);const b=await body(req,2000);return send(res,200,await billing.checkout(user,b.plan,b.locale));}
+ if(req.method==='POST'&&path==='/v1/billing/portal'){limit('portal:'+user.id,10);return send(res,200,await billing.portal(user));}
  if(req.method==='GET'&&path==='/v1/account/license')return send(res,200,{role:roleOf(store,user.id),license:subscription(store,ws)});
  if(req.method==='GET'&&path==='/v1/account/profile')return send(res,200,{profile:accountProfile(store,user.id)});
  if(req.method==='POST'&&path==='/v1/support/ask'){limit('support:'+user.id,10);return send(res,200,await answerSupport(store,user,await body(req,5000),supportOptions));}
@@ -63,6 +69,10 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
   if(req.method==='POST'&&path==='/v1/admin/licenses')throw error(410,'Não é mais necessário emitir licença. O teste de 7 dias começa automaticamente no cadastro.');
   const revoke=path.match(/^\/v1\/admin\/licenses\/([a-f0-9-]{36})$/);
   if(req.method==='DELETE'&&revoke)return send(res,200,revokeInvite(store,user,revoke[1]));
+  if(path==='/v1/admin/billing'&&req.method==='GET')return send(res,200,billing.status());
+  if(path==='/v1/admin/billing'&&req.method==='POST'){limit('stripe-config:'+user.id,3);return send(res,200,await billing.connect(user,await body(req,3000)));}
+  const payment=path.match(/^\/v1\/admin\/accounts\/([a-f0-9-]{36})\/payment$/);
+  if(payment&&req.method==='POST')return send(res,200,billing.manualPayment(user,payment[1],await body(req,2000)));
   const target=path.match(/^\/v1\/admin\/accounts\/([a-f0-9-]{36})\/subscription$/);
   if(req.method==='PATCH'&&target)return send(res,200,{license:updateSubscription(store,user,target[1],await body(req,3000))});
   if(req.method==='GET'&&path==='/v1/admin/license-audit')return send(res,200,{events:store.all('SELECT id,actor_id,workspace_id,action,details,created_at FROM license_audit ORDER BY created_at DESC LIMIT 300')});
@@ -93,6 +103,6 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
  throw error(404,'Rota não encontrada.');
  }
  const server=http.createServer((req,res)=>{handle(req,res).catch(e=>{if(!res.headersSent)send(res,e.status||500,{error:{message:e.status?e.message:'Falha no servidor. Consulte o registro de operação.'}});else res.end();if(!e.status)console.error(JSON.stringify({type:'request-failed',requestId:randomUUID(),errorName:e.name}));});});server.requestTimeout=60000;server.headersTimeout=15000;
- let timer;return {server,store,evolution,worker,startWorker(){timer=setInterval(()=>worker.tick().catch(e=>console.error(JSON.stringify({type:'worker-failed',name:e.name}))),5000);timer.unref();worker.tick();},close(){clearInterval(timer);return new Promise(resolve=>server.close(()=>{store.close();resolve();}));}};
+ let timer;return {server,store,evolution,worker,billing,startWorker(){timer=setInterval(()=>worker.tick().catch(e=>console.error(JSON.stringify({type:'worker-failed',name:e.name}))),5000);timer.unref();worker.tick();},close(){clearInterval(timer);return new Promise(resolve=>server.close(()=>{store.close();resolve();}));}};
 }
-if(process.argv[1]===fileURLToPath(import.meta.url)){const app=createApp();app.server.listen(Number(process.env.PORT)||8080,'0.0.0.0',()=>{app.startWorker();console.log(JSON.stringify({type:'listening',port:Number(process.env.PORT)||8080,version:'0.10.0'}));});const cleanup=setInterval(()=>purgeExpired(app.store),60000);cleanup.unref();process.on('SIGTERM',()=>app.close().then(()=>process.exit(0)));}
+if(process.argv[1]===fileURLToPath(import.meta.url)){const app=createApp();app.server.listen(Number(process.env.PORT)||8080,'0.0.0.0',()=>{app.startWorker();console.log(JSON.stringify({type:'listening',port:Number(process.env.PORT)||8080,version:'0.11.0'}));});const cleanup=setInterval(()=>purgeExpired(app.store),60000);cleanup.unref();process.on('SIGTERM',()=>app.close().then(()=>process.exit(0)));}

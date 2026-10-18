@@ -16,6 +16,9 @@ globalThis.CCPortal=(()=>{
   if(message.type==='portal-login'){const r=await request('/v1/auth/session',{method:'POST',anonymous:true,body:{email:String(message.email||'').slice(0,200),password:String(message.password||'').slice(0,200)}});await chrome.storage.session.set({ccAccountToken:r.accessToken});return {ok:true,role:r.role,license:r.license};}
   if(message.type==='portal-account'){const identity=await request('/v1/account/license');return {ok:true,...identity};}
   if(message.type==='portal-logout'){await request('/v1/auth/logout',{method:'POST'}).catch(()=>{});await chrome.storage.session.remove('ccAccountToken');return {ok:true};}
+  if(message.type==='portal-billing')return {ok:true,...await request('/v1/billing')};
+  if(message.type==='portal-checkout')return {ok:true,...await request('/v1/billing/checkout',{method:'POST',body:{plan:message.plan,locale:message.locale}})};
+  if(message.type==='portal-billing-portal')return {ok:true,...await request('/v1/billing/portal',{method:'POST',body:{}})};
   if(message.type==='portal-academy')return {ok:true,...await request('/v1/academy')};
   if(message.type==='portal-progress')return {ok:true,...await request('/v1/academy/'+encodeURIComponent(message.id)+'/progress',{method:'PUT',body:{completed:message.completed}})};
   if(message.type==='portal-support'){

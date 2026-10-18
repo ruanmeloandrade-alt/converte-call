@@ -1,3 +1,12 @@
+# Alterações — 0.11.0
+
+- Planos em USD: Mensal US$6,98, Trimestral US$16,58; removida oferta semestral.
+- Links Pix discretos somente em português, com as duas mensagens exatas.
+- Novo fluxo de Checkout/portal autenticados pelo servidor; chaves ficam somente no servidor.
+- Administrador: conectar Stripe e confirmar Pix recebido com plano, validade e auditoria.
+- Webhooks: assinatura, deduplicação e verificação de fatura antes de conceder acesso.
+- Ativação da Stripe real pendente da conexão/credencial da conta. Não houve cobrança real no teste.
+
 # Alterações — 0.10.0
 
 - Conta: 7 dias grátis sem convite/documento; e-mail e ambos os telefones únicos, com telefones somente numéricos.

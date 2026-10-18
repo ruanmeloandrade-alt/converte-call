@@ -15,6 +15,17 @@ Importar leads|Import leads|Importar leads|导入潜在客户|リードをイン
 Exportar leads|Export leads|Exportar leads|导出潜在客户|リードをエクスポート|Exporter des prospects|Leads exportieren|Esporta lead
 Seu CRM, na página em que você está|Your CRM on the page you are using|Tu CRM en la página que usas|您当前页面上的 CRM|今いるページで使えるCRM|Votre CRM sur votre page actuelle|Ihr CRM auf Ihrer aktuellen Seite|Il tuo CRM nella pagina che usi
 Seu workspace local e as preferências da assinatura.|Your local workspace and subscription preferences.|Tu espacio local y preferencias de suscripción.|您的本地工作区和订阅偏好。|ローカルワークスペースと契約の設定。|Votre espace local et vos préférences d'abonnement.|Ihr lokaler Arbeitsbereich und Ihre Abonnementeinstellungen.|Il tuo spazio locale e le preferenze di abbonamento.
+Mensal|Monthly|Mensual|月付|月額|Mensuel|Monatlich|Mensile
+Trimestral|Quarterly|Trimestral|季付|3か月ごと|Trimestriel|Vierteljährlich|Trimestrale
+A cada mês|Every month|Cada mes|每月|毎月|Chaque mois|Jeden Monat|Ogni mese
+A cada 3 meses|Every 3 months|Cada 3 meses|每3个月|3か月ごと|Tous les 3 mois|Alle 3 Monate|Ogni 3 mesi
+Assinar com Stripe|Subscribe with Stripe|Suscribirse con Stripe|通过 Stripe 订阅|Stripeで契約|S'abonner avec Stripe|Mit Stripe abonnieren|Abbonati con Stripe
+Gerenciar assinatura|Manage subscription|Gestionar suscripción|管理订阅|契約を管理|Gérer l'abonnement|Abonnement verwalten|Gestisci abbonamento
+Atualizar|Refresh|Actualizar|刷新|更新|Actualiser|Aktualisieren|Aggiorna
+7 dias grátis|7 days free|7 días gratis|免费7天|7日間無料|7 jours gratuits|7 Tage kostenlos|7 giorni gratis
+Escolha seu plano. Cobrança recorrente em dólar.|Choose your plan. Recurring billing in US dollars.|Elige tu plan. Cobro recurrente en dólares.|选择套餐。以美元定期收费。|プランを選択。米ドルでの定期課金。|Choisissez votre offre. Facturation récurrente en dollars.|Wählen Sie Ihren Tarif. Wiederkehrende Abrechnung in US-Dollar.|Scegli il tuo piano. Addebito ricorrente in dollari.
+Renovação automática. Cancele a renovação quando quiser.|Automatic renewal. Cancel renewal at any time.|Renovación automática. Cancela la renovación cuando quieras.|自动续订。可随时取消续订。|自動更新。いつでも更新を停止できます。|Renouvellement automatique. Annulez à tout moment.|Automatische Verlängerung. Jederzeit kündbar.|Rinnovo automatico. Annulla il rinnovo quando vuoi.
+Seu teste começa no cadastro, sem cartão. A assinatura Stripe começa quando você contrata.|Your trial starts at signup, without a card. Stripe billing starts when you subscribe.|Tu prueba empieza al registrarte, sin tarjeta. Stripe cobra al suscribirte.|注册即开始试用，无需银行卡。订阅时开始 Stripe 收费。|登録時に無料体験が始まり、カードは不要です。契約時にStripe課金が始まります。|Votre essai commence à l'inscription, sans carte. Stripe facture à la souscription.|Ihr Test beginnt bei der Registrierung ohne Karte. Die Stripe-Abrechnung startet beim Abonnieren.|La prova inizia alla registrazione, senza carta. Stripe addebita quando ti abboni.
 Início|Home|Inicio|首页|ホーム|Accueil|Startseite|Home
 Dashboard|Dashboard|Panel|数据看板|ダッシュボード|Tableau de bord|Dashboard|Dashboard
 Relacionamento|Relationships|Relaciones|客户关系|顧客管理|Relations|Kundenbeziehungen|Relazioni
