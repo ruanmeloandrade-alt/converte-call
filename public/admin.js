@@ -7,7 +7,7 @@ async function request(path,{method='GET',body}={}){
  const r=await fetch(path,{method,headers:{...(accessToken?{Authorization:'Bearer '+accessToken}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
  const data=await r.json();if(!r.ok){if(r.status===401)exit();throw Error(data.error?.message||'Não foi possível concluir a operação.');}return data;
 }
-function exit(){accessToken='';sessionStorage.removeItem('ccAdminSession');$('#connections').hidden=true;$('#admin-sidebar').hidden=true;document.body.classList.remove('admin-connected');$('#login-panel').hidden=false;$('#dashboard').hidden=true;$('#logout').hidden=true;}
+function exit(){$('#session-loading').hidden=true;accessToken='';sessionStorage.removeItem('ccAdminSession');$('#connections').hidden=true;$('#admin-sidebar').hidden=true;document.body.classList.remove('admin-connected');$('#login-panel').hidden=false;$('#dashboard').hidden=true;$('#logout').hidden=true;}
 function cell(row,value){const c=document.createElement('td');c.textContent=value;row.append(c);return c;}
 function pill(row,status){const c=document.createElement('td'),s=document.createElement('span');s.className='pill '+status;s.textContent=labels[status]||status;c.append(s);row.append(c);}
 function action(parent,title,fn,danger=false){const b=document.createElement('button');b.type='button';b.className=danger?'danger':'secondary';b.textContent=title;b.addEventListener('click',async()=>{b.disabled=true;try{await fn();}catch(e){notify(e.message);}finally{b.disabled=false;}});parent.append(b);}
@@ -23,7 +23,7 @@ async function refresh(){
  const [a,v,h]=await Promise.all([request('/v1/admin/accounts'),request('/v1/admin/academy'),request('/v1/admin/license-audit')]);await loadStripeStatus();accounts=a.accounts;academyLessons=v.lessons;renderAccounts();renderLessons();$('#registration-url').value=location.origin+'/register';
  $('#audit').replaceChildren();const names=Object.fromEntries(accounts.map(a=>[a.workspaceId,a.email])),actions={'trial-issued':'Licença de teste emitida','trial-activated':'Teste ativado','account-trial-started':'Conta criada com 7 dias grátis','trial-revoked':'Licença revogada','subscription-updated':'Assinatura alterada','pix-payment-confirmed':'Pix confirmado pelo administrador','stripe-invoice-paid':'Pagamento Stripe confirmado'};
  for(const e of h.events){const row=document.createElement('tr');cell(row,date(e.created_at));cell(row,actions[e.action]||e.action);cell(row,names[e.workspace_id]||'—');$('#audit').append(row);}
- $('#connections').hidden=false;$('#admin-sidebar').hidden=false;document.body.classList.add('admin-connected');adminPage();$('#login-panel').hidden=true;$('#dashboard').hidden=false;$('#logout').hidden=false;
+ $('#session-loading').hidden=true;$('#connections').hidden=false;$('#admin-sidebar').hidden=false;document.body.classList.add('admin-connected');adminPage();$('#login-panel').hidden=true;$('#dashboard').hidden=false;$('#logout').hidden=false;
 }
 $('#login').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,button=form.querySelector('button');button.disabled=true;try{const f=new FormData(form);const result=await request('/v1/auth/session',{method:'POST',body:{email:f.get('email'),password:f.get('password'),audience:'admin-web'}});if(result.role!=='admin')throw Error('Use sua conta de administrador.');accessToken=result.accessToken;sessionStorage.setItem('ccAdminSession',accessToken);form.reset();await refresh();}catch(error){notify(error.message);}finally{button.disabled=false;}});
 $('#logout').addEventListener('click',async()=>{try{await request('/v1/auth/logout',{method:'POST'});}catch{}exit();});
@@ -39,7 +39,7 @@ function renderLessons(){
 }
 $('#reset-lesson').addEventListener('click',()=>$('#lesson-form').reset());
 $('#lesson-form').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector(':scope > button');b.disabled=true;try{const body={};for(const key of ['title','url','description','category'])body[key]=f.elements[key].value;body.position=Number(f.elements.position.value);body.published=f.elements.published.checked;const id=f.elements.id.value;await request('/v1/admin/academy'+(id?'/'+id:''),{method:id?'PUT':'POST',body});f.reset();await refresh();notify('Aula salva.');}catch(error){notify(error.message);}finally{b.disabled=false;}});
-if(accessToken)refresh().catch(e=>{exit();notify(e.message);});else request('/account/api/admin-session',{method:'POST',body:{}}).then(r=>{accessToken=r.accessToken;sessionStorage.setItem('ccAdminSession',accessToken);return refresh();}).catch(()=>{});
+if(accessToken)refresh().catch(e=>{exit();notify(e.message);});else request('/account/api/admin-session',{method:'POST',body:{}}).then(r=>{accessToken=r.accessToken;sessionStorage.setItem('ccAdminSession',accessToken);return refresh();}).catch(()=>exit());
 
 let pixAccount=null,pixRequest=null;
 function openPix(account){pixAccount=account;pixRequest=crypto.randomUUID();$('#pix-form').reset();$('#pix-customer').textContent=account.email;updatePixTotal();$('#pix-dialog').showModal();}
