@@ -6,6 +6,7 @@ import {vault} from './security.mjs';
 import {installLicensing} from './licensing.mjs';
 import {installProfiles} from './accounts.mjs';
 import {installLearning} from './learning.mjs';
+import {queueLeadChanges} from './automation-events.mjs';
 import '../vendor/core.js';
 import '../vendor/core-v4.js';
 import '../vendor/call-fields.js';
@@ -45,7 +46,7 @@ export class Store{
  normalize(d){Core.migrate(d);for(const k of ['crmSources','companies','catalogs','products','supplierCosts','crmAgents','slimStageAutomations','forms','notifications','leadProducts','orders','brainSources','brainBlockedTerms'])d[k]||=[];return d;}
  get(id){const row=this.one('SELECT data,revision FROM workspaces WHERE id=?',id);if(!row)throw Object.assign(Error('Conta não encontrada.'),{status:404});const data=this.normalize(JSON.parse(row.data));data.members=this.all('SELECT u.id,u.email,p.profile FROM users u LEFT JOIN account_profiles p ON p.user_id=u.id WHERE u.workspace_id=?',id).map(u=>{const profile=u.profile?this.vault.open(u.profile):{};return {id:u.id,name:[profile.firstName,profile.lastName].filter(Boolean).join(' ')||u.email,email:u.email};});return data;}
  revision(id){return this.one('SELECT revision FROM workspaces WHERE id=?',id)?.revision;}
- put(id,data){data.workspaceId=id;this.run('UPDATE workspaces SET data=?,revision=revision+1,updated_at=? WHERE id=?',JSON.stringify(this.normalize(data)),new Date().toISOString(),id);}
+ put(id,data,{automationEvents=true}={}){const save=()=>{const previous=this.one('SELECT data,revision FROM workspaces WHERE id=?',id);data.workspaceId=id;const normalized=this.normalize(data);if(automationEvents&&previous)queueLeadChanges(this,id,JSON.parse(previous.data),normalized,previous.revision+1);this.run('UPDATE workspaces SET data=?,revision=revision+1,updated_at=? WHERE id=?',JSON.stringify(normalized),new Date().toISOString(),id);};return this.db.isTransaction?save():this.transaction(save);}
  mutate(id,fn){return this.transaction(()=>{const d=this.get(id),r=fn(d);this.put(id,d);return r;});}
  secret(id,name,value){if(arguments.length===3){this.run('INSERT INTO secrets VALUES(?,?,?) ON CONFLICT(workspace_id,name) DO UPDATE SET value=excluded.value',id,name,this.vault.seal(value));return;}const r=this.one('SELECT value FROM secrets WHERE workspace_id=? AND name=?',id,name);return r?this.vault.open(r.value):null;}
  event(ws,event){const e={id:event.id||randomUUID(),at:new Date().toISOString(),...event};this.run('INSERT OR IGNORE INTO events(workspace_id,id,payload,created_at) VALUES(?,?,?,?)',ws,e.id,JSON.stringify(e),e.at);return e;}

@@ -1615,897 +1615,17 @@ var init_esm = __esm({
   }
 });
 
-// copied-server-source/lib/google.server.base.ts
-function normalizeGoogleProducts(products) {
-  const valid = new Set(GOOGLE_PRODUCTS.map((p) => p.id));
-  const clean = Array.from(
-    new Set((products ?? []).filter((p) => valid.has(p)))
-  );
-  return clean.length > 0 ? clean : [...GOOGLE_DEFAULT_PRODUCTS];
-}
-function googleScopesForProducts(products) {
-  const selected = normalizeGoogleProducts(products);
-  return Array.from(
-    /* @__PURE__ */ new Set([...GOOGLE_BASE_SCOPES, ...selected.flatMap((p) => GOOGLE_PRODUCT_SCOPES[p] ?? [])])
-  );
-}
-function encKey() {
-  const k = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
-  if (!k) throw new Error("INTEGRATION_ENCRYPTION_KEY n\xE3o configurado.");
-  return k;
-}
-function googleEnv() {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  if (!clientId || !clientSecret) {
-    throw new Error(
-      "Google OAuth n\xE3o configurado no servidor. Cadastre GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET."
-    );
-  }
-  return { clientId, clientSecret };
-}
-function googleEnvReady() {
-  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
-}
-async function activeWorkspace(sb, userId) {
-  const { data } = await sb.from("profiles").select("current_workspace_id").eq("id", userId).maybeSingle();
-  const id = data?.current_workspace_id;
-  if (!id) throw new Error("Workspace ativo n\xE3o encontrado.");
-  return id;
-}
-async function readGoogleSecret(sb, workspaceId) {
-  const { data, error } = await sb.rpc("get_integration_secret", {
-    _workspace_id: workspaceId,
-    _provider: GOOGLE_PROVIDER,
-    _key: encKey()
-  });
-  if (error) throw new Error(error.message ?? "Falha ao ler credenciais Google.");
-  if (!data) throw new Error("Conta Google n\xE3o conectada neste workspace.");
-  return data;
-}
-async function readGoogleSecretSafe(sb, workspaceId) {
-  try {
-    return await readGoogleSecret(sb, workspaceId);
-  } catch {
-    return null;
-  }
-}
-async function writeGoogleSecret(sb, args) {
-  const fn = args.service ? "set_integration_secret_service" : "set_integration_secret";
-  const { error } = await sb.rpc(fn, {
-    _workspace_id: args.workspaceId,
-    _provider: GOOGLE_PROVIDER,
-    _plaintext: JSON.parse(JSON.stringify(args.payload)),
-    _key: encKey(),
-    _metadata: JSON.parse(JSON.stringify(args.metadata)),
-    _status: args.status
-  });
-  if (error) throw new Error(error.message ?? "Falha ao salvar credenciais Google.");
-}
-function buildGoogleAuthUrl(args) {
-  const u = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-  u.searchParams.set("client_id", args.clientId);
-  u.searchParams.set("redirect_uri", args.redirectUri);
-  u.searchParams.set("response_type", "code");
-  u.searchParams.set("scope", (args.scopes ?? GOOGLE_SCOPES).join(" "));
-  u.searchParams.set("access_type", "offline");
-  if (args.forceConsent) u.searchParams.set("prompt", "consent");
-  u.searchParams.set("include_granted_scopes", "true");
-  u.searchParams.set("state", args.state);
-  return u.toString();
-}
-async function exchangeGoogleCode(args) {
-  const { clientId, clientSecret } = googleEnv();
-  const body = new URLSearchParams({
-    code: args.code,
-    client_id: clientId,
-    client_secret: clientSecret,
-    redirect_uri: args.redirectUri,
-    grant_type: "authorization_code"
-  });
-  const r = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
-  });
-  const txt = await r.text();
-  if (!r.ok) throw new Error(`Troca de c\xF3digo falhou (${r.status}): ${txt.slice(0, 300)}`);
-  return JSON.parse(txt);
-}
-async function refreshGoogleToken(refreshToken) {
-  const { clientId, clientSecret } = googleEnv();
-  const body = new URLSearchParams({
-    refresh_token: refreshToken,
-    client_id: clientId,
-    client_secret: clientSecret,
-    grant_type: "refresh_token"
-  });
-  const r = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
-  });
-  const txt = await r.text();
-  if (!r.ok)
-    throw new Error(`Renova\xE7\xE3o do token Google falhou (${r.status}): ${txt.slice(0, 300)}`);
-  return JSON.parse(txt);
-}
-async function getGoogleAccessToken(sb, workspaceId, secretIn) {
-  const secret = secretIn ?? await readGoogleSecret(sb, workspaceId);
-  const stillValid = secret.access_token && secret.expires_at && new Date(secret.expires_at).getTime() - Date.now() > 6e4;
-  if (stillValid) return { token: secret.access_token, secret };
-  if (!secret.refresh_token) {
-    throw new Error("Conta Google sem refresh token. Reconecte a Conta Google.");
-  }
-  const tok = await refreshGoogleToken(secret.refresh_token);
-  const next = {
-    ...secret,
-    access_token: tok.access_token,
-    expires_at: new Date(Date.now() + (tok.expires_in ?? 3600) * 1e3).toISOString(),
-    scope: tok.scope ?? secret.scope
-  };
-  await writeGoogleSecret(sb, {
-    workspaceId,
-    payload: next,
-    metadata: { email: next.email ?? null, refreshed_at: (/* @__PURE__ */ new Date()).toISOString() },
-    status: "connected"
-  });
-  return { token: tok.access_token, secret: next };
-}
-async function googleUserInfo(token) {
-  const r = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!r.ok) return {};
-  return await r.json();
-}
-async function revokeGoogleToken(token) {
-  try {
-    await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(token)}`, {
-      method: "POST"
-    });
-  } catch {
-  }
-}
-async function gfetch(url, token, init) {
-  const r = await fetch(url, {
-    method: init?.method ?? "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      ...init?.headers ?? {}
-    },
-    body: init?.body ? JSON.stringify(init.body) : void 0
-  });
-  const txt = await r.text();
-  if (!r.ok) {
-    throw new Error(`${init?.label ?? "Google"} ${r.status}: ${txt.slice(0, 400)}`);
-  }
-  return txt ? JSON.parse(txt) : {};
-}
-async function ga4ListProperties(token) {
-  const j = await gfetch("https://analyticsadmin.googleapis.com/v1beta/accountSummaries?pageSize=200", token, {
-    label: "GA4 Admin"
-  });
-  const out = [];
-  for (const a of j.accountSummaries ?? []) {
-    for (const p of a.propertySummaries ?? []) {
-      if (!p.property) continue;
-      out.push({
-        property: p.property.replace("properties/", ""),
-        displayName: p.displayName ?? p.property,
-        account: a.account ?? "",
-        accountName: a.displayName
-      });
-    }
-  }
-  return out;
-}
-async function ga4RunReport(args) {
-  const body = {
-    dateRanges: [{ startDate: `${Math.max(1, args.days)}daysAgo`, endDate: "today" }],
-    dimensions: [{ name: args.dimension ?? "sessionDefaultChannelGroup" }],
-    metrics: [
-      { name: "sessions" },
-      { name: "totalUsers" },
-      { name: "screenPageViews" },
-      { name: "keyEvents" }
-    ],
-    limit: 25
-  };
-  const j = await gfetch(
-    `https://analyticsdata.googleapis.com/v1beta/properties/${args.propertyId}:runReport`,
-    args.token,
-    { method: "POST", body, label: "GA4 Data" }
-  );
-  const rows = (j.rows ?? []).map((r) => ({
-    dimension: r.dimensionValues?.[0]?.value ?? "(sem dado)",
-    sessions: Number(r.metricValues?.[0]?.value ?? 0),
-    users: Number(r.metricValues?.[1]?.value ?? 0),
-    views: Number(r.metricValues?.[2]?.value ?? 0),
-    conversions: Number(r.metricValues?.[3]?.value ?? 0)
-  }));
-  const t = j.totals?.[0]?.metricValues;
-  const totals = {
-    sessions: Number(t?.[0]?.value ?? rows.reduce((s, r) => s + r.sessions, 0)),
-    users: Number(t?.[1]?.value ?? rows.reduce((s, r) => s + r.users, 0)),
-    views: Number(t?.[2]?.value ?? rows.reduce((s, r) => s + r.views, 0)),
-    conversions: Number(t?.[3]?.value ?? rows.reduce((s, r) => s + r.conversions, 0))
-  };
-  return { rows, totals };
-}
-async function ga4RealtimeUsers(token, propertyId) {
-  const j = await gfetch(
-    `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runRealtimeReport`,
-    token,
-    { method: "POST", body: { metrics: [{ name: "activeUsers" }] }, label: "GA4 Realtime" }
-  );
-  return Number(j.rows?.[0]?.metricValues?.[0]?.value ?? 0);
-}
-async function gtmListAccounts(token) {
-  const j = await gfetch(
-    "https://tagmanager.googleapis.com/tagmanager/v2/accounts",
-    token,
-    { label: "GTM" }
-  );
-  return (j.account ?? []).map((a) => ({
-    accountId: a.accountId ?? "",
-    name: a.name ?? a.accountId ?? "",
-    path: a.path ?? `accounts/${a.accountId}`
-  }));
-}
-async function gtmListContainers(token, accountId) {
-  const j = await gfetch(`https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers`, token, {
-    label: "GTM"
-  });
-  return (j.container ?? []).map((c) => ({
-    containerId: c.containerId ?? "",
-    name: c.name ?? "",
-    publicId: c.publicId ?? "",
-    path: c.path ?? ""
-  }));
-}
-async function gtmListTags(token, accountId, containerId) {
-  const ws = await gfetch(
-    `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces`,
-    token,
-    { label: "GTM workspaces" }
-  );
-  const wsId = ws.workspace?.[0]?.workspaceId;
-  if (!wsId) return { tags: [], triggers: [] };
-  const base = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${wsId}`;
-  const [tagsRes, trigRes] = await Promise.all([
-    gfetch(`${base}/tags`, token, { label: "GTM tags" }),
-    gfetch(`${base}/triggers`, token, {
-      label: "GTM triggers"
-    })
-  ]);
-  return {
-    tags: (tagsRes.tag ?? []).map((t) => ({
-      name: t.name ?? "",
-      type: t.type ?? "",
-      firing: t.firingTriggerId?.length ?? 0,
-      paused: t.paused ?? false
-    })),
-    triggers: (trigRes.trigger ?? []).map((t) => ({ name: t.name ?? "", type: t.type ?? "" }))
-  };
-}
-async function gbpListAccounts(token) {
-  const j = await gfetch("https://mybusinessaccountmanagement.googleapis.com/v1/accounts?pageSize=100", token, {
-    label: "Business Profile"
-  });
-  return (j.accounts ?? []).map((a) => ({
-    name: a.name ?? "",
-    accountName: a.accountName ?? a.name ?? "",
-    type: a.type
-  }));
-}
-async function gbpListLocations(token, account) {
-  const fields = "name,title,storeCode,phoneNumbers,storefrontAddress";
-  const j = await gfetch(
-    `https://mybusinessbusinessinformation.googleapis.com/v1/${account}/locations?readMask=${fields}&pageSize=100`,
-    token,
-    { label: "Business Profile" }
-  );
-  return (j.locations ?? []).map((l) => ({
-    name: l.name ?? "",
-    title: l.title ?? "",
-    storeCode: l.storeCode,
-    phone: l.phoneNumbers?.primaryPhone,
-    address: [
-      l.storefrontAddress?.addressLines?.join(", "),
-      l.storefrontAddress?.locality,
-      l.storefrontAddress?.administrativeArea
-    ].filter(Boolean).join(" - ")
-  }));
-}
-async function gbpPerformance(token, location, days) {
-  const end = /* @__PURE__ */ new Date();
-  const start = new Date(Date.now() - Math.max(1, days) * 864e5);
-  const loc = location.includes("/") ? location.split("/").pop() : location;
-  const u = new URL(
-    `https://businessprofileperformance.googleapis.com/v1/locations/${loc}:fetchMultiDailyMetricsTimeSeries`
-  );
-  for (const m of GBP_METRICS) u.searchParams.append("dailyMetrics", m);
-  u.searchParams.set("dailyRange.start_date.year", String(start.getUTCFullYear()));
-  u.searchParams.set("dailyRange.start_date.month", String(start.getUTCMonth() + 1));
-  u.searchParams.set("dailyRange.start_date.day", String(start.getUTCDate()));
-  u.searchParams.set("dailyRange.end_date.year", String(end.getUTCFullYear()));
-  u.searchParams.set("dailyRange.end_date.month", String(end.getUTCMonth() + 1));
-  u.searchParams.set("dailyRange.end_date.day", String(end.getUTCDate()));
-  const j = await gfetch(u.toString(), token, { label: "Business Profile Performance" });
-  const totals = {};
-  for (const group of j.multiDailyMetricTimeSeries ?? []) {
-    for (const series of group.dailyMetricTimeSeries ?? []) {
-      const key = series.dailyMetric ?? "";
-      const sum = (series.timeSeries?.datedValues ?? []).reduce(
-        (s, v) => s + Number(v.value ?? 0),
-        0
-      );
-      totals[key] = (totals[key] ?? 0) + sum;
-    }
-  }
-  return {
-    impressions: (totals.BUSINESS_IMPRESSIONS_DESKTOP_SEARCH ?? 0) + (totals.BUSINESS_IMPRESSIONS_MOBILE_SEARCH ?? 0) + (totals.BUSINESS_IMPRESSIONS_DESKTOP_MAPS ?? 0) + (totals.BUSINESS_IMPRESSIONS_MOBILE_MAPS ?? 0),
-    calls: totals.CALL_CLICKS ?? 0,
-    websiteClicks: totals.WEBSITE_CLICKS ?? 0,
-    directions: totals.BUSINESS_DIRECTION_REQUESTS ?? 0,
-    conversations: totals.BUSINESS_CONVERSATIONS ?? 0,
-    raw: totals
-  };
-}
-async function gbpListReviews(token, account, location) {
-  const loc = location.includes("/") ? location.split("/").pop() : location;
-  const j = await gfetch(
-    `https://mybusiness.googleapis.com/v4/${account}/locations/${loc}/reviews?pageSize=50`,
-    token,
-    { label: "Business Profile Reviews" }
-  );
-  return {
-    averageRating: j.averageRating ?? 0,
-    total: j.totalReviewCount ?? j.reviews?.length ?? 0,
-    reviews: (j.reviews ?? []).map((r) => ({
-      id: r.reviewId ?? "",
-      author: r.reviewer?.displayName ?? "Cliente",
-      rating: r.starRating ?? "",
-      comment: r.comment ?? "",
-      createdAt: r.createTime ?? "",
-      reply: r.reviewReply?.comment ?? null
-    }))
-  };
-}
-async function gbpReplyReview(token, account, location, reviewId, comment) {
-  const loc = location.includes("/") ? location.split("/").pop() : location;
-  await gfetch(
-    `https://mybusiness.googleapis.com/v4/${account}/locations/${loc}/reviews/${reviewId}/reply`,
-    token,
-    { method: "PUT", body: { comment }, label: "Business Profile Reply" }
-  );
-  return { ok: true };
-}
-async function hmac(payload, secret) {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(payload));
-  return Buffer.from(sig).toString("base64url");
-}
-async function buildGoogleState(workspaceId, products) {
-  const { clientSecret } = googleEnv();
-  const payload = Buffer.from(
-    JSON.stringify({ ws: workspaceId, t: Date.now(), products: normalizeGoogleProducts(products) }),
-    "utf8"
-  ).toString("base64url");
-  return `${payload}.${await hmac(payload, clientSecret)}`;
-}
-async function verifyGoogleState(state) {
-  const { clientSecret } = googleEnv();
-  const [payload, sig] = state.split(".");
-  if (!payload || !sig) return null;
-  if (await hmac(payload, clientSecret) !== sig) return null;
-  try {
-    const obj = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    if (!obj?.ws || typeof obj.ws !== "string") return null;
-    if (Date.now() - (obj.t ?? 0) > 30 * 60 * 1e3) return null;
-    return { ws: obj.ws, t: obj.t ?? 0, products: normalizeGoogleProducts(obj.products) };
-  } catch {
-    return null;
-  }
-}
-var GOOGLE_PROVIDER, GOOGLE_PRODUCTS, GOOGLE_BASE_SCOPES, GOOGLE_DEFAULT_PRODUCTS, GOOGLE_PRODUCT_SCOPES, GOOGLE_SCOPES, GBP_METRICS;
-var init_google_server_base = __esm({
-  "copied-server-source/lib/google.server.base.ts"() {
-    GOOGLE_PROVIDER = "google";
-    GOOGLE_PRODUCTS = [
-      { id: "ads", label: "Google Ads" },
-      { id: "analytics", label: "Google Analytics 4" },
-      { id: "tagmanager", label: "Google Tag Manager" },
-      { id: "business", label: "Google Business Profile" },
-      { id: "merchant", label: "Google Merchant Center" },
-      { id: "calendar", label: "Google Agenda" },
-      { id: "drive", label: "Google Drive" },
-      { id: "sheets", label: "Google Sheets" },
-      { id: "docs", label: "Google Docs" },
-      { id: "gmail", label: "Gmail (envio)" }
-    ];
-    GOOGLE_BASE_SCOPES = ["openid", "email", "profile"];
-    GOOGLE_DEFAULT_PRODUCTS = [
-      "ads",
-      "analytics",
-      "tagmanager",
-      "business",
-      "merchant",
-      "gmail"
-    ];
-    GOOGLE_PRODUCT_SCOPES = {
-      ads: ["https://www.googleapis.com/auth/adwords"],
-      analytics: ["https://www.googleapis.com/auth/analytics.readonly"],
-      tagmanager: ["https://www.googleapis.com/auth/tagmanager.readonly"],
-      business: ["https://www.googleapis.com/auth/business.manage"],
-      merchant: ["https://www.googleapis.com/auth/content"],
-      calendar: ["https://www.googleapis.com/auth/calendar"],
-      drive: ["https://www.googleapis.com/auth/drive"],
-      sheets: ["https://www.googleapis.com/auth/spreadsheets"],
-      docs: ["https://www.googleapis.com/auth/documents"],
-      gmail: ["https://www.googleapis.com/auth/gmail.send"]
-    };
-    GOOGLE_SCOPES = googleScopesForProducts();
-    GBP_METRICS = [
-      "BUSINESS_IMPRESSIONS_DESKTOP_SEARCH",
-      "BUSINESS_IMPRESSIONS_MOBILE_SEARCH",
-      "BUSINESS_IMPRESSIONS_DESKTOP_MAPS",
-      "BUSINESS_IMPRESSIONS_MOBILE_MAPS",
-      "CALL_CLICKS",
-      "WEBSITE_CLICKS",
-      "BUSINESS_DIRECTION_REQUESTS",
-      "BUSINESS_CONVERSATIONS"
-    ];
-  }
+// salesbot-email.ts
+var salesbot_email_exports = {};
+__export(salesbot_email_exports, {
+  sendWorkspaceEmail: () => sendWorkspaceEmail
 });
-
-// copied-server-source/lib/google.server.ts
-var google_server_exports = {};
-__export(google_server_exports, {
-  ADS_ACCOUNT_QUERY: () => ADS_ACCOUNT_QUERY,
-  GOOGLE_ADS_API: () => GOOGLE_ADS_API,
-  GOOGLE_BASE_SCOPES: () => GOOGLE_BASE_SCOPES,
-  GOOGLE_DEFAULT_PRODUCTS: () => GOOGLE_DEFAULT_PRODUCTS,
-  GOOGLE_MERCHANT_ACCOUNTS_API: () => GOOGLE_MERCHANT_ACCOUNTS_API,
-  GOOGLE_MERCHANT_PRODUCTS_API: () => GOOGLE_MERCHANT_PRODUCTS_API,
-  GOOGLE_PRODUCTS: () => GOOGLE_PRODUCTS,
-  GOOGLE_PRODUCT_SCOPES: () => GOOGLE_PRODUCT_SCOPES,
-  GOOGLE_PROVIDER: () => GOOGLE_PROVIDER,
-  GOOGLE_SCOPES: () => GOOGLE_SCOPES,
-  activeWorkspace: () => activeWorkspace,
-  adsCampaignQuery: () => adsCampaignQuery,
-  adsDeveloperToken: () => adsDeveloperToken,
-  adsListAccessibleCustomers: () => adsListAccessibleCustomers,
-  adsSearch: () => adsSearch,
-  buildGoogleAuthUrl: () => buildGoogleAuthUrl,
-  buildGoogleState: () => buildGoogleState,
-  cleanCustomerId: () => cleanCustomerId,
-  encKey: () => encKey,
-  exchangeGoogleCode: () => exchangeGoogleCode,
-  ga4ListProperties: () => ga4ListProperties,
-  ga4RealtimeUsers: () => ga4RealtimeUsers,
-  ga4RunReport: () => ga4RunReport,
-  gbpListAccounts: () => gbpListAccounts,
-  gbpListLocations: () => gbpListLocations,
-  gbpListReviews: () => gbpListReviews,
-  gbpPerformance: () => gbpPerformance,
-  gbpReplyReview: () => gbpReplyReview,
-  getGoogleAccessToken: () => getGoogleAccessToken,
-  googleEnv: () => googleEnv,
-  googleEnvReady: () => googleEnvReady,
-  googleScopesForProducts: () => googleScopesForProducts,
-  googleUserInfo: () => googleUserInfo,
-  gtmListAccounts: () => gtmListAccounts,
-  gtmListContainers: () => gtmListContainers,
-  gtmListTags: () => gtmListTags,
-  merchantListAccounts: () => merchantListAccounts,
-  merchantListProducts: () => merchantListProducts,
-  normalizeGoogleProducts: () => normalizeGoogleProducts,
-  readGoogleSecret: () => readGoogleSecret,
-  readGoogleSecretSafe: () => readGoogleSecretSafe,
-  refreshGoogleToken: () => refreshGoogleToken,
-  revokeGoogleToken: () => revokeGoogleToken,
-  verifyGoogleState: () => verifyGoogleState,
-  writeGoogleSecret: () => writeGoogleSecret
-});
-function adsDeveloperToken(_secret) {
-  const token = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
-  if (!token) {
-    throw new Error(
-      "Google Ads ainda n\xE3o foi habilitado pelo administrador da MKTOn: configure GOOGLE_ADS_DEVELOPER_TOKEN no servidor. O cliente final n\xE3o deve informar Developer Token."
-    );
-  }
-  return token;
+import { runtimeEmail } from "./salesbot-context.mjs";
+async function sendWorkspaceEmail(_adapter, workspaceId, input) {
+  return runtimeEmail(workspaceId, input);
 }
-function cleanCustomerId(id) {
-  return (id ?? "").replace(/\D/g, "");
-}
-async function adsListAccessibleCustomers(token, developerToken) {
-  const r = await fetch(`${GOOGLE_ADS_API}/customers:listAccessibleCustomers`, {
-    headers: { Authorization: `Bearer ${token}`, "developer-token": developerToken }
-  });
-  const txt = await r.text();
-  if (!r.ok) throw new Error(`Google Ads ${r.status}: ${txt.slice(0, 400)}`);
-  const j = JSON.parse(txt);
-  return (j.resourceNames ?? []).map((n) => n.split("/")[1]).filter(Boolean);
-}
-async function adsSearch(args) {
-  const headers = {
-    Authorization: `Bearer ${args.token}`,
-    "developer-token": args.developerToken,
-    "Content-Type": "application/json"
-  };
-  const login = cleanCustomerId(args.loginCustomerId);
-  if (login) headers["login-customer-id"] = login;
-  const r = await fetch(
-    `${GOOGLE_ADS_API}/customers/${cleanCustomerId(args.customerId)}/googleAds:search`,
-    {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ query: args.query, pageSize: 500 })
-    }
-  );
-  const txt = await r.text();
-  if (!r.ok) throw new Error(`Google Ads ${r.status}: ${txt.slice(0, 500)}`);
-  const j = JSON.parse(txt);
-  return j.results ?? [];
-}
-function adsCampaignQuery(days) {
-  const d = Math.max(1, Math.min(365, days));
-  return `
-    SELECT campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type,
-           metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.ctr,
-           metrics.average_cpc, metrics.conversions, metrics.cost_per_conversion
-    FROM campaign
-    WHERE segments.date DURING LAST_${d === 7 ? "7" : d === 14 ? "14" : "30"}_DAYS
-    ORDER BY metrics.cost_micros DESC
-  `.trim();
-}
-function merchantPriceLabel(price) {
-  if (!price?.amountMicros) return "";
-  const amount = Number(price.amountMicros) / 1e6;
-  if (!Number.isFinite(amount)) return "";
-  const currency = price.currencyCode || "";
-  try {
-    return currency ? new Intl.NumberFormat("pt-BR", { style: "currency", currency }).format(amount) : String(amount);
-  } catch {
-    return `${amount.toFixed(2)} ${currency}`.trim();
-  }
-}
-async function merchantFetch(url, token, label) {
-  const r = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
-  });
-  const txt = await r.text();
-  if (!r.ok) {
-    const registrationHint = r.status === 403 ? " Se o OAuth estiver correto, confirme tamb\xE9m o registro de desenvolvedor do projeto Google Cloud na Merchant API." : "";
-    throw new Error(`Merchant API ${label} ${r.status}: ${txt.slice(0, 400)}${registrationHint}`);
-  }
-  return txt ? JSON.parse(txt) : {};
-}
-async function merchantListAccounts(token) {
-  const out = [];
-  let pageToken = "";
-  do {
-    const url = new URL(`${GOOGLE_MERCHANT_ACCOUNTS_API}/accounts`);
-    url.searchParams.set("pageSize", "500");
-    if (pageToken) url.searchParams.set("pageToken", pageToken);
-    const j = await merchantFetch(
-      url.toString(),
-      token,
-      "accounts.list"
-    );
-    for (const account of j.accounts ?? []) {
-      const id = String(account.accountId ?? account.name?.split("/")[1] ?? "").trim();
-      if (!id) continue;
-      out.push({
-        id,
-        name: account.accountName || `Merchant ${id}`,
-        resourceName: account.name || `accounts/${id}`,
-        testAccount: Boolean(account.testAccount)
-      });
-    }
-    pageToken = j.nextPageToken ?? "";
-  } while (pageToken);
-  return out;
-}
-async function merchantListProducts(token, merchantId) {
-  const id = String(merchantId).replace(/\D/g, "");
-  if (!id) throw new Error("Merchant ID inv\xE1lido.");
-  const out = [];
-  let pageToken = "";
-  do {
-    const url = new URL(`${GOOGLE_MERCHANT_PRODUCTS_API}/accounts/${id}/products`);
-    url.searchParams.set("pageSize", "250");
-    if (pageToken) url.searchParams.set("pageToken", pageToken);
-    const j = await merchantFetch(
-      url.toString(),
-      token,
-      "products.list"
-    );
-    for (const product of j.products ?? []) {
-      const attrs = product.productAttributes ?? {};
-      out.push({
-        id: product.offerId || product.name || "produto",
-        title: attrs.title || product.offerId || product.name || "Produto sem t\xEDtulo",
-        price: merchantPriceLabel(attrs.salePrice ?? attrs.price),
-        availability: attrs.availability || ""
-      });
-    }
-    pageToken = j.nextPageToken ?? "";
-  } while (pageToken);
-  return out;
-}
-var GOOGLE_ADS_API, GOOGLE_MERCHANT_ACCOUNTS_API, GOOGLE_MERCHANT_PRODUCTS_API, ADS_ACCOUNT_QUERY;
-var init_google_server = __esm({
-  "copied-server-source/lib/google.server.ts"() {
-    init_google_server_base();
-    GOOGLE_ADS_API = "https://googleads.googleapis.com/v25";
-    GOOGLE_MERCHANT_ACCOUNTS_API = "https://merchantapi.googleapis.com/accounts/v1";
-    GOOGLE_MERCHANT_PRODUCTS_API = "https://merchantapi.googleapis.com/products/v1";
-    ADS_ACCOUNT_QUERY = "SELECT customer.id, customer.descriptive_name, customer.currency_code, customer.time_zone, customer.manager FROM customer LIMIT 1";
-  }
-});
-
-// copied-server-source/lib/email-sender.server.ts
-var email_sender_server_exports = {};
-__export(email_sender_server_exports, {
-  EMAIL_MODE_INFO: () => EMAIL_MODE_INFO,
-  EMAIL_PROVIDER: () => EMAIL_PROVIDER,
-  activeWorkspace: () => activeWorkspace2,
-  encKey: () => encKey2,
-  readEmailSecret: () => readEmailSecret,
-  sendViaBrevo: () => sendViaBrevo,
-  sendViaGmail: () => sendViaGmail,
-  sendViaMailgun: () => sendViaMailgun,
-  sendViaResend: () => sendViaResend,
-  sendViaSendgrid: () => sendViaSendgrid,
-  sendWorkspaceEmail: () => sendWorkspaceEmail,
-  textFromHtml: () => textFromHtml,
-  verifyProviderKey: () => verifyProviderKey,
-  writeEmailSecret: () => writeEmailSecret
-});
-function encKey2() {
-  const k = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
-  if (!k) throw new Error("INTEGRATION_ENCRYPTION_KEY missing");
-  return k;
-}
-async function activeWorkspace2(sb, userId) {
-  const { data } = await sb.from("profiles").select("current_workspace_id").eq("id", userId).maybeSingle();
-  const id = data?.current_workspace_id;
-  if (!id) throw new Error("Workspace ativo n\xE3o encontrado.");
-  return id;
-}
-async function readEmailSecret(sb, workspaceId) {
-  const { data, error } = await sb.rpc("get_integration_secret", {
-    _workspace_id: workspaceId,
-    _provider: EMAIL_PROVIDER,
-    _key: encKey2()
-  });
-  if (error || !data) return null;
-  const secret = data;
-  if (!secret.mode || !Object.prototype.hasOwnProperty.call(EMAIL_MODE_INFO, secret.mode)) return null;
-  return secret;
-}
-async function writeEmailSecret(sb, args) {
-  const { error } = await sb.rpc("set_integration_secret", {
-    _workspace_id: args.workspaceId,
-    _provider: EMAIL_PROVIDER,
-    _plaintext: JSON.parse(JSON.stringify(args.payload)),
-    _key: encKey2(),
-    _metadata: JSON.parse(JSON.stringify(args.metadata)),
-    _status: args.status
-  });
-  if (error) throw new Error(error.message ?? "Falha ao salvar a configura\xE7\xE3o de e-mail.");
-}
-function encodeHeader(value) {
-  if (/^[\x00-\x7F]*$/.test(value)) return value;
-  const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(value)));
-  return `=?UTF-8?B?${b64}?=`;
-}
-function base64Url(input) {
-  const bytes = new TextEncoder().encode(input);
-  let bin = "";
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-function textFromHtml(html) {
-  return html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\n{3,}/g, "\n\n").trim();
-}
-async function sendViaGmail(token, from, fromName, mail, replyTo) {
-  const boundary = `mkton_${Math.random().toString(36).slice(2)}`;
-  const headers = [
-    `From: ${fromName ? `${encodeHeader(fromName)} <${from}>` : from}`,
-    `To: ${mail.to}`,
-    replyTo ? `Reply-To: ${replyTo}` : null,
-    `Subject: ${encodeHeader(mail.subject)}`,
-    "MIME-Version: 1.0",
-    `Content-Type: multipart/alternative; boundary="${boundary}"`
-  ].filter(Boolean);
-  const body = [
-    "",
-    `--${boundary}`,
-    'Content-Type: text/plain; charset="UTF-8"',
-    "",
-    mail.text ?? textFromHtml(mail.html),
-    `--${boundary}`,
-    'Content-Type: text/html; charset="UTF-8"',
-    "",
-    mail.html,
-    `--${boundary}--`,
-    ""
-  ];
-  const raw = base64Url([...headers, ...body].join("\r\n"));
-  const r = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ raw })
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error?.message ?? `Gmail recusou o envio (${r.status}).`);
-  return { id: j.id ?? null };
-}
-async function sendViaBrevo(apiKey, from, fromName, mail, replyTo) {
-  const r = await fetch("https://api.brevo.com/v3/smtp/email", {
-    method: "POST",
-    headers: { "api-key": apiKey, "Content-Type": "application/json", accept: "application/json" },
-    body: JSON.stringify({
-      sender: { email: from, name: fromName || void 0 },
-      to: [{ email: mail.to }],
-      replyTo: replyTo ? { email: replyTo } : void 0,
-      subject: mail.subject,
-      htmlContent: mail.html,
-      textContent: mail.text ?? textFromHtml(mail.html)
-    })
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.message ?? `Brevo recusou o envio (${r.status}).`);
-  return { id: j.messageId ?? null };
-}
-async function sendViaResend(apiKey, from, fromName, mail, replyTo) {
-  const r = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: fromName ? `${fromName} <${from}>` : from,
-      to: [mail.to],
-      reply_to: replyTo || void 0,
-      subject: mail.subject,
-      html: mail.html,
-      text: mail.text ?? textFromHtml(mail.html)
-    })
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.message ?? `Resend recusou o envio (${r.status}).`);
-  return { id: j.id ?? null };
-}
-async function sendViaSendgrid(apiKey, from, fromName, mail, replyTo) {
-  const r = await fetch("https://api.sendgrid.com/v3/mail/send", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: mail.to }] }],
-      from: { email: from, name: fromName || void 0 },
-      reply_to: replyTo ? { email: replyTo } : void 0,
-      subject: mail.subject,
-      content: [
-        { type: "text/plain", value: mail.text ?? textFromHtml(mail.html) },
-        { type: "text/html", value: mail.html }
-      ]
-    })
-  });
-  if (!r.ok) {
-    const t = await r.text().catch(() => "");
-    throw new Error(t || `SendGrid recusou o envio (${r.status}).`);
-  }
-  return { id: r.headers.get("x-message-id") };
-}
-async function sendViaMailgun(apiKey, domain, region, from, fromName, mail, replyTo) {
-  const host = region === "eu" ? "api.eu.mailgun.net" : "api.mailgun.net";
-  const form = new URLSearchParams({
-    from: fromName ? `${fromName} <${from}>` : from,
-    to: mail.to,
-    subject: mail.subject,
-    html: mail.html,
-    text: mail.text ?? textFromHtml(mail.html)
-  });
-  if (replyTo) form.set("h:Reply-To", replyTo);
-  const r = await fetch(`https://${host}/v3/${domain}/messages`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${btoa(`api:${apiKey}`)}`,
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: form
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.message ?? `Mailgun recusou o envio (${r.status}).`);
-  return { id: j.id ?? null };
-}
-async function verifyProviderKey(secret) {
-  try {
-    if (secret.mode === "brevo") {
-      const r = await fetch("https://api.brevo.com/v3/account", { headers: { "api-key": secret.api_key ?? "" } });
-      if (!r.ok) return "A chave da Brevo n\xE3o foi aceita. Gere outra em Brevo, SMTP & API.";
-      return null;
-    }
-    if (secret.mode === "resend") {
-      const r = await fetch("https://api.resend.com/domains", { headers: { Authorization: `Bearer ${secret.api_key}` } });
-      if (!r.ok) return "A chave do Resend n\xE3o foi aceita. Gere outra em Resend, API Keys.";
-      return null;
-    }
-    if (secret.mode === "sendgrid") {
-      const r = await fetch("https://api.sendgrid.com/v3/scopes", { headers: { Authorization: `Bearer ${secret.api_key}` } });
-      if (!r.ok) return "A chave do SendGrid n\xE3o foi aceita. Gere outra com permiss\xE3o Mail Send.";
-      return null;
-    }
-    if (secret.mode === "mailgun") {
-      const host = secret.region === "eu" ? "api.eu.mailgun.net" : "api.mailgun.net";
-      const r = await fetch(`https://${host}/v3/domains/${secret.domain}`, {
-        headers: { Authorization: `Basic ${btoa(`api:${secret.api_key}`)}` }
-      });
-      if (!r.ok) return "A chave ou o dom\xEDnio do Mailgun n\xE3o foram aceitos. Confira tamb\xE9m se a regi\xE3o est\xE1 certa.";
-      return null;
-    }
-  } catch {
-    return "N\xE3o consegui falar com o provedor agora. Tente de novo em instantes.";
-  }
-  return null;
-}
-async function sendWorkspaceEmail(sb, workspaceId, mail) {
-  const secret = await readEmailSecret(sb, workspaceId);
-  if (!secret) throw new Error("Nenhum e-mail conectado neste workspace.");
-  const from = secret.from_email;
-  if (!from) throw new Error("Remetente n\xE3o configurado na central de e-mail.");
-  if (secret.mode === "gmail") {
-    const g = await Promise.resolve().then(() => (init_google_server(), google_server_exports));
-    const { token } = await g.getGoogleAccessToken(sb, workspaceId);
-    const r2 = await sendViaGmail(token, from, secret.from_name, mail, secret.reply_to);
-    return { ...r2, mode: secret.mode, from };
-  }
-  if (secret.mode === "brevo") {
-    const r2 = await sendViaBrevo(secret.api_key ?? "", from, secret.from_name, mail, secret.reply_to);
-    return { ...r2, mode: secret.mode, from };
-  }
-  if (secret.mode === "resend") {
-    const r2 = await sendViaResend(secret.api_key ?? "", from, secret.from_name, mail, secret.reply_to);
-    return { ...r2, mode: secret.mode, from };
-  }
-  if (secret.mode === "sendgrid") {
-    const r2 = await sendViaSendgrid(secret.api_key ?? "", from, secret.from_name, mail, secret.reply_to);
-    return { ...r2, mode: secret.mode, from };
-  }
-  const r = await sendViaMailgun(
-    secret.api_key ?? "",
-    secret.domain ?? "",
-    secret.region,
-    from,
-    secret.from_name,
-    mail,
-    secret.reply_to
-  );
-  return { ...r, mode: secret.mode, from };
-}
-var EMAIL_PROVIDER, EMAIL_MODE_INFO;
-var init_email_sender_server = __esm({
-  "copied-server-source/lib/email-sender.server.ts"() {
-    EMAIL_PROVIDER = "email_sender";
-    EMAIL_MODE_INFO = {
-      gmail: { label: "Gmail / Google Workspace", dailyLimit: "conforme os limites da conta Google", needsDomain: false },
-      brevo: { label: "Brevo", dailyLimit: "300 por dia no plano gratuito", needsDomain: false },
-      resend: { label: "Resend", dailyLimit: "3.000 por m\xEAs no plano gratuito", needsDomain: true },
-      sendgrid: { label: "SendGrid", dailyLimit: "100 por dia no plano gratuito", needsDomain: true },
-      mailgun: { label: "Mailgun", dailyLimit: "conforme o plano contratado", needsDomain: true }
-    };
+var init_salesbot_email = __esm({
+  "salesbot-email.ts"() {
   }
 });
 
@@ -3007,12 +2127,12 @@ async function executeAction(admin, lead, action, ctx) {
       if (config.modo === "capturar") return;
       if (!config.pixelId) throw new Error("Pixel ID faltando");
       const eventName = config.eventName === "custom" ? config.customEventName ?? "CustomEvent" : config.eventName ?? "Lead";
-      const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
-      if (!encKey3) throw new Error("INTEGRATION_ENCRYPTION_KEY ausente");
+      const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
+      if (!encKey) throw new Error("INTEGRATION_ENCRYPTION_KEY ausente");
       const { data: secret } = await admin.rpc("get_integration_secret", {
         _workspace_id: lead.workspaceId,
         _provider: "meta_capi",
-        _key: encKey3
+        _key: encKey
       });
       const token = secret?.access_token ?? null;
       if (!token) throw new Error("Token da Meta indispon\xEDvel. Configure a Conversions API.");
@@ -3067,7 +2187,7 @@ async function executeAction(admin, lead, action, ctx) {
       const canal = config.canal ?? "link";
       if (canal === "email") {
         if (!lead.email) throw new Error("lead sem e-mail cadastrado");
-        const { sendWorkspaceEmail: sendWorkspaceEmail2 } = await Promise.resolve().then(() => (init_email_sender_server(), email_sender_server_exports));
+        const { sendWorkspaceEmail: sendWorkspaceEmail2 } = await Promise.resolve().then(() => (init_salesbot_email(), salesbot_email_exports));
         const corpo = (config.mensagem?.trim() || DEFAULT_FORM_MESSAGE_TEMPLATE).replace(/\{\{\s*link\s*\}\}/g, link).replace(/\{\{\s*nome\s*\}\}/g, lead.name ?? "");
         await sendWorkspaceEmail2(admin, lead.workspaceId, {
           to: lead.email,
@@ -3649,13 +2769,13 @@ function brl(n) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 async function loadMetaToken(sb, workspaceId) {
-  const encKey3 = process.env["INTEGRATION_ENCRYPTION_KEY"];
-  if (!encKey3) return null;
+  const encKey = process.env["INTEGRATION_ENCRYPTION_KEY"];
+  if (!encKey) return null;
   try {
     const { data } = await sb.rpc("get_integration_secret_service", {
       _workspace_id: workspaceId,
       _provider: "meta",
-      _key: encKey3
+      _key: encKey
     });
     const token = data?.access_token;
     return token ?? null;
@@ -4801,8 +3921,8 @@ async function sendLeadWhatsappText(supabaseAdmin2, workspaceId, leadId, fallbac
   );
 }
 async function sendWhatsappText(supabaseAdmin2, workspaceId, phone, text, sessionId) {
-  const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
-  if (!encKey3) return { ok: false, error: "INTEGRATION_ENCRYPTION_KEY ausente" };
+  const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
+  if (!encKey) return { ok: false, error: "INTEGRATION_ENCRYPTION_KEY ausente" };
   const digits = (phone ?? "").replace(/\D/g, "");
   if (digits.length < 8 && !phone?.includes("@g.us")) return { ok: false, error: "Telefone inv\xE1lido" };
   let sessionQuery = supabaseAdmin2.from("whatsapp_web_sessions").select("id").eq("workspace_id", workspaceId).eq("provider", "evolution").eq("status", "conectado");
@@ -4818,7 +3938,7 @@ async function sendWhatsappText(supabaseAdmin2, workspaceId, phone, text, sessio
   }
   const { data: creds } = await supabaseAdmin2.rpc("get_evolution_credentials_service", {
     _session_id: sessId,
-    _key: encKey3
+    _key: encKey
   });
   const c = creds;
   if (!c?.instance_name || !c.api_key) return { ok: false, error: "Credenciais Evolution indispon\xEDveis" };
@@ -4883,8 +4003,8 @@ async function sendWhatsappText(supabaseAdmin2, workspaceId, phone, text, sessio
   }
 }
 async function sendWhatsappButtons(supabaseAdmin2, workspaceId, phone, text, buttons, footer, sessionId) {
-  const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
-  if (!encKey3) return { ok: false, error: "INTEGRATION_ENCRYPTION_KEY ausente" };
+  const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
+  if (!encKey) return { ok: false, error: "INTEGRATION_ENCRYPTION_KEY ausente" };
   const digits = (phone ?? "").replace(/\D/g, "");
   if (digits.length < 8) return { ok: false, error: "Telefone inv\xE1lido" };
   const btns = buttons.map((b) => {
@@ -4900,7 +4020,7 @@ async function sendWhatsappButtons(supabaseAdmin2, workspaceId, phone, text, but
   if (!sessId) return { ok: false, error: "Nenhuma sess\xE3o Evolution conectada" };
   const { data: creds } = await supabaseAdmin2.rpc("get_evolution_credentials_service", {
     _session_id: sessId,
-    _key: encKey3
+    _key: encKey
   });
   const c = creds;
   if (!c?.instance_name || !c.api_key) return { ok: false, error: "Credenciais Evolution indispon\xEDveis" };
@@ -5895,8 +5015,8 @@ ${customFieldBlock}` : "Este lead ainda n\xE3o possui valores em campos personal
   }
 }
 async function sendWhatsappMedia(supabaseAdmin2, workspaceId, phone, mediaPath, mediaKind, mimeType, fileName, caption, asVoice = false, sessionId) {
-  const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
-  if (!encKey3) return { ok: false, error: "INTEGRATION_ENCRYPTION_KEY ausente" };
+  const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
+  if (!encKey) return { ok: false, error: "INTEGRATION_ENCRYPTION_KEY ausente" };
   const jidIdentity = whatsappIdentityFromJid(phone);
   const isGroupTarget = jidIdentity?.kind === "group";
   const digits = isGroupTarget ? "" : jidIdentity?.kind === "direct" ? jidIdentity.digits : (phone ?? "").replace(/\D/g, "");
@@ -5910,7 +5030,7 @@ async function sendWhatsappMedia(supabaseAdmin2, workspaceId, phone, mediaPath, 
   if (!sessId) return { ok: false, error: "Nenhuma sess\xE3o Evolution conectada" };
   const { data: creds } = await supabaseAdmin2.rpc("get_evolution_credentials_service", {
     _session_id: sessId,
-    _key: encKey3
+    _key: encKey
   });
   const c = creds;
   if (!c?.instance_name || !c.api_key) return { ok: false, error: "Credenciais Evolution indispon\xEDveis" };
@@ -5948,8 +5068,8 @@ async function sendWhatsappMedia(supabaseAdmin2, workspaceId, phone, mediaPath, 
 }
 async function sendWhatsappPresence(supabaseAdmin2, workspaceId, phone, presence, durationMs, sessionId) {
   try {
-    const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
-    if (!encKey3) return;
+    const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
+    if (!encKey) return;
     const jidIdentity = whatsappIdentityFromJid(phone);
     const isGroupTarget = jidIdentity?.kind === "group";
     const digits = isGroupTarget ? "" : jidIdentity?.kind === "direct" ? jidIdentity.digits : (phone ?? "").replace(/\D/g, "");
@@ -5963,7 +5083,7 @@ async function sendWhatsappPresence(supabaseAdmin2, workspaceId, phone, presence
     if (!sessId) return;
     const { data: creds } = await supabaseAdmin2.rpc("get_evolution_credentials_service", {
       _session_id: sessId,
-      _key: encKey3
+      _key: encKey
     });
     const c = creds;
     if (!c?.instance_name || !c.api_key) return;
@@ -5982,8 +5102,8 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, Math.max(0, ms)));
 }
 async function sendWhatsappReaction(supabaseAdmin2, workspaceId, phone, emoji) {
-  const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
-  if (!encKey3) return { ok: false, error: "INTEGRATION_ENCRYPTION_KEY ausente" };
+  const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
+  if (!encKey) return { ok: false, error: "INTEGRATION_ENCRYPTION_KEY ausente" };
   if (!emoji.trim()) return { ok: false, error: "Emoji vazio" };
   const jidIdentity = whatsappIdentityFromJid(phone);
   const isGroup = jidIdentity?.kind === "group";
@@ -6013,7 +5133,7 @@ async function sendWhatsappReaction(supabaseAdmin2, workspaceId, phone, emoji) {
   const fromMe = target.from_me === true;
   const { data: creds } = await supabaseAdmin2.rpc("get_evolution_credentials_service", {
     _session_id: sessId,
-    _key: encKey3
+    _key: encKey
   });
   const credentials = creds;
   if (!credentials?.instance_name || !credentials.api_key) {
@@ -6127,12 +5247,13 @@ async function runAction(supabaseAdmin2, run, lead, block) {
       const escapeHtml = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
       const html = escapeHtml(body).replace(/\r?\n/g, "<br>");
       try {
-        const email = await Promise.resolve().then(() => (init_email_sender_server(), email_sender_server_exports));
+        const email = await Promise.resolve().then(() => (init_salesbot_email(), salesbot_email_exports));
         const sent = await email.sendWorkspaceEmail(supabaseAdmin2, run.workspace_id, {
           to,
           subject,
           html,
-          text: body
+          text: body,
+          idempotencyKey: run.id + ":" + block.id
         });
         return {
           ok: true,
@@ -6541,9 +5662,6 @@ async function runAction(supabaseAdmin2, run, lead, block) {
       });
       return { ok: true, message: `vinculado: ${prodNome} (${kind})` };
     }
-    case "enviar-email": {
-      return { ok: false, message: "envio de e-mail em breve (integra\xE7\xE3o n\xE3o conectada)" };
-    }
     default:
       return { ok: false, message: `a\xE7\xE3o "${tipo}" ainda n\xE3o implementada` };
   }
@@ -6874,12 +5992,12 @@ async function executeRun(supabaseAdmin2, runInput) {
           const roundKey = `_rr_comment_${b.id}`;
           const idx = Number(run.variables?.[roundKey] ?? 0) % variants.length;
           const message = interpolate(variants[idx], lead, run.variables);
-          const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY") ?? "";
+          const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY") ?? "";
           try {
             const { data: tok } = await supabaseAdmin2.rpc("get_meta_page_token", {
               _workspace_id: run.workspace_id,
               _page_id: pageId,
-              _key: encKey3
+              _key: encKey
             });
             const pageToken = tok;
             if (!pageToken) throw new Error("token da p\xE1gina indispon\xEDvel");
@@ -6915,11 +6033,11 @@ async function executeRun(supabaseAdmin2, runInput) {
             break;
           }
           try {
-            const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY") ?? "";
+            const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY") ?? "";
             const { data: tok } = await supabaseAdmin2.rpc("get_meta_page_token", {
               _workspace_id: run.workspace_id,
               _page_id: pageId,
-              _key: encKey3
+              _key: encKey
             });
             const pageToken = tok;
             if (!pageToken) throw new Error("token da p\xE1gina indispon\xEDvel");
@@ -7531,9 +6649,9 @@ async function executeRun(supabaseAdmin2, runInput) {
             break;
           }
           try {
-            const encKey3 = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
+            const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY");
             const base = (runtimeEnv("EVOLUTION_URL") ?? "").replace(/\/+$/, "");
-            if (!encKey3 || !base) throw new Error("Ambiente Evolution n\xE3o configurado");
+            if (!encKey || !base) throw new Error("Ambiente Evolution n\xE3o configurado");
             const groupRoute = await resolveRuntimeWhatsappTarget(
               supabaseAdmin2,
               run.workspace_id,
@@ -7544,7 +6662,7 @@ async function executeRun(supabaseAdmin2, runInput) {
               throw new Error("Sess\xE3o/JID real do grupo n\xE3o p\xF4de ser resolvido");
             }
             const sid = groupRoute.sessionId;
-            const { data: creds } = await supabaseAdmin2.rpc("get_evolution_credentials_service", { _session_id: sid, _key: encKey3 });
+            const { data: creds } = await supabaseAdmin2.rpc("get_evolution_credentials_service", { _session_id: sid, _key: encKey });
             const c = creds;
             if (!c?.instance_name || !c.api_key) throw new Error("Credenciais Evolution indispon\xEDveis");
             const g = await Promise.resolve().then(() => (init_evolution_groups_server(), evolution_groups_server_exports));

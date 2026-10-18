@@ -1,3 +1,4 @@
+import {objectivePixelOptions} from './pixel-leads.mjs';
 import {normalizeProduct, prepareOrder, applyOrderStock} from './product-policy.mjs';
 import {workflowRPC} from './workflow-adapter.mjs';
 import { Core } from "./database.mjs";
@@ -466,11 +467,14 @@ async function rpc(store, ws, module, name, arg = {}) {
     case "listForms":
       result = d.forms;
       break;
+    case "listObjectiveTrackingOptions":
+      result = objectivePixelOptions(store, ws);
+      break;
     case "listTrackingSites":
-      result = { sites: d.tracking };
+      result = { sites: objectivePixelOptions(store,ws).map(s=>({id:s.siteId,name:s.siteName,domain:s.domain,verified:s.verified})) };
       break;
     case "listDistinctEventNames":
-      result = { events: [...new Set((d.inboxEvents || []).map((e) => e.type))] };
+      result = { events: [...new Set(objectivePixelOptions(store,ws).flatMap(s=>s.events.map(e=>e.name)))] };
       break;
     case "loadAgentConversation":
       result = { messages: d.aiConversations?.[p.module] || "[]" };
