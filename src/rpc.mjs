@@ -51,7 +51,7 @@ async function rpc(store, ws, module, name, arg = {}) {
       result = {whatsapp:d.connections?.whatsapp?.status==="connected"?[{id:d.connections.whatsapp.sessionId||"account-whatsapp",label:d.connections.whatsapp.phone||"WhatsApp conectado",status:"connected"}]:[],instagram:[],facebook:[],email:[]};
       break;
     case "listCrmSources":
-      result = { sources: d.crmSources };
+      result = { sources: d.crmSources.length ? d.crmSources : d.funnels.length ? [{id:"local-source",provider:"mkton",display_name:"Converte Call",is_default:true}] : [] };
       break;
     case "createCrmSource": {
       const source = { id: id(), provider: "mkton", display_name: p.name, is_default: !d.crmSources.length };
