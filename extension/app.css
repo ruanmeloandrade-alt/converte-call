@@ -5,6 +5,6 @@
 
 /* Converte Call spectrum: shared accents only; preserve semantic success/error colors. */
 :root{--brand-magenta:#b22f78;--brand-ember:#ed7c32;--brand-violet:#a83cdb;--brand-gradient:linear-gradient(120deg,#a83cdb,#d63b91 54%,#f49339);--purple:#b22f78;--lav:#fbedf4;--primary:#b22f78;--primary-foreground:#fff;--color-primary:var(--primary);--color-secondary:#fbedf4;--color-secondary-foreground:#8a3764;--color-accent:#fbedf4;--color-accent-foreground:#8a3764;--color-ring:#d869a3;--ring:#d869a3;--chat-accent:#b22f78}
-.dark{--primary:#dc72ac;--color-secondary:#3d2034;--color-secondary-foreground:#f1c4dd;--color-accent:#44223a;--color-accent-foreground:#f2c4df;--chat-accent:#dc72ac}
+.dark{--primary:#dc72ac;--primary-foreground:#301020;--color-primary-foreground:#301020;--color-secondary:#3d2034;--color-secondary-foreground:#f1c4dd;--color-accent:#44223a;--color-accent-foreground:#f2c4df;--chat-accent:#dc72ac}
 
 .mark{background:var(--brand-gradient)}.btn.primary{background:var(--brand-magenta);border-color:var(--brand-magenta)}.btn.primary:hover{background:#962961}.nav-item.active{background:linear-gradient(110deg,#7d315f50,#b34a7a24);color:#f7d7e9}
