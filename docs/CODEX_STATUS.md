@@ -488,3 +488,10 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Sete retratos sintéticos em sprite local substituem todas as iniciais dos stories. Cada retrato seleciona título, relato, perfil e composição visual distintos; mantém identificação de exemplo. Variações de cores, padrões e adesivos por história.
 - Validado em navegador: clique nos sete rostos, sete textos e posições de retrato únicos, imagem decodificada e proporção correta, conteúdo dentro do telefone; mantém testes desktop/Android, navegação, pausa, download, tutorial e módulosPWA.
 - Arquivos: public/sales.html, public/sales.css, public/sales.js, public/story-portraits.png, src/public-experience.mjs (somente rota estática do PNG), test/public-experience.browser.mjs e docs/CODEX_STATUS.md. Sem dependências, alteração de integrações ou versão da extensão.
+
+## 2026-10-18 — Escopo acumulado: fundo interativo da página de vendas
+- Acrescentado campo de pontos/traços em canvas fixo e transparente a cliques, com deformação em curva e iluminação roxa/magenta próximas ao cursor em toda a página. Mantém tema escuro e as entregas anteriores.
+- Respeita pausa global, movimento reduzido, touch e aba oculta. Renderiza somente durante interação/acomodação e resize/scroll; área limitada ao viewport e DPR1.5. Sem dependências novas.
+- Teste de navegador comprovou mudança real dos pixels ao mover mouse na abertura e na seção de stories, canvas sem interceptar cliques, pausa estática, reduced-motion estático e ausência de overflow. Jornada desktop/Android completa e download deZIP publicado também passaram. Screenshot revisado.
+- Escopo preservado: hero em partículas, sete rostos e histórias individuais, CTA sete dias, UTMs, download do ZIP publicado no ADM, tutorial e PWA. Este item soma-se aos pedidos anteriores.
+- Arquivos: public/sales.html, public/sales.css, public/sales.js, test/sales-background.browser.mjs, docs/CODEX_STATUS.md. Nenhuma mudança de conta, integrações ou versão da extensão.

@@ -62,3 +62,32 @@ const params=new URLSearchParams(location.search),allowed=['ref','utm_source','u
  screen.tabIndex=0;screen.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();show(index+(e.key==='ArrowRight'?1:-1));}});
  new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)start();else stop();},{threshold:.25}).observe(screen);document.addEventListener('visibilitychange',()=>document.hidden?stop():start());controls();show(0);
 })();
+// Interactive dot/line field follows the pointer across the sales page, never the app.
+(()=>{
+ const canvas=document.querySelector('#interaction-field');if(!canvas)return;
+ const ctx=canvas.getContext('2d');if(!ctx)return;
+ const motion=matchMedia('(prefers-reduced-motion: reduce)'),fine=matchMedia('(hover: hover) and (pointer: fine)');
+ let width=0,height=0,spacing=27,frame=0,last=0,power=0,targetPower=0,settling=false;
+ const pointer={x:-1000,y:-1000,targetX:-1000,targetY:-1000};
+ const paused=()=>motion.matches||document.body.classList.contains('motion-paused');
+ function draw(){
+  ctx.clearRect(0,0,width,height);const active=paused()?0:power,radius=190,shift=paused()?0:(scrollY*.035)%spacing;
+  if(active>.005){const glow=ctx.createRadialGradient(pointer.x,pointer.y,0,pointer.x,pointer.y,radius);glow.addColorStop(0,'rgba(222,49,157,'+(.1*active)+')');glow.addColorStop(.55,'rgba(139,57,232,'+(.065*active)+')');glow.addColorStop(1,'rgba(139,57,232,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);}
+  ctx.lineCap='round';
+  for(let y=-spacing;y<height+spacing;y+=spacing)for(let x=spacing/2;x<width;x+=spacing){
+   const by=y-shift,dx=x-pointer.x,dy=by-pointer.y,d=Math.hypot(dx,dy),influence=active*Math.pow(Math.max(0,1-d/radius),1.4),angle=Math.atan2(dy,dx)+Math.PI/2+influence*1.7;
+   const px=x+(Math.cos(angle)*11+dx/Math.max(1,d)*7)*influence,py=by+(Math.sin(angle)*11+dy/Math.max(1,d)*7)*influence;
+   const length=.65+influence*9;ctx.strokeStyle='rgba('+Math.round(139+90*influence)+','+Math.round(100-42*influence)+','+Math.round(220-39*influence)+','+(.19+influence*.65)+')';ctx.lineWidth=1.35+influence*1.1;
+   ctx.beginPath();ctx.moveTo(px-Math.cos(angle)*length/2,py-Math.sin(angle)*length/2);ctx.lineTo(px+Math.cos(angle)*length/2,py+Math.sin(angle)*length/2);ctx.stroke();
+  }
+ }
+ function tick(now){frame=0;if(document.hidden||paused()){draw();return;}const dt=last?Math.min(48,now-last):16;last=now;const ease=1-Math.exp(-dt/85);pointer.x+=(pointer.targetX-pointer.x)*ease;pointer.y+=(pointer.targetY-pointer.y)*ease;power+=(targetPower-power)*ease;draw();settling=Math.abs(power-targetPower)>.002||Math.abs(pointer.x-pointer.targetX)+Math.abs(pointer.y-pointer.targetY)>.15;if(settling)frame=requestAnimationFrame(tick);else last=0;}
+ function request(){if(!frame&&!document.hidden&&!paused())frame=requestAnimationFrame(tick);}
+ function reset(){cancelAnimationFrame(frame);frame=0;last=0;power=targetPower=0;draw();}
+ function resize(){width=innerWidth;height=innerHeight;spacing=width<760?29:27;const ratio=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);draw();}
+ addEventListener('pointermove',e=>{if(!fine.matches||e.pointerType==='touch'||paused())return;if(!power){pointer.x=e.clientX;pointer.y=e.clientY;}pointer.targetX=e.clientX;pointer.targetY=e.clientY;targetPower=1;request();},{passive:true});
+ document.documentElement.addEventListener('pointerleave',()=>{targetPower=0;request();},{passive:true});addEventListener('blur',()=>{targetPower=0;request();});
+ addEventListener('scroll',()=>{if(!paused())request();},{passive:true});addEventListener('resize',resize,{passive:true});
+ document.addEventListener('visibilitychange',()=>document.hidden?reset():draw());motion.addEventListener('change',reset);fine.addEventListener('change',reset);
+ new MutationObserver(()=>{if(paused())reset();else draw();}).observe(document.body,{attributes:true,attributeFilter:['class']});resize();
+})();
