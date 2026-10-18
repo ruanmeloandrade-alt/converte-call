@@ -44,12 +44,12 @@ test('extension follows real tab activation, reload, windows and Inbox without r
   await assert.doesNotReject(async()=>{for(let i=0;i<100;i++){const f=second.frames().find(f=>f.url().includes('surface.html#')&&f.url().includes('view=hud'));if(f&&await (await f.frameElement()).isVisible())return;await new Promise(r=>setTimeout(r,50));}throw Error('HUD did not follow');});
   await setView('inbox','employee-inbox');await crm(second,'employee-inbox');
   const wa=await ctx.newPage();await wa.goto('https://web.whatsapp.com/');await wa.bringToFront();await visible(wa);
-   await wa.waitForFunction(()=>!!document.getElementById('converte-call-composer'));
+   await wa.waitForFunction(()=>!!document.getElementById('converte-call-profile'));
   assert.equal(await worker.evaluate(async()=>(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState.mode),'inbox');
   await second.bringToFront();await crm(second,'employee-inbox');await hidden(wa);
   // Employees keep the internal Inbox even on the WhatsApp host.
   await worker.evaluate(()=>{CCPortal.request=async()=>({membership:{role:'member',permissions:['inbox']}});});
-   await wa.bringToFront();await wa.reload();try{await crm(wa,'employee-inbox');}catch(error){console.log('Employee restore diagnostic',await worker.evaluate(async()=>({state:(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState,license:await CCPortal.request('/v1/account/license')})),wa.frames().map(f=>f.url()));throw error;}assert.equal(await wa.locator('#converte-call-composer').count(),0);
+   await wa.bringToFront();await wa.reload();try{await crm(wa,'employee-inbox');}catch(error){console.log('Employee restore diagnostic',await worker.evaluate(async()=>({state:(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState,license:await CCPortal.request('/v1/account/license')})),wa.frames().map(f=>f.url()));throw error;}assert.equal(await wa.locator('#converte-call-profile').count(),0);
   await setView('dock','home');await first.bringToFront();await visible(first);
   assert.equal(await worker.evaluate(async()=>(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState.mode),'dock');
   await worker.evaluate(()=>{CCPortal.request=async()=>({lessons:[{id:'fixture-lesson',title:'Aprenda a usar o Converte Call',videoId:'ABCDEFGHIJK'}]});});
@@ -68,6 +68,12 @@ test('extension follows real tab activation, reload, windows and Inbox without r
   await crm(youtube,'academy');
   await first.bringToFront();await crm(first,'academy');
   await assert.rejects(worker.evaluate(()=>handle({type:'open-academy-lesson',id:'not-allowed'},{})),/Aula não disponível/);
+  // Checkout remains visible rather than being covered by the expanded CRM.
+  const checkoutPage=await ctx.newPage();await checkoutPage.goto('https://convertecall.pro/checkout');await checkoutPage.bringToFront();await visible(checkoutPage);
+  await checkoutPage.waitForTimeout(150);
+  for(const f of checkoutPage.frames().filter(f=>f.url().includes('panel.html#')))assert.equal(await (await f.frameElement()).isVisible(),false);
+  assert.equal(await worker.evaluate(async()=>(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState.view),'academy');
+  await first.bringToFront();await crm(first,'academy');
   // A second normal browser window follows the same state (recorder popups excluded).
    const pageEvent=ctx.waitForEvent('page');
    const newWindow=await worker.evaluate(url=>chrome.windows.create({url,focused:true,type:'normal'}),base+'/window');

@@ -68,3 +68,9 @@ Renovação conserva convites pendentes dentro da capacidade. Redução paga des
 Validação local: `test/billing.test.mjs`, `test/team-billing.test.mjs`, `test/teams.test.mjs` e `test/experience.browser.mjs`. Provedor Stripe nas provas de contrato é um adaptador de teste isolado, não uma cobrança real. A conexão Stripe real, atualização de quantidade de assinatura já ativa e Inbox original de funcionários ainda precisam de conclusão/validação antes de anunciar Equipe comercialmente disponível. Não houve publicação desta alteração ainda.
 
 Revisão de preço Equipe: lookup/idempotência dos novos preços usam `0150-v1`. Não atualiza assinaturas já contratadas; qualquer migração de preço vigente exige fluxo explícito. Não houve provisionamento nem cobrança real neste incremento. Pix permanece R$5/R$15 por funcionário. Sistema de parceiros e portais: [escopo](tasks/2026-10-18-partners-web-portals.md).
+
+
+### Câmbio fixo e alteração de assinatura (0.13.4)
+Checkout: https://convertecall.pro/checkout. Configuração: https://adm.convertecall.pro/admin/pagamentos.
+BRL padrão; USD e EUR selecionáveis antes da compra. Bases USD6.98/mês e USD16.58/trimestre; funcionário adicional USD1.50/mês ou USD4.50/trimestre, até sete pessoas incluindo titular. Câmbio inicial autorizado USD1=BRL5.50/EUR1.17. ADM muda novas cotações; revisão evita compra usando cotação antiga. Assinaturas existentes preservam preço contratado.
+Alterações de plano são confirmadas no portal hospedado; redução programada para fim do período, upgrade com ajuste de cobrança. Nunca liberar assentos pelo redirecionamento. Troca de moeda de assinatura ativa exige suporte por enquanto. Pix manual mantém valores próprios aprovados; indicados de parceiro não recebem opção Pix.

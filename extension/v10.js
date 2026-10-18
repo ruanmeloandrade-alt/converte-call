@@ -10,7 +10,7 @@ actions['billing-open']=()=>go('plans');actions['billing-refresh']=loadBilling;
 actions['billing-pix']=element=>{const plan=CCBillingCatalog.find(p=>p.id===element.dataset.plan);if(plan)chrome.tabs.create({url:'https://wa.me/5522992888971?text='+encodeURIComponent(CCBillingQuote(plan.id,billingSeats).pixMessage)});};
 async function openBillingPage(type,payload={}){try{const result=await service(type,payload),url=new URL(result.url);if(url.protocol!=='https:'||!['checkout.stripe.com','billing.stripe.com'].includes(url.hostname))throw Error('O serviço de pagamento retornou um endereço inválido.');await chrome.tabs.create({url:url.href});}catch(error){if(/Entre na sua conta|Sessão expirada/.test(error.message)){portalSignIn();return;}throw error;}}
 actions['billing-pay']=async element=>{element.disabled=true;try{await openBillingPage('portal-checkout',{plan:element.dataset.plan,locale:billingLang(),seats:billingSeats});}finally{element.disabled=false;}};
-actions['billing-manage']=()=>openBillingPage('portal-billing-portal');
+actions['billing-manage']=actions['billing-web-checkout'];
 const billingGoBefore=go;go=function(next){billingGoBefore(next);if(next==='plans')loadBilling();};
 
 actions['billing-seat-minus']=()=>{billingSeats=Math.max(1,billingSeats-1);render();};

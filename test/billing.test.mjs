@@ -21,6 +21,7 @@ test('real HTTP billing authorizes admin/Pix, verifies signed payments, deduplic
   if(path==='/v1/checkout/sessions/cs_LOCAL')return Response.json({id:'cs_LOCAL',url:'https://checkout.stripe.com/test_local',expires_at:Math.floor(Date.now()/1000)+3600,status:mode,mode:'subscription',payment_status:mode==='complete'?'paid':'unpaid',subscription:'sub_LOCAL',invoice:'in_LOCAL'});
   if(path==='/v1/subscriptions/sub_LOCAL')return Response.json({id:'sub_LOCAL',customer:'cus_LOCAL',status:subStatus,cancel_at_period_end:cancel,metadata:{workspaceId:workspace,plan:'monthly',application:'converte-call'},items:{data:[{quantity:1,price:{id:price}}]}});
   if(path==='/v1/invoices/in_LOCAL')return Response.json({id:'in_LOCAL',status:invoiceStatus,amount_paid:invoiceStatus==='paid'?698:0,currency:'usd',customer:'cus_LOCAL',parent:{subscription_details:{subscription:'sub_LOCAL'}},lines:{data:[{pricing:{price_details:{price}},period:{end}}]}});
+  if(path.startsWith('/v1/billing_portal/configurations/'))return Response.json({id:'bpc_LOCAL'});
   if(path==='/v1/billing_portal/sessions')return Response.json({url:'https://billing.stripe.com/local_portal'});
   throw Error('Unexpected provider request '+path);
  };

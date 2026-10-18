@@ -1,16 +1,4 @@
 {
-  "@/lib/products.functions": [
-    "listProductCatalogs",
-    "linkLeadProduct",
-    "unlinkLeadProduct",
-    "saveProductCatalog",
-    "deleteProductCatalog",
-    "saveProduct",
-    "deleteProduct",
-    "bulkUpsertProducts",
-    "renameProductCategory",
-    "listProductLeads"
-  ],
   "@/lib/crm.functions": [
     "listAllPipelineStages",
     "listWorkspaceUsers",
@@ -66,6 +54,18 @@
     "normalizeEvolutionDeliveryStatus",
     "isEvolutionConnectionClosedMessage"
   ],
+  "@/lib/products.functions": [
+    "listProductCatalogs",
+    "linkLeadProduct",
+    "unlinkLeadProduct",
+    "saveProductCatalog",
+    "deleteProductCatalog",
+    "saveProduct",
+    "deleteProduct",
+    "bulkUpsertProducts",
+    "renameProductCategory",
+    "listProductLeads"
+  ],
   "@/lib/crm-arquivos.functions": [
     "setLeadKeepFiles",
     "listCrmArquivos",
@@ -99,10 +99,17 @@
     "removeCompanyMember",
     "listUnassignedLeads"
   ],
-  "@/lib/internal-messages.functions": [
-    "listInternalMessages",
-    "markInternalMessageRead",
-    "sendInternalMessage"
+  "@/lib/conversation-agents.functions": [
+    "listConversationAgents",
+    "upsertConversationAgent",
+    "deleteConversationAgent",
+    "duplicateConversationAgent",
+    "setPrimaryConversationAgent",
+    "getConversationAgentStats",
+    "listConversationAgentRuns",
+    "activateConversationAgentForLead",
+    "listActiveWorkspaceConversationAgents",
+    "setConversationAgentEnabled"
   ],
   "@/lib/workflow.functions": [
     "listWorkflowPipelinesLite",
@@ -149,87 +156,10 @@
     "registerAttachment",
     "deleteAttachment"
   ],
-  "@/lib/conversation-agents.functions": [
-    "listConversationAgents",
-    "upsertConversationAgent",
-    "deleteConversationAgent",
-    "duplicateConversationAgent",
-    "setPrimaryConversationAgent",
-    "getConversationAgentStats",
-    "listConversationAgentRuns",
-    "activateConversationAgentForLead",
-    "listActiveWorkspaceConversationAgents",
-    "setConversationAgentEnabled"
-  ],
-  "@/lib/whatsapp-groups.functions": [
-    "listWorkspaceGroups",
-    "syncSessionGroups",
-    "createWhatsAppGroup",
-    "joinGroupByLink",
-    "leaveGroup",
-    "renameGroup",
-    "setGroupDescription",
-    "setGroupAutomation",
-    "saveGroupRules",
-    "listGroupSalesbots",
-    "listGroupAiAgents",
-    "upsertGroupAiAgent",
-    "deleteGroupAiAgent",
-    "duplicateGroupAiAgent",
-    "getGroupAgentStats",
-    "listInboxGroupConversations",
-    "listInboxGroupMessages",
-    "sendGroupMessage",
-    "sendGroupMedia",
-    "normalizeWhatsAppGroupParticipant",
-    "isExplicitEvolutionDisconnectedState",
-    "isEvolutionConnectionClosedMessage",
-    "extractEvolutionProviderMessage"
-  ],
-  "@/lib/tracked-links.functions": [
-    "listTrackedLinkSites",
-    "createTrackedLink",
-    "listTrackedLinks"
-  ],
-  "@/lib/channels.functions": [
-    "listWorkspaceChannels"
-  ],
-  "@/lib/salesbots.functions": [
-    "uploadSalesbotMedia",
-    "getSalesbotMediaSignedUrl",
-    "listSalesbotMedia",
-    "listSalesbots",
-    "duplicateSalesbot",
-    "deleteSalesbot",
-    "syncSalesbotFromLocal",
-    "listSalesbotsFull",
-    "getSalesbotGraph",
-    "setSalesbotActive",
-    "deleteSalesbotByLocalId",
-    "listSalesbotPickerOptions",
-    "startSalesbotForLead",
-    "getSalesbot",
-    "createSalesbot",
-    "saveSalesbot",
-    "listSalesbotRevisions",
-    "restoreSalesbotRevision"
-  ],
-  "@/lib/crm-audiences.functions": [
-    "listCrmAudiences",
-    "previewCrmAudience",
-    "createCrmAudience",
-    "deleteCrmAudience",
-    "refreshCrmAudience",
-    "exportCrmAudienceToMeta",
-    "createCrmAudienceLookalike",
-    "broadcastCrmAudience",
-    "listAudienceFilterOptions",
-    "reactivateCrmAudienceWithSalesbot",
-    "reactivateCrmAudienceWithAgent",
-    "CustomFieldRuleSchema",
-    "AudienceFiltersSchema",
-    "updateCrmAudience",
-    "getCrmAudienceContacts"
+  "@/lib/internal-messages.functions": [
+    "listInternalMessages",
+    "markInternalMessageRead",
+    "sendInternalMessage"
   ],
   "@/lib/meta.functions": [
     "startMetaOAuth",
@@ -259,6 +189,23 @@
     "resultFromObjective",
     "sendMetaConversionsEvent"
   ],
+  "@/lib/crm-audiences.functions": [
+    "listCrmAudiences",
+    "previewCrmAudience",
+    "createCrmAudience",
+    "deleteCrmAudience",
+    "refreshCrmAudience",
+    "exportCrmAudienceToMeta",
+    "createCrmAudienceLookalike",
+    "broadcastCrmAudience",
+    "listAudienceFilterOptions",
+    "reactivateCrmAudienceWithSalesbot",
+    "reactivateCrmAudienceWithAgent",
+    "CustomFieldRuleSchema",
+    "AudienceFiltersSchema",
+    "updateCrmAudience",
+    "getCrmAudienceContacts"
+  ],
   "@/lib/evolution.functions": [
     "createEvolutionInstance",
     "fetchEvolutionQrCode",
@@ -269,35 +216,58 @@
     "recreateEvolutionInstance",
     "sendEvolutionText"
   ],
-  "@/lib/tracking.functions": [
-    "createTrackingSite",
-    "listTrackingSites",
-    "deleteTrackingSite",
-    "listTrackingSources"
+  "@/lib/salesbots.functions": [
+    "uploadSalesbotMedia",
+    "getSalesbotMediaSignedUrl",
+    "listSalesbotMedia",
+    "listSalesbots",
+    "duplicateSalesbot",
+    "deleteSalesbot",
+    "syncSalesbotFromLocal",
+    "listSalesbotsFull",
+    "getSalesbotGraph",
+    "setSalesbotActive",
+    "deleteSalesbotByLocalId",
+    "listSalesbotPickerOptions",
+    "startSalesbotForLead",
+    "getSalesbot",
+    "createSalesbot",
+    "saveSalesbot",
+    "listSalesbotRevisions",
+    "restoreSalesbotRevision"
   ],
-  "@/lib/tracking-live.functions": [
-    "listConversions",
-    "upsertConversion",
-    "deleteConversion",
-    "listDistinctEventNames",
-    "listTrackingEvents",
-    "getTrackingOverview",
-    "listUtmRanking",
-    "listWhatsappCalls"
+  "@/lib/tracked-links.functions": [
+    "listTrackedLinkSites",
+    "createTrackedLink",
+    "listTrackedLinks"
   ],
-  "@/lib/workspace.functions": [
-    "getActiveWorkspace"
+  "@/lib/channels.functions": [
+    "listWorkspaceChannels"
   ],
-  "@/lib/mkton-full-provision.functions": [
-    "getMktonBootstrapState",
-    "provisionMktonFull"
-  ],
-  "@/lib/mkton-admin-provision.functions": [
-    "provisionMktonLeadEntry"
-  ],
-  "@/lib/lead-360.functions": [
-    "getLead360",
-    "setLeadCompany"
+  "@/lib/whatsapp-groups.functions": [
+    "listWorkspaceGroups",
+    "syncSessionGroups",
+    "createWhatsAppGroup",
+    "joinGroupByLink",
+    "leaveGroup",
+    "renameGroup",
+    "setGroupDescription",
+    "setGroupAutomation",
+    "saveGroupRules",
+    "listGroupSalesbots",
+    "listGroupAiAgents",
+    "upsertGroupAiAgent",
+    "deleteGroupAiAgent",
+    "duplicateGroupAiAgent",
+    "getGroupAgentStats",
+    "listInboxGroupConversations",
+    "listInboxGroupMessages",
+    "sendGroupMessage",
+    "sendGroupMedia",
+    "normalizeWhatsAppGroupParticipant",
+    "isExplicitEvolutionDisconnectedState",
+    "isEvolutionConnectionClosedMessage",
+    "extractEvolutionProviderMessage"
   ],
   "@/lib/forms.functions": [
     "listForms",
@@ -320,21 +290,54 @@
     "buildFormAssetUrl",
     "getFormById"
   ],
+  "@/lib/tracking.functions": [
+    "createTrackingSite",
+    "listTrackingSites",
+    "deleteTrackingSite",
+    "listTrackingSources"
+  ],
+  "@/lib/tracking-live.functions": [
+    "listConversions",
+    "upsertConversion",
+    "deleteConversion",
+    "listDistinctEventNames",
+    "listTrackingEvents",
+    "getTrackingOverview",
+    "listUtmRanking",
+    "listWhatsappCalls"
+  ],
+  "@/lib/workspace.functions": [
+    "getActiveWorkspace"
+  ],
+  "@/lib/mkton-admin-provision.functions": [
+    "provisionMktonLeadEntry"
+  ],
+  "@/lib/mkton-full-provision.functions": [
+    "getMktonBootstrapState",
+    "provisionMktonFull"
+  ],
   "@/lib/inbox-labels.functions": [
     "listInboxLabels",
     "upsertInboxLabel",
     "deleteInboxLabel",
     "toggleLabelAssignment"
   ],
+  "@/lib/lead-360.functions": [
+    "getLead360",
+    "setLeadCompany"
+  ],
+  "@/lib/agent-system-targets.functions": [
+    "listAgentSystemTargets"
+  ],
   "@/lib/permissions-core.functions": [
     "getMyPermissions",
     "loadEffectivePermissions"
   ],
-  "@/lib/workflow-rewards.functions": [
-    "listRewards",
-    "createReward",
-    "updateReward",
-    "deleteReward"
+  "@/lib/group-reports.functions": [
+    "getGroupReports"
+  ],
+  "@/lib/crm-reports.functions": [
+    "getCrmReports"
   ],
   "@/lib/workflow-gamification.functions": [
     "getGamificationConfig",
@@ -346,17 +349,14 @@
     "saveShareCardUrl",
     "awardTaskPoints"
   ],
-  "@/lib/agent-system-targets.functions": [
-    "listAgentSystemTargets"
+  "@/lib/workflow-rewards.functions": [
+    "listRewards",
+    "createReward",
+    "updateReward",
+    "deleteReward"
   ],
   "@/lib/objective-tracking.functions": [
     "listObjectiveTrackingOptions"
-  ],
-  "@/lib/group-reports.functions": [
-    "getGroupReports"
-  ],
-  "@/lib/crm-reports.functions": [
-    "getCrmReports"
   ],
   "@/lib/team-chat.functions": [
     "listInternalMessageTargets",
