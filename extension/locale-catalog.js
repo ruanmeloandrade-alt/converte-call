@@ -26,6 +26,15 @@ Atualizar|Refresh|Actualizar|刷新|更新|Actualiser|Aktualisieren|Aggiorna
 Escolha seu plano. Cobrança recorrente em dólar.|Choose your plan. Recurring billing in US dollars.|Elige tu plan. Cobro recurrente en dólares.|选择套餐。以美元定期收费。|プランを選択。米ドルでの定期課金。|Choisissez votre offre. Facturation récurrente en dollars.|Wählen Sie Ihren Tarif. Wiederkehrende Abrechnung in US-Dollar.|Scegli il tuo piano. Addebito ricorrente in dollari.
 Renovação automática. Cancele a renovação quando quiser.|Automatic renewal. Cancel renewal at any time.|Renovación automática. Cancela la renovación cuando quieras.|自动续订。可随时取消续订。|自動更新。いつでも更新を停止できます。|Renouvellement automatique. Annulez à tout moment.|Automatische Verlängerung. Jederzeit kündbar.|Rinnovo automatico. Annulla il rinnovo quando vuoi.
 Seu teste começa no cadastro, sem cartão. A assinatura Stripe começa quando você contrata.|Your trial starts at signup, without a card. Stripe billing starts when you subscribe.|Tu prueba empieza al registrarte, sin tarjeta. Stripe cobra al suscribirte.|注册即开始试用，无需银行卡。订阅时开始 Stripe 收费。|登録時に無料体験が始まり、カードは不要です。契約時にStripe課金が始まります。|Votre essai commence à l'inscription, sans carte. Stripe facture à la souscription.|Ihr Test beginnt bei der Registrierung ohne Karte. Die Stripe-Abrechnung startet beim Abonnieren.|La prova inizia alla registrazione, senza carta. Stripe addebita quando ti abboni.
+Sistema atualizado|System up to date|Sistema actualizado|系统已更新|システムは最新です|Système à jour|System aktuell|Sistema aggiornato
+Sistema desatualizado|Update available|Sistema desactualizado|有可用更新|更新があります|Mise à jour disponible|Update verfügbar|Aggiornamento disponibile
+Verificando atualização…|Checking for updates…|Buscando actualizaciones…|正在检查更新…|更新を確認中…|Recherche de mises à jour…|Suche nach Updates…|Ricerca aggiornamenti…
+Atualização não verificada|Update status unavailable|Actualización no verificada|无法确认更新状态|更新状態を確認できません|État indisponible|Updatestatus nicht verfügbar|Stato non disponibile
+Baixe a versão atualizada|Download the update|Descargar actualización|下载更新|更新をダウンロード|Télécharger la mise à jour|Update herunterladen|Scarica aggiornamento
+Verificar novamente|Check again|Volver a comprobar|重新检查|再確認|Vérifier à nouveau|Erneut prüfen|Verifica di nuovo
+Precisa de ajuda com o seu marketing?|Need help with your marketing?|¿Necesitas ayuda con tu marketing?|需要营销方面的帮助吗？|マーケティングのサポートが必要ですか？|Besoin d'aide pour votre marketing ?|Brauchen Sie Hilfe beim Marketing?|Hai bisogno di aiuto con il marketing?
+Fale com uma empresa especializada.|Talk to a specialist company.|Habla con una empresa especializada.|咨询专业团队。|専門の会社に相談しましょう。|Parlez à une entreprise spécialisée.|Sprechen Sie mit einem Spezialisten.|Parla con un'azienda specializzata.
+Vamos conversar ↗|Let's talk ↗|Hablemos ↗|联系我们 ↗|相談する ↗|Discutons ↗|Kontakt aufnehmen ↗|Parliamone ↗
 Início|Home|Inicio|首页|ホーム|Accueil|Startseite|Home
 Dashboard|Dashboard|Panel|数据看板|ダッシュボード|Tableau de bord|Dashboard|Dashboard
 Relacionamento|Relationships|Relaciones|客户关系|顧客管理|Relations|Kundenbeziehungen|Relazioni

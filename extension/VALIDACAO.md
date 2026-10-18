@@ -1,3 +1,7 @@
+# Validação — 0.12.0
+
+13 testes nativos passaram. Chrome real: menu/atualizações/RB Mídia e persistência do cofre após reiniciar Chrome; CryptoKey não extraível. ZIP real foi descompactado nos testes e comparado ao manifest/hash; conta grátis/paga verificadas contra API local real, sem envio de mensagens. Nenhum QR ou pagamento real nesta entrega.
+
 # Validação — 0.11.0
 
 12 testes nativos passaram, incluindo preços/Pix, permissões, recebimento/idempotência, webhook assinado, fatura paga, renovação falha, cancelamento/portal e nova assinatura. Dois testes de Chrome passaram, incluindo liberação manual Pix e mensagens exatas; Pix não aparece em inglês. Stripe foi substituída por respostas controladas SOMENTE NOS TESTES. A implementação de produção faz requisições reais, sem simular sucesso quando desconectada. Conta Stripe exige reconexão/credencial; pagamento real/sandbox real não validados.

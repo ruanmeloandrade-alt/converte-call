@@ -42,6 +42,7 @@ Não basta o healthcheck passar: os fluxos de bots, agentes, mídia, OAuth e aut
 - [Cadastro de 7 dias e administração de assinaturas](docs/LICENCAS.md)
 - [Suporte, Faculdade e idiomas](docs/SUPORTE-FACULDADE.md)
 - [Pagamentos Stripe e Pix](docs/PAGAMENTOS.md)
+- [Atualizações, credenciais e convite RB Mídia](docs/ATUALIZACOES.md)
 
 Referências oficiais: [Railway autodeploy](https://docs.railway.com/deployments/github-autodeploys), [Evolution OpenAPI v2](https://github.com/evolution-foundation/docs-evolution/blob/main/openapi/openapi-v2.json), [SQLite no Node 24](https://nodejs.org/docs/latest-v24.x/api/sqlite.html).
 

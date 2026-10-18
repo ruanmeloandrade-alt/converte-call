@@ -1,4 +1,4 @@
-CONVERTE CALL 0.11.1
+CONVERTE CALL 0.12.0
 
 Se já usa a extensão, mantenha a pasta Converte Call v0.2.0 da Área de Trabalho.
 Ela foi atualizada no mesmo caminho. Em chrome://extensions, clique em Recarregar.
@@ -44,3 +44,12 @@ Pix: R$29,90 mensal ou R$67,90 trimestral; liberação manual pelo administrador
 Stripe: conexão/credencial e conta recebedora são configuradas somente no
 ambiente privado do servidor. O administrador apenas consulta o estado.
 Não envie chaves pelo chat. Consulte docs/PAGAMENTOS.md no GitHub.
+
+ATUALIZACOES E RB MIDIA
+Abaixo de Conta: verde = interface atualizada; vermelho = nova versão publicada.
+Baixe a versão atualizada entrega o ZIP do servidor. Extraia na MESMA pasta
+já instalada e use Recarregar; não remova a extensão nem troque de pasta.
+Credenciais agora são preservadas em cofre cifrado e o login da conta é renovado.
+Se a sessão antiga já foi perdida, pode ser necessário um primeiro login.
+Não há limpeza das configurações existentes durante atualização.
+Convite RB Mídia no rodapé usa a situação real da assinatura para compor a mensagem.

@@ -1,5 +1,5 @@
 'use strict';
-importScripts('internal-config.js','core.js','core-v4.js','notification-catalog.js','notification-center.js','call-fields.js','services.js','portal-services.js');
+importScripts('credential-vault.js','internal-config.js','core.js','core-v4.js','notification-catalog.js','notification-center.js','call-fields.js','services.js','portal-services.js');
 let creating;
 async function engine(){
  const url=chrome.runtime.getURL('offscreen.html');

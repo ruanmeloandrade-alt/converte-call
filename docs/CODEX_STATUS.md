@@ -172,3 +172,40 @@ Pix já registra pagamento e libera plano; pedido formal integrado ao restante d
 Solicitações registradas para sequência, com prioridade atual Stripe: Faculdade deve ter mesma visão aluno/admin com botão Editar apenas admin, banner e organização de cursos/módulos/aulas editados na própria Faculdade, não listagem avulsa no painel de assinaturas. Dashboard do proprietário deve exibir métricas globais reais de clientes/trials/assinaturas, com autorização no servidor, nunca para outros clientes. Personalização de tema e links públicos, mantendo domínio Railway por enquanto e domínio próprio depois. Pedido Pix deve ser vinculado ao cliente/plano/recebimento/liberação. Não afirmar que esses pedidos já foram implementados nesta correção.
 Verificações: testes de billing validam bloqueio HTTP410 e recebedor divergente sem gravação. Demais checks registrados no relatório da entrega.
 Arquivos: public/admin.html, public/admin.js, src/billing.mjs, src/server.mjs, test/billing.test.mjs, package.json, extension/manifest.json, extension/LEIA-ME.txt, README.md, docs/PAGAMENTOS.md e docs/CODEX_STATUS.md.
+
+## 0.12 — menu, atualizações e preservação / 18-10-2026
+Usuário definiu status abaixo de Conta e merchan RB Mídia no rodapé, forneceu PNG e print. Logo copiada sem edição; WhatsApp assumido5522992888971 (contato já informado), textos cG/cP exatos. Segmentação vem de GET/v1/account/marketing-link com licença real no relógio do servidor, sem declarar grátis quando falta login. Admin classificado acesso integral/pago, expirado/suspenso grátis.
+Status usa versão real do manifest via /v1/releases/latest e ZIP servido pelo próprio backend; comparação numérica, verde/vermelho/neutro. Docker passa a levar extension/. ZIP nativo determinístico com CRC32, sem dependência nova/Actions. Download manual é necessário para extensão unpacked; não afirmar atualização automática do código. Manter caminho/ID e dados, sem remover instalação.
+Identificada perda potencial nas versões antigas: credenciais somente session. Implementado cofreAESGCM com CryptoKey não extraível em IndexedDB e ciphertext fora do workspace, compartilhado com gravador. Login da extensão pede dispositivo; migração6, hash de refresh com90dias e renovação da sessão12h. Login que substitui acesso/logout revoga; atualização nunca faz logout. Legado de sessão é migrado quando ainda existe; não prometer recuperar segredo previamente apagado. Conta diferente/logout explícito limpa material sensível local para evitar mistura. Chave também sincroniza com cofre do servidor ao salvar/logar, se autorizado. Sem mudança da instância Evolution nem revogação OAuth/QR.
+PASS13testes nativos; Chrome menu+RB+status e cofre com reinício real do Chrome passaram. Mensagens não enviadas, provedor/chaves reais não usados. Sincronização CRM integral, executor, conexão Stripe e OAuth continuam pendentes; Faculdade inline/dashboardadmin/tema/pedidos também preservados como próximos pedidos, sem afirmar implementação. Documentação ATUALIZACOES.md com procedimentos/limites.
+Arquivos alterados:
+- Dockerfile
+- README.md
+- docs/ARQUITETURA.md
+- docs/ATUALIZACOES.md
+- docs/CODEX_STATUS.md
+- docs/SUPORTE-FACULDADE.md
+- extension/ALTERACOES.md
+- extension/LEIA-ME.txt
+- extension/VALIDACAO.md
+- extension/ai-media.js
+- extension/background.js
+- extension/credential-vault.js
+- extension/icons/rb-midia.png
+- extension/locale-catalog.js
+- extension/manifest.json
+- extension/offscreen.html
+- extension/panel.html
+- extension/portal-services.js
+- extension/recorder.html
+- extension/release.js
+- extension/services.js
+- extension/v11.css
+- extension/v11.js
+- package.json
+- src/releases.mjs
+- src/server.mjs
+- test/portal.browser.mjs
+- test/portal.test.mjs
+- test/updates.test.mjs
+- test/vault.browser.mjs

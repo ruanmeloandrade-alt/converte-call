@@ -2,7 +2,7 @@
 
 ## Menu e acesso
 
-Em Conta, Faculdade aparece imediatamente acima de Integrações. Suporte aparece imediatamente abaixo de Notificações. A extensão usa um transporte autenticado da conta, sem ativar prematuramente a sincronização integral do CRM. Tokens ficam apenas em chrome.storage.session e não entram em exportações de dados.
+Em Conta, Faculdade aparece imediatamente acima de Integrações. Suporte aparece imediatamente abaixo de Notificações. A extensão usa um transporte autenticado da conta, sem ativar prematuramente a sincronização integral do CRM. Desde 0.12, tokens ficam em cofre cifrado persistente e cache de sessão; não entram em exportações de dados. Detalhes em ATUALIZACOES.md.
 
 O suporte humano abre https://wa.me/5522992888971, correspondente a (22) 99288-8971. O clique abre uma conversa; não envia mensagens automaticamente.
 

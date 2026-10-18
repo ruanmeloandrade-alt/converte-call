@@ -1,3 +1,10 @@
+# Alterações — 0.12.0
+
+- Status de atualização real sob Conta; download da versão publicada pelo servidor.
+- Convite RB Mídia no rodapé, logo original e mensagem conforme licença real.
+- Cofre cifrado persistente, renovação de login e sincronização da chave IA.
+- Dados/conexões anteriores preservados; não é migração integral do CRM para nuvem.
+
 # Alterações — 0.11.1
 
 - Removido formulário de chave Stripe do painel; API de alteração bloqueada inclusive para administrador.

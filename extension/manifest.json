@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Converte Call",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "minimum_chrome_version": "116",
   "description": "CRM no WhatsApp Web, funis, bots, agentes, projetos Kanban, UTMs e gravação local.",
   "permissions": [
@@ -91,7 +91,9 @@
         "i18n.js",
         "billing-catalog.js",
         "v10.js",
-        "v10.css"
+        "v10.css",
+        "v11.js",
+        "v11.css"
       ],
       "matches": [
         "http://*/*",
@@ -108,7 +110,8 @@
     "https://*.zoom.us/*",
     "https://api.openai.com/*",
     "https://www.googleapis.com/*",
-    "https://gmail.googleapis.com/*"
+    "https://gmail.googleapis.com/*",
+    "https://converte-api-production.up.railway.app/*"
   ],
   "optional_host_permissions": [
     "https://*/*"
