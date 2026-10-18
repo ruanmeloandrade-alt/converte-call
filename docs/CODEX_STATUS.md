@@ -557,3 +557,5 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Cinco cenários de navegador passaram: arquivos/links/faixa e reação sob configuração real do Codex; carrossel com transição real e avanço automático; globo; fundo; jornada pública completa até ZIP/tutorial/Android. Verificados todos os 57 PNGs byte a byte contra os arquivos fornecidos. Screenshots desktop/mobile revisados.
 - Sem dependências novas, versão/ZIP da extensão, alterações em integrações ou dados privados. Rotas acrescentadas são somente os PNGs públicos explicitamente enumerados.
 - Arquivos: public/sales.html, public/sales.css, public/sales.js, public/client-logos/*.png (57), src/public-experience.mjs, test/client-logos.browser.mjs, test/followup-carousel.browser.mjs, test/globe.browser.mjs, test/sales-background.browser.mjs e docs/CODEX_STATUS.md.
+
+- Complemento: faixa de logos usa Web Animations com velocidade mais suave em movimento reduzido, preservando o avanço contínuo pedido pelo usuário no próprio Codex. Pausa fora da tela/aba oculta. Teste cobre movimento nessa configuração também.
