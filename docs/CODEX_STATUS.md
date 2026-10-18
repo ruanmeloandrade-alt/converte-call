@@ -529,3 +529,10 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Crédito do rodapé preparado: Dev Media aponta para https://dev.midia.com, conforme informado. RB Media permanece texto até confirmação do endereço do site.
 - Validação em navegador desktop (1440px) e mobile (393px): ordem CTA → FAQ → marcas, abertura de resposta e ausência de overflow passaram.
 - Arquivos: public/sales.html, public/sales.css e docs/CODEX_STATUS.md. Sem dependências nem atualização da extensão.
+
+
+## 2026-10-18 — Reação visível da marca ao mouse
+- Aumentado raio e deslocamento das partículas de CONVERTE CALL; retorno agora usa mola amortecida. Evento acompanha a área da marca. Removida referência obsoleta ao controle de pausa.
+- Mantidas preferência de movimento reduzido, interrupção fora da tela/aba oculta e layout. Sem dependências ou alterações na extensão.
+- Navegador real: hover alterou 15.328 pixels de opacidade, retorno capturado, movimento reduzido estático. Teste do fundo interativo passou. Screenshot revisado.
+- Arquivos: public/sales.js e docs/CODEX_STATUS.md.

@@ -9,7 +9,7 @@ document.querySelector('#scenario-previous').onclick=()=>scenario(scenarioKeys[(
 const params=new URLSearchParams(location.search),allowed=['ref','utm_source','utm_medium','utm_campaign','utm_content','utm_term'];for(const link of document.querySelectorAll('a[href="/download"]')){const url=new URL(link.href);for(const key of allowed)if(params.has(key))url.searchParams.set(key,params.get(key).slice(0,200));if(/Android/i.test(navigator.userAgent))url.searchParams.set('platform','android');link.href=url.pathname+url.search;}
 // Particle wordmark stays local: no libraries, remote assets or customer data.
 (()=>{
- const canvas=document.querySelector('#brand-particles'),button=document.querySelector('#toggle-motion');if(!canvas)return;
+ const canvas=document.querySelector('#brand-particles');if(!canvas)return;
  const ctx=canvas.getContext('2d');if(!ctx)return;
  let width=0,height=0,points=[],stars=[],frame=0,paused=reduce,visible=true,time=0;
  const pointer={x:-9999,y:-9999};
@@ -20,7 +20,7 @@ const params=new URLSearchParams(location.search),allowed=['ref','utm_source','u
   let size=height*.8;m.font='900 '+size+'px Arial, sans-serif';size*=width*.96/m.measureText('CONVERTE CALL').width;m.font='900 '+size+'px Arial, sans-serif';m.textAlign='center';m.textBaseline='middle';m.fillText('CONVERTE CALL',width/2,height/2);
   const palette=[[196,92,255],[255,83,178],[255,159,74]],color=x=>{const t=x/width*2,i=Math.min(1,Math.floor(t)),f=t-i;return 'rgb('+palette[i].map((v,k)=>Math.round(v+(palette[i+1][k]-v)*f)).join(',')+')';};
   const data=m.getImageData(0,0,mask.width,mask.height).data,step=width<600?3:4;points=[];
-  for(let y=0;y<mask.height;y+=step)for(let x=0;x<mask.width;x+=step)if(data[(y*mask.width+x)*4+3]>130){const px=x+(Math.random()-.5)*1.6,py=y+(Math.random()-.5)*1.6;points.push({x:px,y:py,homeX:px,homeY:py,r:1+Math.random()*1.1,a:.8+Math.random()*.2,phase:Math.random()*6.28,color:color(x)});}
+  for(let y=0;y<mask.height;y+=step)for(let x=0;x<mask.width;x+=step)if(data[(y*mask.width+x)*4+3]>130){const px=x+(Math.random()-.5)*1.6,py=y+(Math.random()-.5)*1.6;points.push({x:px,y:py,vx:0,vy:0,homeX:px,homeY:py,r:1+Math.random()*1.1,a:.8+Math.random()*.2,phase:Math.random()*6.28,color:color(x)});}
   stars=Array.from({length:width<600?30:80},()=>({x:Math.random()*width,y:Math.random()*height,r:.3+Math.random()*.8,a:.1+Math.random()*.3}));
   draw();
  }
@@ -28,15 +28,15 @@ const params=new URLSearchParams(location.search),allowed=['ref','utm_source','u
   ctx.clearRect(0,0,width,height);
   for(const s of stars){ctx.fillStyle='rgba(201,149,244,'+s.a+')';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();}
   ctx.globalCompositeOperation='lighter';
-  for(const p of points){let tx=p.homeX,ty=p.homeY;if(!paused){const dx=p.homeX-pointer.x,dy=p.homeY-pointer.y,d=Math.hypot(dx,dy);if(d>0&&d<95){const force=(1-d/95)*27;tx+=dx/d*force;ty+=dy/d*force;}ty+=Math.sin(time*.016+p.phase)*.65;}
-   p.x+=(tx-p.x)*.12;p.y+=(ty-p.y)*.12;ctx.globalAlpha=p.a;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+  for(const p of points){let tx=p.homeX,ty=p.homeY;if(!paused){const dx=p.homeX-pointer.x,dy=p.homeY-pointer.y,d=Math.hypot(dx,dy),radius=Math.max(80,Math.min(180,width*.15));if(d<radius){const angle=d>.01?Math.atan2(dy,dx):p.phase,force=Math.pow(1-d/radius,1.15)*Math.min(110,width*.13);tx+=Math.cos(angle)*force;ty+=Math.sin(angle)*force;}ty+=Math.sin(time*.016+p.phase)*.65;}
+   if(paused){p.x=p.homeX;p.y=p.homeY;p.vx=p.vy=0;}else{p.vx=(p.vx+(tx-p.x)*.055)*.78;p.vy=(p.vy+(ty-p.y)*.055)*.78;p.x+=p.vx;p.y+=p.vy;}ctx.globalAlpha=p.a;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
   }
   ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
  }
  function tick(){frame=0;if(paused||!visible||document.hidden)return;time++;draw();frame=requestAnimationFrame(tick);}
  function start(){if(!paused&&visible&&!document.hidden&&!frame)frame=requestAnimationFrame(tick);}
  function stop(){cancelAnimationFrame(frame);frame=0;}
- canvas.addEventListener('pointermove',e=>{const rect=canvas.getBoundingClientRect();pointer.x=e.clientX-rect.left;pointer.y=e.clientY-rect.top;},{passive:true});canvas.addEventListener('pointerleave',()=>{pointer.x=pointer.y=-9999;});
+ canvas.parentElement.addEventListener('pointermove',e=>{const rect=canvas.getBoundingClientRect();pointer.x=e.clientX-rect.left;pointer.y=e.clientY-rect.top;},{passive:true});canvas.parentElement.addEventListener('pointerleave',()=>{pointer.x=pointer.y=-9999;});
  function controls(){document.body.classList.toggle('motion-paused',paused);}
  matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{paused=e.matches;controls();if(paused){stop();draw();}else start();});
  new ResizeObserver(resize).observe(canvas);
