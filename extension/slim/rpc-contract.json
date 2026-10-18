@@ -1,4 +1,21 @@
 {
+  "@/lib/products.functions": [
+    "listProductCatalogs",
+    "linkLeadProduct",
+    "unlinkLeadProduct",
+    "saveProductCatalog",
+    "deleteProductCatalog",
+    "saveProduct",
+    "deleteProduct",
+    "bulkUpsertProducts",
+    "renameProductCategory",
+    "listProductLeads"
+  ],
+  "@/lib/suppliers.functions": [
+    "deleteSupplierProductCost",
+    "listSupplierProductCosts",
+    "saveSupplierProductCost"
+  ],
   "@/lib/crm.functions": [
     "listAllPipelineStages",
     "listWorkspaceUsers",
@@ -54,39 +71,6 @@
     "normalizeEvolutionDeliveryStatus",
     "isEvolutionConnectionClosedMessage"
   ],
-  "@/lib/products.functions": [
-    "listProductCatalogs",
-    "linkLeadProduct",
-    "unlinkLeadProduct",
-    "saveProductCatalog",
-    "deleteProductCatalog",
-    "saveProduct",
-    "deleteProduct",
-    "bulkUpsertProducts",
-    "renameProductCategory",
-    "listProductLeads"
-  ],
-  "@/lib/crm-arquivos.functions": [
-    "setLeadKeepFiles",
-    "listCrmArquivos",
-    "deleteLeadFiles"
-  ],
-  "@/lib/dashboard-config.functions": [
-    "listKpiCatalog",
-    "listMetaDashboardAccounts",
-    "setMetaDashboardAccounts",
-    "listKpiSelections",
-    "saveKpiSelections",
-    "updateKpiSelection",
-    "listPriorityZones",
-    "upsertPriorityZone",
-    "deletePriorityZone"
-  ],
-  "@/lib/suppliers.functions": [
-    "deleteSupplierProductCost",
-    "listSupplierProductCosts",
-    "saveSupplierProductCost"
-  ],
   "@/lib/companies.functions": [
     "listCompanies",
     "createCompany",
@@ -110,6 +94,81 @@
     "activateConversationAgentForLead",
     "listActiveWorkspaceConversationAgents",
     "setConversationAgentEnabled"
+  ],
+  "@/lib/meta.functions": [
+    "startMetaOAuth",
+    "syncMetaWorkspace",
+    "getMetaStatus",
+    "disconnectMeta",
+    "listMetaAvailableAssets",
+    "saveMetaCapiToken",
+    "deleteMetaCapiToken",
+    "getMetaCapiStatus",
+    "listMessagingStatus",
+    "subscribeMessaging",
+    "listMetaCampaigns",
+    "listMetaAdSets",
+    "listMetaAds",
+    "setMetaCampaignStatus",
+    "setMetaObjectStatus",
+    "getMetaObjectTimeSeries",
+    "listMetaSyncedAdAccounts",
+    "getMetaSocialAccountInsights",
+    "listSocialInsightChannels",
+    "discoverMetaPagesForToken",
+    "verifyMetaState",
+    "getMetaInsights",
+    "getMetaAiSuggestions",
+    "buildMetaState",
+    "resultFromObjective",
+    "sendMetaConversionsEvent"
+  ],
+  "@/lib/evolution.functions": [
+    "createEvolutionInstance",
+    "fetchEvolutionQrCode",
+    "fetchEvolutionStatus",
+    "disconnectEvolution",
+    "listEvolutionSessions",
+    "getWhatsappQuota",
+    "recreateEvolutionInstance",
+    "sendEvolutionText"
+  ],
+  "@/lib/crm-audiences.functions": [
+    "listCrmAudiences",
+    "previewCrmAudience",
+    "createCrmAudience",
+    "deleteCrmAudience",
+    "refreshCrmAudience",
+    "exportCrmAudienceToMeta",
+    "createCrmAudienceLookalike",
+    "broadcastCrmAudience",
+    "listAudienceFilterOptions",
+    "reactivateCrmAudienceWithSalesbot",
+    "reactivateCrmAudienceWithAgent",
+    "CustomFieldRuleSchema",
+    "AudienceFiltersSchema",
+    "updateCrmAudience",
+    "getCrmAudienceContacts"
+  ],
+  "@/lib/salesbots.functions": [
+    "uploadSalesbotMedia",
+    "getSalesbotMediaSignedUrl",
+    "listSalesbotMedia",
+    "listSalesbots",
+    "duplicateSalesbot",
+    "deleteSalesbot",
+    "syncSalesbotFromLocal",
+    "listSalesbotsFull",
+    "getSalesbotGraph",
+    "setSalesbotActive",
+    "deleteSalesbotByLocalId",
+    "listSalesbotPickerOptions",
+    "startSalesbotForLead",
+    "getSalesbot",
+    "createSalesbot",
+    "saveSalesbot",
+    "listSalesbotRevisions",
+    "restoreSalesbotRevision"
   ],
   "@/lib/workflow.functions": [
     "listWorkflowPipelinesLite",
@@ -161,88 +220,54 @@
     "markInternalMessageRead",
     "sendInternalMessage"
   ],
-  "@/lib/meta.functions": [
-    "startMetaOAuth",
-    "syncMetaWorkspace",
-    "getMetaStatus",
-    "disconnectMeta",
-    "listMetaAvailableAssets",
-    "saveMetaCapiToken",
-    "deleteMetaCapiToken",
-    "getMetaCapiStatus",
-    "listMessagingStatus",
-    "subscribeMessaging",
-    "listMetaCampaigns",
-    "listMetaAdSets",
-    "listMetaAds",
-    "setMetaCampaignStatus",
-    "setMetaObjectStatus",
-    "getMetaObjectTimeSeries",
-    "listMetaSyncedAdAccounts",
-    "getMetaSocialAccountInsights",
-    "listSocialInsightChannels",
-    "discoverMetaPagesForToken",
-    "verifyMetaState",
-    "getMetaInsights",
-    "getMetaAiSuggestions",
-    "buildMetaState",
-    "resultFromObjective",
-    "sendMetaConversionsEvent"
-  ],
-  "@/lib/crm-audiences.functions": [
-    "listCrmAudiences",
-    "previewCrmAudience",
-    "createCrmAudience",
-    "deleteCrmAudience",
-    "refreshCrmAudience",
-    "exportCrmAudienceToMeta",
-    "createCrmAudienceLookalike",
-    "broadcastCrmAudience",
-    "listAudienceFilterOptions",
-    "reactivateCrmAudienceWithSalesbot",
-    "reactivateCrmAudienceWithAgent",
-    "CustomFieldRuleSchema",
-    "AudienceFiltersSchema",
-    "updateCrmAudience",
-    "getCrmAudienceContacts"
-  ],
-  "@/lib/evolution.functions": [
-    "createEvolutionInstance",
-    "fetchEvolutionQrCode",
-    "fetchEvolutionStatus",
-    "disconnectEvolution",
-    "listEvolutionSessions",
-    "getWhatsappQuota",
-    "recreateEvolutionInstance",
-    "sendEvolutionText"
-  ],
-  "@/lib/salesbots.functions": [
-    "uploadSalesbotMedia",
-    "getSalesbotMediaSignedUrl",
-    "listSalesbotMedia",
-    "listSalesbots",
-    "duplicateSalesbot",
-    "deleteSalesbot",
-    "syncSalesbotFromLocal",
-    "listSalesbotsFull",
-    "getSalesbotGraph",
-    "setSalesbotActive",
-    "deleteSalesbotByLocalId",
-    "listSalesbotPickerOptions",
-    "startSalesbotForLead",
-    "getSalesbot",
-    "createSalesbot",
-    "saveSalesbot",
-    "listSalesbotRevisions",
-    "restoreSalesbotRevision"
-  ],
   "@/lib/tracked-links.functions": [
     "listTrackedLinkSites",
     "createTrackedLink",
     "listTrackedLinks"
   ],
-  "@/lib/channels.functions": [
-    "listWorkspaceChannels"
+  "@/lib/crm-arquivos.functions": [
+    "setLeadKeepFiles",
+    "listCrmArquivos",
+    "deleteLeadFiles"
+  ],
+  "@/lib/dashboard-config.functions": [
+    "listKpiCatalog",
+    "listMetaDashboardAccounts",
+    "setMetaDashboardAccounts",
+    "listKpiSelections",
+    "saveKpiSelections",
+    "updateKpiSelection",
+    "listPriorityZones",
+    "upsertPriorityZone",
+    "deletePriorityZone"
+  ],
+  "@/lib/permissions-core.functions": [
+    "getMyPermissions",
+    "loadEffectivePermissions"
+  ],
+  "@/lib/forms.functions": [
+    "listForms",
+    "normalizeVarKey",
+    "buildFormShareUrl",
+    "renderFormMessage",
+    "upsertForm",
+    "deleteForm",
+    "uploadFormLogo",
+    "buildFormPublicUrl",
+    "buildFormShareUrlWithWorkspace",
+    "buildFormIngestUrl",
+    "rotateFormIngestToken",
+    "normalizeSlug",
+    "isValidSlug",
+    "getPublicForm",
+    "submitPublicForm",
+    "uploadFormSubmissionFile",
+    "formShareOrigin",
+    "buildFormAssetUrl",
+    "getFormById"
+  ],
+  "@/lib/agent-system-targets.functions": [
+    "listAgentSystemTargets"
   ],
   "@/lib/whatsapp-groups.functions": [
     "listWorkspaceGroups",
@@ -269,32 +294,20 @@
     "isEvolutionConnectionClosedMessage",
     "extractEvolutionProviderMessage"
   ],
-  "@/lib/forms.functions": [
-    "listForms",
-    "normalizeVarKey",
-    "buildFormShareUrl",
-    "renderFormMessage",
-    "upsertForm",
-    "deleteForm",
-    "uploadFormLogo",
-    "buildFormPublicUrl",
-    "buildFormShareUrlWithWorkspace",
-    "buildFormIngestUrl",
-    "rotateFormIngestToken",
-    "normalizeSlug",
-    "isValidSlug",
-    "getPublicForm",
-    "submitPublicForm",
-    "uploadFormSubmissionFile",
-    "formShareOrigin",
-    "buildFormAssetUrl",
-    "getFormById"
+  "@/lib/channels.functions": [
+    "listWorkspaceChannels"
   ],
-  "@/lib/tracking.functions": [
-    "createTrackingSite",
-    "listTrackingSites",
-    "deleteTrackingSite",
-    "listTrackingSources"
+  "@/lib/inbox-labels.functions": [
+    "listInboxLabels",
+    "upsertInboxLabel",
+    "deleteInboxLabel",
+    "toggleLabelAssignment"
+  ],
+  "@/lib/objective-tracking.functions": [
+    "listObjectiveTrackingOptions"
+  ],
+  "@/lib/workspace.functions": [
+    "getActiveWorkspace"
   ],
   "@/lib/tracking-live.functions": [
     "listConversions",
@@ -306,8 +319,11 @@
     "listUtmRanking",
     "listWhatsappCalls"
   ],
-  "@/lib/workspace.functions": [
-    "getActiveWorkspace"
+  "@/lib/tracking.functions": [
+    "createTrackingSite",
+    "listTrackingSites",
+    "deleteTrackingSite",
+    "listTrackingSources"
   ],
   "@/lib/mkton-admin-provision.functions": [
     "provisionMktonLeadEntry"
@@ -316,28 +332,9 @@
     "getMktonBootstrapState",
     "provisionMktonFull"
   ],
-  "@/lib/inbox-labels.functions": [
-    "listInboxLabels",
-    "upsertInboxLabel",
-    "deleteInboxLabel",
-    "toggleLabelAssignment"
-  ],
   "@/lib/lead-360.functions": [
     "getLead360",
     "setLeadCompany"
-  ],
-  "@/lib/agent-system-targets.functions": [
-    "listAgentSystemTargets"
-  ],
-  "@/lib/permissions-core.functions": [
-    "getMyPermissions",
-    "loadEffectivePermissions"
-  ],
-  "@/lib/group-reports.functions": [
-    "getGroupReports"
-  ],
-  "@/lib/crm-reports.functions": [
-    "getCrmReports"
   ],
   "@/lib/workflow-gamification.functions": [
     "getGamificationConfig",
@@ -355,8 +352,11 @@
     "updateReward",
     "deleteReward"
   ],
-  "@/lib/objective-tracking.functions": [
-    "listObjectiveTrackingOptions"
+  "@/lib/crm-reports.functions": [
+    "getCrmReports"
+  ],
+  "@/lib/group-reports.functions": [
+    "getGroupReports"
   ],
   "@/lib/team-chat.functions": [
     "listInternalMessageTargets",

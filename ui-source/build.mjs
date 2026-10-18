@@ -13,6 +13,13 @@ if(auth.test(text)){auth.lastIndex=0;text=text.replace(auth,'setWorkspaceId(awai
 if(relative.replaceAll('\\','/').endsWith('AgentTestChat.tsx')||relative.replaceAll('\\','/').endsWith('AiAgentChat.tsx')){text=`import {agentTestFetch} from ${JSON.stringify(platform)};\n`+text;text=text.replace('api: "/api/agent-test-chat",','api: "/api/agent-test-chat", fetch:agentTestFetch,').replace('api: "/api/ai-agent/chat",','api: "/api/ai-agent/chat", fetch:agentTestFetch,');}
 if(relative.replaceAll('\\','/')==='legacy/crm.agente-ia.legacy.tsx'){text=`import {extensionPipelines} from ${JSON.stringify(platform)};\n`+text;text=text.replace(/const \{ data, error \} = await supabase\s*\.from\("pipelines"\)\s*\.select\("id,name,position"\)\s*\.eq\("workspace_id", workspaceId!\)\s*\.order\("position"\);\s*if \(error\) throw new Error\(error.message\);\s*return \(data \?\? \[\]\) as Array<\{ id: string; name: string \}>;/,'return await extensionPipelines();');}
 if(relative.replaceAll('\\','/')==='legacy/crm.automacoes.legacy.tsx'){text=text.replace(/<button\s+onClick=\{\(\) => setActiveView\("grupos"\)\}[\s\S]*?<\/button>/,'');}
+// Keep the copied Inbox while connecting only the actions available in Converte Call.
+if(relative.replaceAll('\\','/')==='components/inbox/InboxPage.legacy.tsx'){
+ text=`import {InboxAutomationControls} from ${JSON.stringify(path.resolve('inbox-controls.tsx'))};\n`+text;
+ text=text.replace('{/* Ações */}', '{isLead && <InboxAutomationControls leadId={conversation.id} onDraft={(text)=>setDraft(d=>d.trim()?d:text)}/>} {/* Ações */}');
+ text=text.replace(/<div className="relative">\s*<IconBtn\s*label="Enviar formulário"/,'<div className="relative" hidden><IconBtn label="Enviar formulário"');
+ text=text.replace('`(${a.type})`','(a.type === "message_in" ? "Mensagem recebida" : a.type === "message_out" ? "Mensagem enviada" : "Registro da conversa")');
+}
 // One stage selection control: both originals selected the same stage's leads.
 if(relative.replaceAll('\\','/')==='legacy/crm.funis-de-venda.legacy.tsx'){
  const duplicate=/{!isAutomatize && !wobble && !colorMode && \([\s\S]*?<Checkbox[\s\S]*?\/>\s*\)}/;

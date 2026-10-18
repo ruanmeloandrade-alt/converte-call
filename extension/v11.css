@@ -9,3 +9,5 @@ html,body{height:100%;overflow:hidden}#app{height:100dvh;min-height:0}.workspace
 .btn[data-action="new-sale"]{background:#168552;color:#fff;border-color:#168552}.btn[data-action="new-sale"]:hover{background:#116d43}
 
 .support-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px}.support-chat-card{min-width:0}.support-chat-log{display:flex;flex-direction:column;gap:12px;max-height:440px;overflow:auto;margin:22px 0;padding:4px}.support-bubble{max-width:90%;padding:14px 17px;border-radius:16px;line-height:1.65;font-size:14px;overflow-wrap:anywhere}.support-bubble.user{align-self:flex-end;background:#7355da;color:#fff;border-bottom-right-radius:4px}.support-bubble.assistant{align-self:flex-start;background:#f0edf8;color:#382e4a;border-bottom-left-radius:4px}.support-human-card{align-self:start}.support-chat-card textarea{min-height:80px}@media(max-width:900px){.support-layout{grid-template-columns:minmax(0,1fr)}}
+
+.forum-reactions{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.forum-reactions .btn{padding:6px 9px;min-width:38px}.forum-gif{max-width:100%;max-height:360px;object-fit:contain;border-radius:12px}

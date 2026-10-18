@@ -47,9 +47,11 @@ globalThis.CCPortal=(()=>{
   if(message.type==='portal-academy-admin')return {ok:true,...await request('/v1/admin/academy')};
   if(message.type==='portal-lesson-save')return {ok:true,...await request('/v1/admin/academy'+(message.id?'/'+encodeURIComponent(message.id):''),{method:message.id?'PATCH':'POST',body:message.lesson})};
   if(message.type==='portal-lesson-delete')return {ok:true,...await request('/v1/admin/academy/'+encodeURIComponent(message.id),{method:'DELETE'})};
+  if(message.type==='portal-inbox-control'){const paths={choices:['/v1/whatsapp/choices','GET'],context:['/v1/whatsapp/context','POST'],start:['/v1/whatsapp/dispatch','POST'],stop:['/v1/whatsapp/stop','POST'],reply:['/v1/whatsapp/reply','POST']},route=paths[message.action];if(!route)throw Error('Ação inválida.');return {ok:true,...await request(route[0],{method:route[1],body:route[1]==='GET'?undefined:message.data,headers:{'Idempotency-Key':message.requestId||crypto.randomUUID()}})};}
   if(message.type==='portal-forums')return {ok:true,...await request('/v1/academy/forums')};
   if(message.type==='portal-forum-create')return {ok:true,...await request('/v1/academy/forums',{method:'POST',body:message.forum})};
   if(message.type==='portal-forum-posts')return {ok:true,...await request('/v1/academy/forums/'+encodeURIComponent(message.id)+'/posts')};
+  if(message.type==='portal-forum-reaction')return {ok:true,...await request('/v1/academy/forums/'+encodeURIComponent(message.id)+'/posts/'+encodeURIComponent(message.postId)+'/reaction',{method:'PUT',body:{emoji:message.emoji,active:message.active}})};
   if(message.type==='portal-forum-post')return {ok:true,...await request('/v1/academy/forums/'+encodeURIComponent(message.id)+'/posts',{method:'POST',body:message.post})};
   if(message.type==='portal-academy')return {ok:true,...await request('/v1/academy')};
   if(message.type==='portal-progress')return {ok:true,...await request('/v1/academy/'+encodeURIComponent(message.id)+'/progress',{method:'PUT',body:{completed:message.completed}})};
