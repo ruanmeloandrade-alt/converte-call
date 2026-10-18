@@ -471,3 +471,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Ajuste mínimo de compatibilidade: listCrmSources retorna o descritor padrão já usado no adaptador local quando há funil padrão real sem descritor remoto. Não cria clientes/funis/linhas de negócio e preserva fontes existentes. Necessário ao bootstrap original na nova interface web.
 - Ícones PNG renderizados da marca vetorial do projeto, sem dependência nova. Não alterou extensão, preços, conexões, regras financeiras ou aviso de versão. ZIP continua0.13.7; servidor/UIweb0.14.0.
 - Testes iniciais encontraram overflow horizontal decorativo (corrigido por clipping), ausência do descritor de CRM na conta nova (corrigido) e limitação de instalação em contexto anônimo (teste passou a usar perfil persistente real; não ignorou erro). Jornada desktop/Android passou incluindo ZIP, tutorial, login, funil real, perfil, cérebro, manifest, instalação sem erros CDP e fallback offline. Regressão do Inbox de funcionário passou.
+
+## 2026-10-18 — ZIP publicado no ADM e páginas de venda
+- Verde: /download/info e o anúncio de atualização usam a mesma publicação do ADM. O download consulta essa fonte novamente em cada clique, sem cache, inclusive em páginas abertas antes de uma publicação e no botão baixar novamente.
+- Validado em navegador com servidor/banco isolados: publicar 9.0.0, abrir página, publicar 9.0.1, baixar bytes exatos; publicar 9.0.2, baixar novamente; falha 503 mantém tutorial e permite nova tentativa. Nenhuma publicação de teste foi feita em produção.
+- Arquivos: public/download.js; test/download-release.browser.mjs; test/release-uploads.test.mjs; test/fixtures/release-zip.mjs; docs/CODEX_STATUS.md. Sem alteração de versão da extensão ou conexões.
