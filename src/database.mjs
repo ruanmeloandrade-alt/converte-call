@@ -4,6 +4,8 @@ import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {vault} from './security.mjs';
 import {installLicensing} from './licensing.mjs';
+import {installProfiles} from './accounts.mjs';
+import {installLearning} from './learning.mjs';
 import '../vendor/core.js';
 import '../vendor/core-v4.js';
 import '../vendor/call-fields.js';
@@ -30,6 +32,8 @@ export class Store{
  CREATE TABLE IF NOT EXISTS rag_chunks(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,source_id TEXT NOT NULL,text TEXT NOT NULL,embedding TEXT,model TEXT,updated_at TEXT NOT NULL);
  INSERT OR IGNORE INTO migrations VALUES(1,datetime('now'));`);
   installLicensing(this);
+  installProfiles(this);
+  installLearning(this);
   // A send interrupted after the HTTP request is uncertain, never blindly resend.
   this.db.exec("UPDATE outbox SET status='uncertain' WHERE status='sending'; UPDATE jobs SET status='pending' WHERE status='running'; UPDATE inbound SET status='pending' WHERE status='processing';");
  }

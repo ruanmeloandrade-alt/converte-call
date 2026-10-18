@@ -14,7 +14,7 @@ vendor/core.js e core-v4.js preservam o motor de projetos da extensão. vendor/r
 
 ## API implementada
 
-O servidor 0.9 acrescenta o painel `/admin`, ativação `/activate` e licenciamento por workspace. A migração aditiva 2 cria account_roles, subscriptions, license_invites e license_audit. A conta inicial existente recebe papel administrativo; clientes são cadastrados apenas com licença e têm operações bloqueadas no servidor após vencer. Detalhes, contratos e limites em [LICENCAS.md](LICENCAS.md).
+O servidor 0.10 mantém /admin e substitui convites pelo cadastro /register com 7 dias grátis, e-mail/telefones únicos e sem documentos. A migração aditiva 2 cria account_roles, subscriptions, license_invites e license_audit. A conta inicial existente recebe papel administrativo; clientes recebem o teste automaticamente ao criar a conta e têm operações bloqueadas no servidor após vencer. Detalhes, contratos e limites em [LICENCAS.md](LICENCAS.md).
 
 - `/health/ready`: saúde e configuração, sem valores secretos.
 - `POST /v1/auth/bootstrap`: conta inicial com token de instalação de uso único.
@@ -34,3 +34,6 @@ O servidor 0.9 acrescenta o painel `/admin`, ativação `/activate` e licenciame
 ## Pontos a concluir antes do deploy de uso real
 
 Executor completo de bots/agentes e gatilhos do funil, sincronização remota integral com a extensão sem sobrescrever dados concorrentes, idempotência dos despachos, mídia segmentada/retenção/transcrição, backup/restauração, OAuth e testes reais Evolution. Banco/fila estruturalmente presentes não significam execução desses fluxos.
+
+## Conta e aprendizado — 0.10
+Migração 3: perfil cifrado e índice HMAC dos dois telefones (account_profiles/account_phones). Migração 4: academy_lessons, academy_progress e support_questions. POST /v1/auth/register cria cliente e trial em uma transação. GET /v1/account/profile retorna perfil autorizado. /v1/admin/academy exige administrador; /v1/academy mostra apenas publicações. FAQ /v1/support/ask distingue guia de resposta via provedor. O token portal fica somente em chrome.storage.session e não ativa gatewayUrl. Detalhes em SUPORTE-FACULDADE.md.

@@ -10,10 +10,12 @@ import {rpc} from './rpc.mjs';
 import {installPixelSchema,createPixel,pixelScript,pixelSnippet,ingestPixel,pixelStats} from './pixel.mjs';
 import {brainQuery,knowledge} from './brain.mjs';
 import {uploadAsset,removeAsset,verifyAsset,assetPath,purgeExpired} from './assets.mjs';
-import {roleOf,subscription,requireSubscription,requireAdmin,issueTrial,redeemTrial,adminAccounts,adminInvites,revokeInvite,updateSubscription} from './licensing.mjs';
+import {roleOf,subscription,requireSubscription,requireAdmin,adminAccounts,adminInvites,revokeInvite,updateSubscription} from './licensing.mjs';
+import {validateProfile,requireAvailablePhones,startAccountTrial,accountProfile} from './accounts.mjs';
+import {lessons,saveLesson,deleteLesson,markLesson,answerSupport,SUPPORT_URL} from './learning.mjs';
 const contract=JSON.parse(readFileSync(new URL('../vendor/rpc-contract.json',import.meta.url)));
 const error=(status,message)=>Object.assign(Error(message),{status});
-export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.ENCRYPTION_KEY,bootstrap=process.env.BOOTSTRAP_TOKEN,evolutionOptions}={}){
+export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.ENCRYPTION_KEY,bootstrap=process.env.BOOTSTRAP_TOKEN,evolutionOptions,supportOptions}={}){
  const store=new Store(dir,master),evolution=new Evolution(store,evolutionOptions),worker=new Worker(store,evolution),limits=new Map();installPixelSchema(store);
  function limit(key,max,ms=60000){const now=Date.now();let r=limits.get(key);if(!r||r.until<now){r={n:0,until:now+ms};limits.set(key,r);}if(++r.n>max)throw error(429,'Muitas tentativas. Aguarde um minuto.');if(limits.size>10000)for(const [k,v]of limits)if(v.until<now)limits.delete(k);}
  function send(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
@@ -23,8 +25,8 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
  async function handle(req,res){const url=new URL(req.url,'http://localhost'),path=url.pathname;res.setHeader('Referrer-Policy','no-referrer');const origin=String(req.headers.origin||'');if(origin.startsWith('chrome-extension://')||origin===process.env.PUBLIC_URL?.replace(/\/$/,'')){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Headers','Authorization,Content-Type,Idempotency-Key');res.setHeader('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE,OPTIONS');}if(req.method==='OPTIONS'&&!path.startsWith('/p/')){res.writeHead(204);res.end();return;}
  if(req.method==='GET'&&/^\/p\/[a-f0-9]{40}\.js$/.test(path)){const key=path.split('/').at(-1).slice(0,-3),pixel=store.one('SELECT id,workspace_id FROM pixels WHERE public_key=? AND enabled=1',key);if(!pixel)throw error(404,'Pixel não encontrado.');requireSubscription(store,pixel.workspace_id);res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'public, max-age=300','X-Content-Type-Options':'nosniff'});return res.end(pixelScript(process.env.PUBLIC_URL,key));}
  if(/^\/p\/[a-f0-9]{40}\/events$/.test(path)){const key=path.split('/')[2],pixel=store.one('SELECT origin,workspace_id FROM pixels WHERE public_key=? AND enabled=1',key);if(pixel?.origin===origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST,OPTIONS');}if(req.method==='OPTIONS'){res.writeHead(204);return res.end();}if(req.method!=='POST')throw error(405,'Método inválido.');if(pixel)requireSubscription(store,pixel.workspace_id);limit('pixel:'+key+':'+req.socket.remoteAddress,240);return send(res,202,ingestPixel(store,key,origin,await body(req,5000)));}
- if(req.method==='GET'&&path==='/health/ready'){store.one('SELECT 1');return send(res,200,{status:'ready',version:'0.9.0',storage:'persistent-sqlite',evolutionConfigured:!!evolution.baseUrl&&!!evolution.key});}
- if(req.method==='GET'&&['/','/setup','/activate','/admin'].includes(path)){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'",'Cache-Control':'no-store'});return res.end(readFileSync(new URL(path==='/admin'?'../public/admin.html':'../public/setup.html',import.meta.url)));}
+ if(req.method==='GET'&&path==='/health/ready'){store.one('SELECT 1');return send(res,200,{status:'ready',version:'0.10.0',storage:'persistent-sqlite',evolutionConfigured:!!evolution.baseUrl&&!!evolution.key});}
+ if(req.method==='GET'&&['/','/setup','/register','/activate','/admin'].includes(path)){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'",'Cache-Control':'no-store'});return res.end(readFileSync(new URL(path==='/admin'?'../public/admin.html':'../public/setup.html',import.meta.url)));}
  if(req.method==='GET'&&['/setup.js','/setup.css'].includes(path)){res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript; charset=utf-8':'text/css; charset=utf-8'});return res.end(readFileSync(new URL('../public'+path,import.meta.url)));}
  if(req.method==='GET'&&['/admin.js','/admin.css'].includes(path)){res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript; charset=utf-8':'text/css; charset=utf-8','X-Content-Type-Options':'nosniff','Cache-Control':'no-store'});return res.end(readFileSync(new URL('../public'+path,import.meta.url)));}
  if(req.method==='GET'&&path.startsWith('/v1/assets/')){const id=path.split('/').at(-1),row=verifyAsset(store,id,url.searchParams);requireSubscription(store,row.workspace_id);const buffer=readFileSync(assetPath(store,id));res.writeHead(200,{'Content-Type':row.mime,'Content-Length':buffer.length,'Content-Disposition':"attachment; filename*=UTF-8''"+encodeURIComponent(row.name),'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});return res.end(buffer);}
@@ -32,27 +34,33 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
  if(req.method==='POST'&&path==='/v1/auth/bootstrap'){limit('bootstrap:'+req.socket.remoteAddress,5);const b=await body(req,2000);if(!bootstrap||!same(b.token,bootstrap)||store.one('SELECT id FROM users LIMIT 1'))throw error(403,'Cadastro inicial indisponível.');const email=String(b.email||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw error(400,'Informe um e-mail válido.');const credentials=await hashPassword(b.password),user=store.transaction(()=>{if(store.one('SELECT id FROM users LIMIT 1'))throw error(409,'Conta já criada.');const workspace_id=store.createWorkspace(),id=randomUUID();store.run('INSERT INTO users VALUES(?,?,?,?,?,?)',id,email,credentials.hash,credentials.salt,workspace_id,new Date().toISOString());store.run("INSERT INTO account_roles VALUES(?,'admin')",id);return {id,workspace_id};});return send(res,201,session(user));}
  if(req.method==='POST'&&path==='/v1/auth/session'){limit('login:'+req.socket.remoteAddress,10);const b=await body(req,2000),user=store.one('SELECT * FROM users WHERE email=?',String(b.email||'').trim().toLowerCase());if(!user||!await checkPassword(b.password,user))throw error(401,'E-mail ou senha incorretos.');return send(res,200,session(user));}
  if(req.method==='POST'&&path==='/v1/auth/register'){
-  limit('register:'+req.socket.remoteAddress,5);const b=await body(req,3000),email=String(b.email||'').trim().toLowerCase();
+  if(!store.one("SELECT user_id FROM account_roles WHERE role='admin' LIMIT 1"))throw error(503,'O cadastro aguarda a configuração inicial do administrador.');
+  limit('register:'+req.socket.remoteAddress,5);const b=await body(req,5000),email=String(b.email||'').trim().toLowerCase(),profile=validateProfile(b);
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw error(400,'Informe um e-mail válido.');
   if(store.one('SELECT id FROM users WHERE email=?',email))throw error(409,'Este e-mail já está cadastrado. Entre na sua conta.');
+  requireAvailablePhones(store,profile);
   const credentials=await hashPassword(b.password),user=store.transaction(()=>{
    if(store.one('SELECT id FROM users WHERE email=?',email))throw error(409,'Este e-mail já está cadastrado.');
    const workspace_id=store.createWorkspace(),id=randomUUID();
    store.run('INSERT INTO users VALUES(?,?,?,?,?,?)',id,email,credentials.hash,credentials.salt,workspace_id,new Date().toISOString());
-   redeemTrial(store,{licenseKey:b.licenseKey,userId:id,workspaceId:workspace_id,email});return {id,workspace_id};
+   startAccountTrial(store,id,workspace_id,profile);return {id,workspace_id};
   });return send(res,201,session(user));
  }
  const user=authenticate(req),ws=user.workspace_id;limit('account:'+user.id,300);
  if(req.method==='GET'&&path==='/v1/account/license')return send(res,200,{role:roleOf(store,user.id),license:subscription(store,ws)});
+ if(req.method==='GET'&&path==='/v1/account/profile')return send(res,200,{profile:accountProfile(store,user.id)});
+ if(req.method==='POST'&&path==='/v1/support/ask'){limit('support:'+user.id,10);return send(res,200,await answerSupport(store,user,await body(req,5000),supportOptions));}
+ if(req.method==='GET'&&path==='/v1/support')return send(res,200,{supportUrl:SUPPORT_URL});
  if(path.startsWith('/v1/admin/')){
   requireAdmin(store,user);
-  if(req.method==='GET'&&path==='/v1/admin/accounts')return send(res,200,{accounts:adminAccounts(store,user)});
+  if(req.method==='GET'&&path==='/v1/admin/accounts')return send(res,200,{accounts:adminAccounts(store,user).map(a=>({...a,profile:accountProfile(store,a.id)}))});
+  if(req.method==='GET'&&path==='/v1/admin/academy')return send(res,200,{lessons:lessons(store,user,true)});
+  if(req.method==='POST'&&path==='/v1/admin/academy')return send(res,201,{lesson:saveLesson(store,user,await body(req,5000))});
+  const video=path.match(/^\/v1\/admin\/academy\/([a-f0-9-]{36})$/);
+  if(req.method==='PUT'&&video)return send(res,200,{lesson:saveLesson(store,user,await body(req,5000),video[1])});
+  if(req.method==='DELETE'&&video)return send(res,200,deleteLesson(store,user,video[1]));
   if(req.method==='GET'&&path==='/v1/admin/licenses')return send(res,200,{licenses:adminInvites(store,user)});
-  if(req.method==='POST'&&path==='/v1/admin/licenses'){
-   const issued=issueTrial(store,user,await body(req,2000));
-   const activationUrl=process.env.PUBLIC_URL?new URL('/activate#license='+issued.licenseKey,process.env.PUBLIC_URL).href:null;
-   return send(res,201,{...issued,activationUrl});
-  }
+  if(req.method==='POST'&&path==='/v1/admin/licenses')throw error(410,'Não é mais necessário emitir licença. O teste de 7 dias começa automaticamente no cadastro.');
   const revoke=path.match(/^\/v1\/admin\/licenses\/([a-f0-9-]{36})$/);
   if(req.method==='DELETE'&&revoke)return send(res,200,revokeInvite(store,user,revoke[1]));
   const target=path.match(/^\/v1\/admin\/accounts\/([a-f0-9-]{36})\/subscription$/);
@@ -62,6 +70,9 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
  }
  if(req.method==='POST'&&path==='/v1/auth/logout'){store.run('DELETE FROM sessions WHERE user_id=?',user.id);return send(res,200,{ok:true});}
  requireSubscription(store,ws);
+ if(req.method==='GET'&&path==='/v1/academy')return send(res,200,{lessons:lessons(store,user)});
+ const progress=path.match(/^\/v1\/academy\/([a-f0-9-]{36})\/progress$/);
+ if(req.method==='PUT'&&progress)return send(res,200,markLesson(store,user,progress[1],(await body(req,1000)).completed));
  if(req.method==='GET'&&path==='/v1/workspace'){return send(res,200,{workspace:store.get(ws),revision:store.revision(ws)});}
  if(req.method==='POST'&&path==='/v1/workspace/import'){const b=await body(req);const result=store.mutate(ws,d=>{if(d.importedAt||d.leads.length||d.bots.length||d.agents.length)throw error(409,'Conta já tem dados. Use sincronização, sem substituir o banco.');const next=b.workspace;if(!next||!Array.isArray(next.leads)||!Array.isArray(next.funnels))throw error(400,'Workspace inválido.');for(const k of Object.keys(next))if(!['workspaceId','connections','syncCursor','integration'].includes(k))d[k]=next[k];d.workspaceId=ws;d.importedAt=new Date().toISOString();return {imported:true};});return send(res,201,result);}
  if(req.method==='PUT'&&path==='/v1/workspace/definitions'){const b=await body(req);if(b.schemaVersion!==4)throw error(400,'Versão de definições inválida.');store.mutate(ws,d=>{for(const key of ['funnels','bots','agents','rules','knowledge','customFields','workflows','slimStageAutomations','crmAgents']){if(b[key]!==undefined){if(!Array.isArray(b[key]))throw error(400,'Coleção inválida: '+key);d[key]=b[key];}}if(b.brain)d.brain=b.brain;});return send(res,200,{accepted:true,revision:store.revision(ws)});}
@@ -84,4 +95,4 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
  const server=http.createServer((req,res)=>{handle(req,res).catch(e=>{if(!res.headersSent)send(res,e.status||500,{error:{message:e.status?e.message:'Falha no servidor. Consulte o registro de operação.'}});else res.end();if(!e.status)console.error(JSON.stringify({type:'request-failed',requestId:randomUUID(),errorName:e.name}));});});server.requestTimeout=60000;server.headersTimeout=15000;
  let timer;return {server,store,evolution,worker,startWorker(){timer=setInterval(()=>worker.tick().catch(e=>console.error(JSON.stringify({type:'worker-failed',name:e.name}))),5000);timer.unref();worker.tick();},close(){clearInterval(timer);return new Promise(resolve=>server.close(()=>{store.close();resolve();}));}};
 }
-if(process.argv[1]===fileURLToPath(import.meta.url)){const app=createApp();app.server.listen(Number(process.env.PORT)||8080,'0.0.0.0',()=>{app.startWorker();console.log(JSON.stringify({type:'listening',port:Number(process.env.PORT)||8080,version:'0.9.0'}));});const cleanup=setInterval(()=>purgeExpired(app.store),60000);cleanup.unref();process.on('SIGTERM',()=>app.close().then(()=>process.exit(0)));}
+if(process.argv[1]===fileURLToPath(import.meta.url)){const app=createApp();app.server.listen(Number(process.env.PORT)||8080,'0.0.0.0',()=>{app.startWorker();console.log(JSON.stringify({type:'listening',port:Number(process.env.PORT)||8080,version:'0.10.0'}));});const cleanup=setInterval(()=>purgeExpired(app.store),60000);cleanup.unref();process.on('SIGTERM',()=>app.close().then(()=>process.exit(0)));}

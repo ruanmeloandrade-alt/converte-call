@@ -83,3 +83,49 @@ Implementados /admin, emissão e revogação de licença de teste de uso único,
 Testes: 5 testes nativos passaram; navegador passou em emissão, cadastro, dias, data exata, suspensão e reativação, sem overflow móvel; Pixel no navegador passou novamente com fixture explicitamente licenciada. QA encontrou e corrigiu uso de currentTarget após await no login e largura mínima de coluna no mobile. Um teste inicialmente atingiu o limite real de cadastros; passou a validar o HTTP429 e a revogação separadamente, sem enfraquecer o limite em produção.
 Publicação desta versão ainda precisa ser conferida na Railway. A extensão 0.8 instalada continua sem gateway/sincronização; portanto não está sujeita ao novo bloqueio de interface e não deve ser distribuída como teste comercial. Executor dos bots/agentes segue HTTP503. Não afirmar que bots, WhatsApp real e teste completo estão liberados.
 Arquivos: src/licensing.mjs, src/database.mjs, src/server.mjs, src/worker.mjs; public/admin.html/css/js, public/setup.html/css/js; test/licensing.test.mjs, test/licensing.browser.mjs, fixtures dos testes server/projects/Pixel; package.json, README.md, docs/LICENCAS.md e docs/ARQUITETURA.md. Sem alterações nos módulos aprovados da extensão.
+
+## Cadastro direto, suporte, Faculdade e idioma — 0.10 / 18-10-2026
+Conta inicial do proprietário preservada. Nova conta recebe 7x24h grátis na criação, sem convite/cartão. Por instrução posterior do usuário, removidos CPF/CNPJ e restrições por documento ANTES da publicação: nada disso foi coletado em produção. Nome/sobrenome/nascimento mantidos; e-mail e ambos os contatos WhatsApp são únicos entre contas, somente dígitos com código internacional/DDD, validação de formato e índice HMAC. Sem SMS/OTP e sem prova de titularidade. Verificação de duplicidade repetida dentro da transação. Migração 3 aditiva, nenhum registro/senha/workspace anterior apagado.
+Faculdade antes de Integrações e Suporte depois de Notificações; vídeos YouTube somente administrador publica/edita/exclui, cliente apenas assiste e marca conclusão. Suporte humano abre 5522992888971. FAQ guarda perguntas/respostas cifradas e distingue IA real (chave/modelo do usuário) de consulta direta ao guia. Contrato da IA testado com retorno controlado, sem chamada paga. Migração 4 aditiva. Conta da extensão usa token próprio em chrome.storage.session para esses módulos, sem ligar prematuramente gatewayUrl do CRM.
+Idioma configurável/persistente: português Brasil/Portugal, inglês, espanhol, mandarim, japonês, francês, alemão e italiano. Catálogo local de menus/comandos, sem tradução de conteúdo dos usuários ou serviço externo; textos explicativos/construtores legados ainda têm cobertura parcial. Navegação expandida preservada em renderizações assíncronas. CSP preserva frames self dos construtores e permite player youtube-nocookie.
+Validação: dez testes nativos passaram. Cadastro/admin no navegador passou (cadastro direto, alteração de assinatura/dias/data, suspensão, CRUD/publicação de aulas, mobile). Extensão Chrome passou (posição dos menus, player, conclusão, FAQ, suporte, troca de oito variantes de idioma e persistência; título de projeto do usuário preservado). QR, mensagens reais, reprodução real YouTube e chamada paga IA não testados. Nenhuma conta/aula de demonstração criada no servidor público.
+Pendências preservadas: sincronização remota integral, aplicação da licença a todos os módulos locais, executor de bots/agentes (HTTP503), OAuth Google/Gmail, transcrição/mídia hospedada e RAG semântico. Não anunciar comercialmente como sistema final completo.
+Arquivos alterados nesta entrega:
+- README.md
+- docs/ARQUITETURA.md
+- docs/CODEX_STATUS.md
+- docs/LICENCAS.md
+- docs/SUPORTE-FACULDADE.md
+- extension/ALTERACOES.md
+- extension/INTEGRACAO.md
+- extension/LEIA-ME.txt
+- extension/VALIDACAO.md
+- extension/background.js
+- extension/i18n.js
+- extension/internal-config.js
+- extension/locale-catalog.js
+- extension/manifest.json
+- extension/panel.html
+- extension/portal-services.js
+- extension/slim.html
+- extension/surface.html
+- extension/v9.css
+- extension/v9.js
+- package.json
+- public/admin.css
+- public/admin.html
+- public/admin.js
+- public/setup.css
+- public/setup.html
+- public/setup.js
+- src/accounts.mjs
+- src/database.mjs
+- src/learning.mjs
+- src/licensing.mjs
+- src/server.mjs
+- test/accounts.test.mjs
+- test/learning.test.mjs
+- test/licensing.browser.mjs
+- test/licensing.test.mjs
+- test/portal.browser.mjs
+- test/portal.test.mjs

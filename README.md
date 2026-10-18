@@ -1,6 +1,6 @@
 # Converte Call — servidor em preparação
 
-Servidor próprio para a extensão Chrome, com deploy na Railway. **Não usar GitHub Actions.** Repositório público: [ruanmeloandrade-alt/converte-call](https://github.com/ruanmeloandrade-alt/converte-call). Código e documentação publicados na branch `feat/railway-server`. API, Evolution, PostgreSQL e Redis online em 18/10/2026. Saúde pública: https://converte-api-production.up.railway.app/health/ready . A Evolution é uma instalação nova e separada. Cadastro inicial e vínculo do WhatsApp ainda pendentes; a extensão local ainda não está conectada ao servidor.
+Servidor próprio para a extensão Chrome, com deploy na Railway. **Não usar GitHub Actions.** Repositório público: [ruanmeloandrade-alt/converte-call](https://github.com/ruanmeloandrade-alt/converte-call). Código e documentação publicados na branch `feat/railway-server`. API, Evolution, PostgreSQL e Redis online em 18/10/2026. Saúde pública: https://converte-api-production.up.railway.app/health/ready . A Evolution é uma instalação nova e separada. Conta administrativa inicial criada pelo proprietário. A versão 0.10 adiciona cadastro automático de 7 dias sem documentos, Faculdade e suporte; a conexão integral do CRM e o vínculo real do WhatsApp ainda estão pendentes.
 
 ## Estado real
 
@@ -39,7 +39,8 @@ Não basta o healthcheck passar: os fluxos de bots, agentes, mídia, OAuth e aut
 - [Contratos e limites](docs/ARQUITETURA.md)
 - [Pixel Call](docs/PIXEL-CALL.md)
 - [Andamento e solicitações](docs/CODEX_STATUS.md)
-- [Licenças de 7 dias e administração de assinaturas](docs/LICENCAS.md)
+- [Cadastro de 7 dias e administração de assinaturas](docs/LICENCAS.md)
+- [Suporte, Faculdade e idiomas](docs/SUPORTE-FACULDADE.md)
 
 Referências oficiais: [Railway autodeploy](https://docs.railway.com/deployments/github-autodeploys), [Evolution OpenAPI v2](https://github.com/evolution-foundation/docs-evolution/blob/main/openapi/openapi-v2.json), [SQLite no Node 24](https://nodejs.org/docs/latest-v24.x/api/sqlite.html).
 

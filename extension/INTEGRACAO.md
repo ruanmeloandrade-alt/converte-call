@@ -236,3 +236,6 @@ retroativos de blocos sem saber em que momento cada dado foi dito.
 GET/POST v1/tracking/pixels consulta/cria sites autenticados. Cadastro recebe name e url; retorno inclui pixel e snippet. GET retorna pixels com stats (visits, sessions, clicks, visibleMs) e páginas. Script público GET /p/:key.js; eventos POST /p/:key/events, origem deve corresponder ao site cadastrado. Sessões anônimas; não fazem associação automática a lead.
 
 A implementação local e os testes estão em converte-call-server. Repositório/projeto de deploy e instalação Evolution aguardam confirmação. Não ligar gatewayUrl antes de concluir executor e sincronização remota. Nenhum GitHub Actions foi criado.
+
+# Conta 0.10
+accountUrl configura login, Faculdade e suporte. portal-services.js usa token separado em sessão; gatewayUrl continua vazio para preservar o CRM local. Cadastro /register recebe e-mail e telefones únicos, sem CPF/CNPJ. Não habilita executor remoto ou sincronização integral. Preferência de idioma é local e não envia dados a serviços de tradução.

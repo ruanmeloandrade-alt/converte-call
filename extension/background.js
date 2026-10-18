@@ -1,5 +1,5 @@
 'use strict';
-importScripts('internal-config.js','core.js','core-v4.js','notification-catalog.js','notification-center.js','call-fields.js','services.js');
+importScripts('internal-config.js','core.js','core-v4.js','notification-catalog.js','notification-center.js','call-fields.js','services.js','portal-services.js');
 let creating;
 async function engine(){
  const url=chrome.runtime.getURL('offscreen.html');
@@ -18,6 +18,7 @@ async function downloadRecording(id){const result=await media({type:'media-url',
 async function handle(m,sender){
  if(m.type==='open-recorder')return openRecorder(sender);
  if(m.type==='capture-engine-started'){const recordingContext=await recorderContext();if(recordingContext?.tabId>=0){const recordingTab=await chrome.tabs.get(recordingContext.tabId);await chrome.windows.update(recordingTab.windowId,{state:'minimized'});}const host=(await chrome.storage.session.get('ccRecorderHostTab')).ccRecorderHostTab;if(host){await chrome.tabs.update(host,{active:true}).catch(()=>{});await chrome.tabs.sendMessage(host,{channel:'cc',type:'open',view:'hud'}).catch(()=>{});}await notify();return {ok:true};}
+ const portal=await CCPortal.handle(m,sender);if(portal!==undefined)return portal;
  const service=await CCServices.handle(m,sender);if(service!==undefined)return service;
  if(m.type==='open-inbox'){
   const tabs=await chrome.tabs.query({url:'https://web.whatsapp.com/*'});const tab=tabs[0]||await chrome.tabs.create({url:'https://web.whatsapp.com/'});

@@ -74,7 +74,7 @@ export function updateSubscription(store,actor,workspaceId,input,now=Date.now())
  if(!suspensionOnly&&(!Number.isFinite(expiresAt)||expiresAt<=now||expiresAt>now+3650*DAY))throw fail(400,'Informe uma validade futura de até 10 anos.');
  if(suspensionOnly&&!current)throw fail(400,'Esta conta ainda não tem uma assinatura.');
  const plan=String(input.plan||current?.plan||'personalizado').trim();
- if(!plan||plan.length>80||(!suspensionOnly&&plan==='trial'))throw fail(400,'Escolha um nome de plano pago. O teste é ativado por licença.');
+ if(!plan||plan.length>80||(!suspensionOnly&&plan==='trial'))throw fail(400,'Escolha um nome de plano pago. O teste começa automaticamente no cadastro.');
  const suspended=input.suspended===undefined?(current?.suspended||0):Number(input.suspended);
  store.transaction(()=>{store.run('INSERT INTO subscriptions VALUES(?,?,?,?,?,?) ON CONFLICT(workspace_id) DO UPDATE SET plan=excluded.plan,expires_at=excluded.expires_at,suspended=excluded.suspended',workspaceId,plan,current?.started_at||now,expiresAt,current?.trial_started_at||null,suspended);audit(store,actor.id,workspaceId,'subscription-updated',{before:current?{plan:current.plan,expiresAt:current.expires_at,suspended:!!current.suspended}:null,after:{plan,expiresAt,suspended:!!suspended}});});
  return subscription(store,workspaceId,now);

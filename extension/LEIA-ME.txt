@@ -1,36 +1,38 @@
-CONVERTE CALL 0.8.0 — ATUALIZAÇÃO DA EXTENSÃO
+CONVERTE CALL 0.10.0
 
-Recarregue a extensão em chrome://extensions e atualize o WhatsApp Web.
-A pasta Converte Call v0.2.0 da Área de Trabalho foi atualizada no mesmo caminho.
-Não remova a extensão para atualizar; assim preserva os dados e o ID.
+Se já usa a extensão, mantenha a pasta Converte Call v0.2.0 da Área de Trabalho.
+Ela foi atualizada no mesmo caminho. Em chrome://extensions, clique em Recarregar.
+Não remova a extensão nem limpe os dados do navegador. Depois atualize o WhatsApp.
 
-AJUSTES CONCLUÍDOS
-- Inbox sem logo no topo. Tags do lead na mesma barra, ao lado de WhatsApp.
-- Perfil e Funil/etapa ao lado do nome do contato. Controles de atendimento
-  permanecem acima da caixa de mensagem.
-- Uma única seleção por etapa do funil. As duas seleções anteriores atuavam
-  sobre os mesmos leads. Mantida a seleção/desseleção e a edição em massa.
-- Cérebro com bordas finas e suaves, campos e botões no padrão do CRM.
-  Estrutura e CRUD originais preservados.
-- Nome corrigido para Pixel Call. Área adicionada ao Tracking, com cadastro
-  de site, geração/cópia de código e consulta de visitas/cliques/tempo.
-  Esses dados dependem do servidor: nenhuma estatística foi simulada.
+Novo cadastro: https://converte-api-production.up.railway.app/register
+Administração: https://converte-api-production.up.railway.app/admin
 
-SERVIDOR — AINDA NÃO PUBLICADO
-O acesso ao Railway foi confirmado. O destino GitHub/Railway e a Evolution
-aguardam a escolha do proprietário. O gateway desta extensão continua vazio;
-nenhum ambiente da Saúde Slim foi alterado. Não há GitHub Actions.
-O servidor está em preparação. Auth, persistência, CRUD, filas, fontes do cérebro
-E Pixel Call foram testados localmente. Despacho de bots/agentes, sincronização
-integral, mídia hospedada, OAuth e deploy real ainda não estão concluídos.
-Não considerar esta versão como servidor completo nem conexão Evolution ativa.
+CADASTRO
+Nome, sobrenome, nascimento, e-mail, senha e WhatsApp principal. Não pedimos documento.
+Segundo WhatsApp opcional. A conta recebe 7 dias grátis ao ser criada; sem código.
+E-mails e ambos os telefones não podem ser reutilizados em outra conta.
+Telefones somente com números, incluindo código do país e DDD (5522992888971). O administrador libera o plano manualmente.
+Os dois WhatsApps são contatos de cadastro; não representam duas conexões de automação.
 
-PIXEL CALL
-Código colocado no head do site cadastrado. Visitas anônimas, cliques, UTMs e
-tempo ativo com a página visível/com foco. Não identifica um visitante como lead
-por conta própria e não coleta campos de formulário. Respeita Do Not Track.
-A instalação num site público exige o domínio HTTPS final do servidor.
+FACULDADE E SUPORTE
+No menu Conta, Faculdade fica acima de Integrações e Suporte abaixo de Notificações.
+Use Entrar na conta e autorize o acesso ao servidor. A Faculdade mostra as aulas
+publicadas pelo administrador. O cadastro e edição de vídeos ficam em /admin.
+Suporte humano: WhatsApp (22) 99288-8971. FAQ: escreva sua pergunta na própria tela.
+Com chave e modelo de IA configurados em Integrações, a resposta usa a IA e o guia
+do produto. Sem chave/modelo, aparece Resposta do guia. Não é uma resposta de IA.
 
-Os recursos aprovados de gravação, calls, projetos e notificações foram
-preservados e os testes locais relevantes passaram. Configurações reais de
-conta, provedores e credenciais continuam necessárias para integrações externas.
+LIMITES ATUAIS
+A conta está conectada para Faculdade e FAQ. O gateway integral do CRM permanece
+pendente para preservar seus dados locais. Bots/agentes no servidor, WhatsApp real,
+sincronização integral, OAuth e transcrição hospedada ainda não estão liberados.
+O bloqueio por assinatura já protege o servidor; a proteção integral do CRM local
+ainda não está concluída. Não distribuir como versão comercial final.
+Os módulos aprovados de Inbox, funil, gravação, workflows e projetos foram preservados.
+
+IDIOMAS
+Configurações > Idioma da interface: português Brasil/Portugal, inglês, espanhol,
+mandarim, japonês, francês, alemão e italiano. Preferência salva neste navegador.
+Catálogo inicial cobre menus e comandos; textos explicativos e partes dos
+construtores originais ainda podem aparecer em português. Conteúdos dos usuários
+não são traduzidos. Não usamos serviço externo de tradução.

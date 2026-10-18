@@ -1,12 +1,11 @@
-# Verificações 0.8.0
+# Validação — 0.10.0
 
-PASS: posicionamento do Inbox em cabeçalho/contato e rodapé, sem logo; botões de bot/agente/resposta/tags; layout após resize e compositor posicionado.
-PASS: uma checkbox por etapa; seleção/desseleção dos leads; ação em massa original preservada.
-PASS: cérebro com bordas 1px #e5e1ee; informação/link/documento/termo, persistência, pausa e exclusão continuam funcionando.
-PASS: bot e agente originais salvam sem regressão; UTMs e cópia direta; Kanban/cores/regras; 17 categorias de notificações.
-PASS: captura real com clique no seletor da tela de teste, WebM salvo e decodificado.
-PASS local do servidor: login/sessão única, persistência após reabertura, isolamento entre contas, CRUD, fontes e Pixel Call.
-PASS Pixel Call com script real em navegador de teste: pageview, clique, UTM e tempo ativo; query sensível descartada e eventos deduplicados.
+Dez testes nativos passaram: HTTP/SQLite, telefones numéricos, unicidade de e-mail e dos dois telefones, perfil cifrado, teste automático de 7 dias, permissões, vencimento, assinatura manual, Faculdade, progresso por usuário, FAQ/contrato da IA e transporte da conta da extensão.
 
-NÃO VALIDADO: Railway/deploy, GitHub publicado, Evolution real, conta pessoal WhatsApp, OAuth, IA paga, bot/agente no servidor, indexação semântica, vídeos hospedados.
-O servidor está em preparação; não foi conectado à extensão e não está pronto para testar todas as funções.
+Navegador: cadastro direto, assinatura e CRUD de aulas pelo administrador; navegação real da extensão Chrome, posições dos menus, player incorporado e conclusão, FAQ com backend local real por transporte de teste. O destino do suporte foi verificado pela chamada chrome.tabs.create com a URL exata, sem abrir contato real.
+
+Os vídeos de teste e as contas eram locais e descartáveis. Reprodução real de vídeo no YouTube, chamada paga da IA, login da conta real na extensão e mensagens de WhatsApp não foram validados. Não há dados fictícios publicados em produção.
+
+O controle do servidor não representa bloqueio completo dos módulos locais. O executor dos bots/agentes continua pendente, assim como a sincronização integral do CRM.
+
+Idioma: teste real no Chrome troca português, inglês, espanhol, mandarim, japonês, francês, alemão e italiano; verifica persistência após recarregar e preservação de título de projeto. Cobertura inicial do catálogo é de menus/comandos, não tradução integral dos construtores legados ou dos textos de ajuda.

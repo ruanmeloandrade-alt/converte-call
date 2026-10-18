@@ -6,12 +6,12 @@ import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {createApp} from '../src/server.mjs';
 import {Store} from '../src/database.mjs';
-import {subscription,updateSubscription,roleOf,redeemTrial} from '../src/licensing.mjs';
+import {subscription,updateSubscription,roleOf} from '../src/licensing.mjs';
 import {hashPassword} from '../src/security.mjs';
 
 const DAY=86400000,master='7'.repeat(64),bootstrap='test-license-bootstrap-only';
 
-test('trial activation, one-time keys, administrator authority, expiry and manual renewal use the server clock',async()=>{
+test('automatic trial, administrator authority, expiry and manual renewal use the server clock',async()=>{
  const dir=mkdtempSync(join(tmpdir(),'cc-licenses-'));let app=createApp({dir,master,bootstrap});
  await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
  const base='http://127.0.0.1:'+app.server.address().port;process.env.PUBLIC_URL=base;
@@ -19,23 +19,16 @@ test('trial activation, one-time keys, administrator authority, expiry and manua
   const r=await fetch(base+path,{method,headers:{...(accessToken?{Authorization:'Bearer '+accessToken}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
   return {status:r.status,data:await r.json()};
  };
- const customer=(email,licenseKey)=>({email,password:'Customer-test-password',licenseKey,role:'admin',days:99999});
+ const customer=email=>({email,password:'Customer-test-password',firstName:'Cliente',lastName:'Teste',birthDate:'1992-05-19',whatsapp:'5522992888971',role:'admin',days:99999});
  try{
   const owner=await call('/v1/auth/bootstrap',{body:{token:bootstrap,email:'owner@example.com',password:'Admin-test-password'}});
   assert.equal(owner.status,201);assert.equal(owner.data.role,'admin');assert.equal(owner.data.license.status,'admin');
   const admin=owner.data.accessToken;
   const accountsBefore=app.store.one('SELECT COUNT(*) AS n FROM users').n;
-  assert.equal((await call('/v1/auth/register',{body:customer('missing@example.com','not-a-key')})).status,400);
-  assert.equal(app.store.one('SELECT COUNT(*) AS n FROM users').n,accountsBefore,'invalid activation rolls back user creation');
-  assert.equal(app.store.one('SELECT COUNT(*) AS n FROM workspaces').n,accountsBefore,'invalid activation rolls back workspace creation');
-  const issue=await call('/v1/admin/licenses',{accessToken:admin,body:{email:'Client@example.com'}});
-  assert.equal(issue.status,201);assert.equal(issue.data.trialDays,7);assert(issue.data.activationUrl.startsWith(base+'/activate#license='));
-  assert.notEqual(app.store.one('SELECT key_hash FROM license_invites WHERE id=?',issue.data.id).key_hash,issue.data.licenseKey);
-  assert.equal((await call('/v1/auth/register',{body:customer('wrong@example.com',issue.data.licenseKey)})).status,400);
-  assert.equal(app.store.one('SELECT redeemed_at FROM license_invites WHERE id=?',issue.data.id).redeemed_at,null);
-  const beforeActivation=Date.now();
-  const activation=await call('/v1/auth/register',{body:customer('client@example.com',issue.data.licenseKey)});
-  assert.equal(activation.status,201);assert.equal(activation.data.role,'customer','client cannot choose administrator role');
+  assert.equal((await call('/v1/auth/register',{body:{...customer('missing@example.com'),whatsapp:''}})).status,400);
+  assert.equal(app.store.one('SELECT COUNT(*) AS n FROM users').n,accountsBefore);
+  const beforeActivation=Date.now(),activation=await call('/v1/auth/register',{body:customer('client@example.com')});
+  assert.equal(activation.status,201);assert.equal(activation.data.role,'customer');
   const client=activation.data.accessToken,workspaceId=activation.data.workspaceId;
   const record=app.store.one('SELECT * FROM subscriptions WHERE workspace_id=?',workspaceId);
   assert.equal(record.expires_at-record.started_at,7*DAY);assert(record.started_at>=beforeActivation);
@@ -43,14 +36,7 @@ test('trial activation, one-time keys, administrator authority, expiry and manua
   assert.equal((await call('/v1/admin/licenses',{accessToken:client,body:{}})).status,403);
   assert.equal((await call('/v1/admin/accounts/'+workspaceId+'/subscription',{accessToken:client,method:'PATCH',body:{days:3650,plan:'Mensal'}})).status,403);
   assert.equal((await call('/v1/workspace',{accessToken:client})).status,200);
-  assert.equal((await call('/v1/auth/register',{body:customer('duplicate@example.com',issue.data.licenseKey)})).status,400);
-  assert.equal((await call('/v1/auth/register',{body:customer('CLIENT@example.com',issue.data.licenseKey)})).status,409);
-  const revoked=await call('/v1/admin/licenses',{accessToken:admin,body:{}});
-  assert.equal((await call('/v1/admin/licenses/'+revoked.data.id,{accessToken:admin,method:'DELETE'})).status,200);
-  assert.equal((await call('/v1/auth/register',{body:customer('revoked@example.com',revoked.data.licenseKey)})).status,429,'registration attempts are rate-limited');
-  assert.throws(()=>app.store.transaction(()=>redeemTrial(app.store,{licenseKey:revoked.data.licenseKey,userId:app.store.one('SELECT id FROM users WHERE workspace_id=?',workspaceId).id,workspaceId,email:'revoked@example.com'})),e=>e.status===400&&e.message.includes('revogada'));
-  const listing=await call('/v1/admin/licenses',{accessToken:admin});assert(!JSON.stringify(listing.data).includes(issue.data.licenseKey));
-  const audit=await call('/v1/admin/license-audit',{accessToken:admin});assert(!JSON.stringify(audit.data).includes(issue.data.licenseKey));
+  assert.equal((await call('/v1/auth/register',{body:customer('CLIENT@example.com')})).status,409);
   const pixel=await call('/v1/tracking/pixels',{accessToken:client,body:{name:'Site do cliente',url:'https://customer.example'}});
   assert.equal(pixel.status,201);
   app.store.run('UPDATE subscriptions SET expires_at=? WHERE workspace_id=?',Date.now()-1,workspaceId);
