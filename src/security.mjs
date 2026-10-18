@@ -1,0 +1,10 @@
+import {randomBytes,createHash,createHmac,scrypt as scryptCallback,timingSafeEqual,createCipheriv,createDecipheriv} from 'node:crypto';
+import {promisify} from 'node:util';
+const scrypt=promisify(scryptCallback);
+export const token=()=>randomBytes(32).toString('base64url');
+export const digest=s=>createHash('sha256').update(String(s)).digest('hex');
+export function same(a,b){const x=Buffer.from(String(a||'')),y=Buffer.from(String(b||''));return x.length===y.length&&timingSafeEqual(x,y);}
+export async function hashPassword(password,salt=randomBytes(16).toString('hex')){if(typeof password!=='string'||password.length<10||password.length>200)throw Object.assign(Error('Use uma senha de 10 a 200 caracteres.'),{status:400});return {salt,hash:Buffer.from(await scrypt(password,salt,64)).toString('hex')};}
+export async function checkPassword(password,user){const hash=await hashPassword(String(password||''),user.salt).catch(()=>({hash:''}));return same(hash.hash,user.password_hash);}
+export function vault(master){if(!/^[a-f0-9]{64}$/i.test(master||''))throw Error('ENCRYPTION_KEY deve conter 32 bytes em hexadecimal.');const key=Buffer.from(master,'hex');return {sign(value){return createHmac('sha256',key).update(value).digest('base64url');},seal(value){const iv=randomBytes(12),c=createCipheriv('aes-256-gcm',key,iv),body=Buffer.concat([c.update(JSON.stringify(value),'utf8'),c.final()]);return [iv,c.getAuthTag(),body].map(b=>b.toString('base64url')).join('.');},open(value){const [iv,tag,body]=value.split('.').map(s=>Buffer.from(s,'base64url')),c=createDecipheriv('aes-256-gcm',key,iv);c.setAuthTag(tag);return JSON.parse(Buffer.concat([c.update(body),c.final()]).toString('utf8'));}};}
+export function cleanJSON(value){if(Array.isArray(value))return value.map(cleanJSON);if(value&&typeof value==='object'){const out={};for(const [k,v] of Object.entries(value)){if(['__proto__','prototype','constructor'].includes(k))throw Object.assign(Error('Chave inválida.'),{status:400});out[k]=cleanJSON(v);}return out;}return value;}

@@ -1,0 +1,20 @@
+{
+  "url": "https://slimesaude.com/crm/agente-ia",
+  "publicAsset": "https://slimesaude.com/assets/crm.agente-ia-Co3A8qio.js",
+  "sha256": "c7710201dcaa200f35d56cfdc8db8dec65ab66f6e20a1ab19f8b2b42f471562c",
+  "fieldsCopied": [
+    "Informação",
+    "Documento",
+    "Link",
+    "Promoção",
+    "Palavras proibidas",
+    "Links autorizados",
+    "Fontes cadastradas"
+  ],
+  "adaptations": [
+    "Bundled imports replaced with local React/Lucide",
+    "Real Chrome workspace replaces remote auth bootstrap",
+    "Scoped local/server persistence adapter",
+    "Converte Call brand text"
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "manifest_version": 3,
+  "name": "Converte Call",
+  "version": "0.8.0",
+  "minimum_chrome_version": "116",
+  "description": "CRM no WhatsApp Web, funis, bots, agentes, projetos Kanban, UTMs e gravação local.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "offscreen",
+    "downloads",
+    "alarms",
+    "notifications",
+    "identity",
+    "clipboardWrite"
+  ],
+  "action": {
+    "default_title": "Abrir controles do Converte Call",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://meet.google.com/*",
+        "https://*.zoom.us/*",
+        "https://app.zoom.us/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "panel.html",
+        "app.css",
+        "app.js",
+        "surface.html",
+        "surface.js",
+        "surface.css",
+        "icons/*",
+        "workspace.js",
+        "native.js",
+        "core.js",
+        "release.js",
+        "release.css",
+        "builders.js",
+        "slim-catalog.js",
+        "surface-extra.js",
+        "v4.js",
+        "v4.css",
+        "fields.js",
+        "core-v4.js",
+        "slim-holidays.js",
+        "slim.html",
+        "slim/*",
+        "internal-config.js",
+        "v5.js",
+        "v5.css",
+        "surface-v5.js",
+        "surface-inbox.js",
+        "v6.js",
+        "v6.css",
+        "notification-catalog.js",
+        "call-fields.js",
+        "v7.js",
+        "v7.css",
+        "v8.js",
+        "v8.css"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline'"
+  },
+  "host_permissions": [
+    "https://web.whatsapp.com/*",
+    "https://meet.google.com/*",
+    "https://*.zoom.us/*",
+    "https://api.openai.com/*",
+    "https://www.googleapis.com/*",
+    "https://gmail.googleapis.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ]
+}

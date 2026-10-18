@@ -1,0 +1,10 @@
+{
+  "source": "Converte Call 0.7 local repository adapter",
+  "sha256": "10c6fa81b3838a28730941d6fcbb533c5a89dbaf1b4ae985b2a05bfb95d4af6e",
+  "adaptations": [
+    "Chrome storage to authenticated workspace in persistent SQLite",
+    "Real server asset storage",
+    "Real user list and agent run statistics",
+    "Server job queue for stage automation"
+  ]
+}

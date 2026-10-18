@@ -1,0 +1,165 @@
+{
+  "@/lib/conversation-agents.functions": [
+    "listConversationAgents",
+    "upsertConversationAgent",
+    "deleteConversationAgent",
+    "duplicateConversationAgent",
+    "setPrimaryConversationAgent",
+    "getConversationAgentStats",
+    "listConversationAgentRuns",
+    "listActiveWorkspaceConversationAgents"
+  ],
+  "@/lib/products.functions": [
+    "listProductCatalogs",
+    "linkLeadProduct",
+    "unlinkLeadProduct",
+    "saveProductCatalog",
+    "deleteProductCatalog",
+    "saveProduct",
+    "deleteProduct",
+    "bulkUpsertProducts",
+    "renameProductCategory"
+  ],
+  "@/lib/crm.functions": [
+    "listAllPipelineStages",
+    "listWorkspaceUsers",
+    "listConnectedLeadSources",
+    "listFunnels",
+    "moveLead",
+    "listCrmSources",
+    "createFunnel",
+    "listStageAutomations",
+    "saveStageAutomations",
+    "reorderPipelineStages",
+    "setDefaultCrmSource",
+    "updatePipelineStage",
+    "createPipelineStage",
+    "deletePipelineStage",
+    "renamePipeline",
+    "reorderFunnels",
+    "deletePipeline",
+    "createLead",
+    "duplicatePipeline",
+    "bulkMoveLeads",
+    "backfillAutomationAction",
+    "deleteLead",
+    "duplicateLead",
+    "createCrmSource"
+  ],
+  "@/lib/leads.functions": [
+    "listWorkspaceTags",
+    "listLeadCustomFields",
+    "createLeadCustomField",
+    "getLeadDetail",
+    "updateLead",
+    "updateLeadCustomField",
+    "deleteLeadCustomField",
+    "setLeadCustomFieldValue",
+    "listLeads"
+  ],
+  "@/lib/crm-arquivos.functions": [
+    "setLeadKeepFiles"
+  ],
+  "@/lib/tracked-links.functions": [
+    "listTrackedLinkSites",
+    "createTrackedLink"
+  ],
+  "@/lib/salesbots.functions": [
+    "uploadSalesbotMedia",
+    "getSalesbotMediaSignedUrl",
+    "listSalesbotMedia",
+    "listSalesbots",
+    "duplicateSalesbot",
+    "deleteSalesbot",
+    "syncSalesbotFromLocal",
+    "listSalesbotsFull",
+    "getSalesbotGraph",
+    "setSalesbotActive",
+    "deleteSalesbotByLocalId",
+    "listSalesbotPickerOptions"
+  ],
+  "@/lib/companies.functions": [
+    "listCompanies",
+    "createCompany",
+    "updateCompany"
+  ],
+  "@/lib/workflow.functions": [
+    "listWorkflowPipelinesLite"
+  ],
+  "@/lib/suppliers.functions": [
+    "deleteSupplierProductCost",
+    "listSupplierProductCosts",
+    "saveSupplierProductCost"
+  ],
+  "@/lib/channels.functions": [
+    "listWorkspaceChannels"
+  ],
+  "@/lib/whatsapp-groups.functions": [
+    "listWorkspaceGroups",
+    "syncSessionGroups",
+    "createWhatsAppGroup",
+    "joinGroupByLink",
+    "leaveGroup",
+    "renameGroup",
+    "setGroupDescription",
+    "setGroupAutomation",
+    "saveGroupRules",
+    "listGroupSalesbots",
+    "listGroupAiAgents",
+    "upsertGroupAiAgent",
+    "deleteGroupAiAgent",
+    "duplicateGroupAiAgent",
+    "getGroupAgentStats"
+  ],
+  "@/lib/lead-360.functions": [
+    "getLead360",
+    "setLeadCompany"
+  ],
+  "@/lib/agent-system-targets.functions": [
+    "listAgentSystemTargets"
+  ],
+  "@/lib/forms.functions": [
+    "listForms",
+    "normalizeVarKey"
+  ],
+  "@/lib/tracking-live.functions": [
+    "listDistinctEventNames"
+  ],
+  "@/lib/tracking.functions": [
+    "listTrackingSites"
+  ],
+  "@/lib/mkton-admin-provision.functions": [
+    "provisionMktonLeadEntry"
+  ],
+  "@/lib/workspace.functions": [
+    "getActiveWorkspace"
+  ],
+  "@/lib/mkton-full-provision.functions": [
+    "getMktonBootstrapState",
+    "provisionMktonFull"
+  ],
+  "@/lib/objective-tracking.functions": [
+    "listObjectiveTrackingOptions"
+  ],
+  "@/lib/group-reports.functions": [
+    "getGroupReports"
+  ],
+  "@/lib/crm-reports.functions": [
+    "getCrmReports"
+  ],
+  "@/lib/team-chat.functions": [
+    "listInternalMessageTargets"
+  ],
+  "@/lib/lead-origins.functions": [
+    "listLeadOrigins"
+  ],
+  "@/lib/salesbot-webhook.functions": [
+    "testSalesbotWebhook"
+  ],
+  "@/lib/salesbot-external-automations.functions": [
+    "listSalesbotExternalAutomations"
+  ],
+  "@/lib/salesbot-external-automation-test.functions": [
+    "testSalesbotExternalAutomation"
+  ]
+}

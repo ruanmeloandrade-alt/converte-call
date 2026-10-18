@@ -1,0 +1,8 @@
+FONTES DA INTERFACE CONVERTE CALL
+Requisitos: Node.js e npm. Executar npm ci nesta pasta.
+node build.mjs
+node node_modules/@tailwindcss/cli/dist/index.mjs -i styles.css -o ../extension/slim/runtime.css --minify
+As cópias originais usadas estão em copied-source, com hashes em extension/slim/source-manifest.json.
+O build aplica adaptações de plataforma sem editar as cópias originais.
+O cérebro usa brain-page.original.js + brain-page.adapted.js + brain-repository.ts.
+Nenhum GitHub Actions é necessário. Não colocar credenciais nem dados de clientes nesta pasta.

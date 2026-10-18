@@ -1,0 +1,38 @@
+'use strict';
+globalThis.CCCore=(()=>{
+ const id=()=>crypto.randomUUID(),now=()=>new Date().toISOString();
+ const defaultStages=()=>['Novo lead','Em contato','Qualificação','Proposta','Negociação','Venda realizada','Perdida'].map((name,i)=>({id:id(),name,color:['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ef4444','#10b981','#6b7280'][i]}));
+ function migrate(d){
+  for(const k of ['leads','workflow','notes','rules','calls','campaigns','events','groups','tracking','customFields','sales','localActivity','utmLinks','tasks','projectRules','bots','agents','knowledge','analyses','inboxEvents','automationRuns'])d[k]||=[];
+  d.bindings||={};d.brain||={};d.providers||={ai:'OpenAI'};
+  if(!d.funnels){const old=[...new Set(d.leads.map(l=>l.stage).filter(Boolean))];d.funnels=[{id:'commercial',name:'Funil Comercial',stages:defaultStages()}];for(const name of old)if(!d.funnels[0].stages.some(s=>s.name===name))d.funnels[0].stages.splice(0,0,{id:id(),name,color:'#8890a4'});}
+  d.activeFunnel||=d.funnels[0]?.id;
+  d.projectColumns||=[{id:'todo',name:'A fazer'},{id:'doing',name:'Em andamento'},{id:'done',name:'Concluído'}];
+  if(!d.notesMigrated){for(const n of d.notes)if(!d.tasks.some(t=>t.legacyId===n.id))d.tasks.push({id:id(),legacyId:n.id,title:n.title,body:n.text||'',type:'note',column:'todo',createdAt:now(),enteredAt:now()});d.notesMigrated=true;}
+  for(let i=0;i<d.workflow.length;i++){const n=d.workflow[i];n.edges||=d.workflow[i+1]?[{id:id(),label:'Avançar',to:d.workflow[i+1].id}]:[];n.block||='objetivo';n.mode||='strict';}
+  d.workflowStart||=d.workflow[0]?.id;
+  for(const l of d.leads){l.funnelId||=d.funnels[0]?.id;l.createdAt||=now();l.status||=(l.stage==='Perdida'?'lost':l.stage==='Venda realizada'?'won':'open');}
+  d.connections||={whatsapp:{status:'disconnected'},google:{},gmail:{}};
+  d.version=3;return d;
+ }
+ function log(d,type,entityId,text,extra={}){const e={id:id(),type,entityId,text,at:now(),...extra};d.localActivity.unshift(e);return e;}
+ function makeUTM(f){const u=new URL(f.url);if(!['https:','http:'].includes(u.protocol)||u.username||u.password)throw Error('Use um link HTTP ou HTTPS sem credenciais.');for(const k of ['source','medium','campaign','content','term']){if(f[k]?.trim())u.searchParams.set('utm_'+k,f[k].trim());else u.searchParams.delete('utm_'+k);}return u.href;}
+ function moveLead(d,l,stage,funnelId=l.funnelId){const previous=l.stage;if(previous===stage&&l.funnelId===funnelId)return;const funnel=d.funnels.find(f=>f.id===funnelId);if(!funnel?.stages.some(s=>s.name===stage))throw Error('Etapa inválida.');l.stage=stage;l.funnelId=funnelId;l.status=stage==='Perdida'?'lost':stage==='Venda realizada'?'won':'open';l.stageEnteredAt=now();log(d,'lead-stage',l.id,`${l.name}: ${previous} → ${stage}`,{stage,funnelId});}
+ function validateGraph(nodes,start){if(!nodes.length||!nodes.some(n=>n.id===start))throw Error('Escolha um bloco inicial.');const ids=new Set(nodes.map(n=>n.id));for(const n of nodes)for(const e of n.edges||[])if(!ids.has(e.to))throw Error('Uma ligação aponta para um bloco removido.');const seen=new Set();function walk(i){if(seen.has(i))return;seen.add(i);for(const e of nodes.find(n=>n.id===i)?.edges||[])walk(e.to);}walk(start);return nodes.filter(n=>!seen.has(n.id)).map(n=>n.id);}
+ function projectTick(d,t=Date.now()){
+ const hits=[];for(const task of [...d.tasks]){for(const rule of d.projectRules.filter(r=>r.active&&r.column===task.column&&(!r.projectId||r.projectId===task.projectId))){
+ if(task.ruleTrail?.includes(rule.id))continue;const due=rule.trigger==='entered'||rule.trigger==='time'&&t-Date.parse(task.enteredAt||task.createdAt)>=Number(rule.minutes)*60000||rule.trigger==='due'&&task.due&&t>=Date.parse(task.due);if(!due)continue;
+ const key=[rule.id,task.id,task.enteredAt,rule.updatedAt||''].join(':');if(d.automationRuns.some(r=>r.key===key))continue;
+ const run={id:id(),key,at:now(),taskId:task.id,ruleId:rule.id,status:'done'},project=d.projects?.find(p=>p.id===task.projectId);try{
+ if(rule.action==='move'){if(!project?.columns.some(c=>c.id===rule.target)||rule.target===task.column)throw Error('Coluna de destino inválida.');task.ruleTrail=[...(task.ruleTrail||[]),rule.id];task.column=rule.target;task.enteredAt=now();}
+ else if(rule.action==='create'){const target=rule.target||project?.columns[0]?.id;if(!project?.columns.some(c=>c.id===target))throw Error('Coluna de destino removida.');d.tasks.push({id:id(),projectId:task.projectId,lead:task.lead||project?.lead||'',title:rule.name||rule.text||'Nova tarefa',body:'Gerada pela automação '+rule.name,type:'task',status:'open',column:target,createdAt:now(),enteredAt:now(),ruleTrail:[...(task.ruleTrail||[]),rule.id]});}
+ else if(rule.action==='progress'||rule.action==='completed'){task.status=rule.action;}
+ else if(rule.action==='lead-stage'){const lead=d.leads.find(l=>l.id===(task.lead||project?.lead));if(!lead)throw Error('Cartão e projeto sem cliente associado.');const funnel=d.funnels.find(f=>f.id===rule.targetFunnel),stage=funnel?.stages.find(s=>s.id===rule.targetStage);if(!stage)throw Error('Etapa de destino removida.');moveLead(d,lead,stage.name,funnel.id);}
+ else hits.push({title:rule.name,text:task.title,key:'run:'+run.id});
+ }catch(error){run.status='skipped';run.message=error.message;}d.automationRuns.push(run);log(d,'project-rule',task.id,rule.name+': '+task.title);
+ }}return hits;
+ }
+ function metrics(d,recordings=[]){const won=new Set([...d.leads.filter(l=>l.status==='won').map(l=>l.id),...d.sales.map(s=>s.lead).filter(Boolean)]);const lost=d.leads.filter(l=>l.status==='lost');const revenue=d.sales.reduce((n,s)=>n+Number(s.amount||0),0);return {leads:d.leads.length,won:won.size,lost:lost.length,revenue,ticket:d.sales.length?revenue/d.sales.length:0,conversion:d.leads.length?won.size/d.leads.length*100:0,open:d.leads.filter(l=>!won.has(l.id)&&l.status!=='lost').length,pipeline:d.leads.filter(l=>l.status==='open'&&!won.has(l.id)).reduce((n,l)=>n+Number(l.value||0),0),recordings:recordings.length,minutes:recordings.reduce((n,r)=>n+(r.durationMs||0)/60000,0),messages:d.inboxEvents.filter(e=>e.type==='message').length,externalCalls:d.inboxEvents.filter(e=>e.type==='call').length};}
+ function merge(base,next,latest){const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);for(const key of Object.keys(next)){if(same(next[key],base[key]))continue;if(Array.isArray(next[key])&&next[key].every(x=>x&&typeof x==='object'&&x.id)&&Array.isArray(base[key])){const old=new Map(base[key].map(x=>[x.id,x])),fresh=new Map(next[key].map(x=>[x.id,x]));const rows=(latest[key]||[]).filter(x=>!old.has(x.id)||fresh.has(x.id));for(const row of next[key]){const previous=old.get(row.id);if(same(row,previous))continue;let target=rows.find(x=>x.id===row.id);if(!target){rows.push(structuredClone(row));continue;}for(const f of Object.keys(row))if(!same(row[f],previous?.[f]))target[f]=structuredClone(row[f]);}latest[key]=rows;}else latest[key]=structuredClone(next[key]);}return latest;}
+ return {id,now,migrate,defaultStages,log,makeUTM,moveLead,validateGraph,projectTick,metrics,merge};
+})();

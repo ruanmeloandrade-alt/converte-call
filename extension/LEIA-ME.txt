@@ -1,0 +1,36 @@
+CONVERTE CALL 0.8.0 — ATUALIZAÇÃO DA EXTENSÃO
+
+Recarregue a extensão em chrome://extensions e atualize o WhatsApp Web.
+A pasta Converte Call v0.2.0 da Área de Trabalho foi atualizada no mesmo caminho.
+Não remova a extensão para atualizar; assim preserva os dados e o ID.
+
+AJUSTES CONCLUÍDOS
+- Inbox sem logo no topo. Tags do lead na mesma barra, ao lado de WhatsApp.
+- Perfil e Funil/etapa ao lado do nome do contato. Controles de atendimento
+  permanecem acima da caixa de mensagem.
+- Uma única seleção por etapa do funil. As duas seleções anteriores atuavam
+  sobre os mesmos leads. Mantida a seleção/desseleção e a edição em massa.
+- Cérebro com bordas finas e suaves, campos e botões no padrão do CRM.
+  Estrutura e CRUD originais preservados.
+- Nome corrigido para Pixel Call. Área adicionada ao Tracking, com cadastro
+  de site, geração/cópia de código e consulta de visitas/cliques/tempo.
+  Esses dados dependem do servidor: nenhuma estatística foi simulada.
+
+SERVIDOR — AINDA NÃO PUBLICADO
+O acesso ao Railway foi confirmado. O destino GitHub/Railway e a Evolution
+aguardam a escolha do proprietário. O gateway desta extensão continua vazio;
+nenhum ambiente da Saúde Slim foi alterado. Não há GitHub Actions.
+O servidor está em preparação. Auth, persistência, CRUD, filas, fontes do cérebro
+E Pixel Call foram testados localmente. Despacho de bots/agentes, sincronização
+integral, mídia hospedada, OAuth e deploy real ainda não estão concluídos.
+Não considerar esta versão como servidor completo nem conexão Evolution ativa.
+
+PIXEL CALL
+Código colocado no head do site cadastrado. Visitas anônimas, cliques, UTMs e
+tempo ativo com a página visível/com foco. Não identifica um visitante como lead
+por conta própria e não coleta campos de formulário. Respeita Do Not Track.
+A instalação num site público exige o domínio HTTPS final do servidor.
+
+Os recursos aprovados de gravação, calls, projetos e notificações foram
+preservados e os testes locais relevantes passaram. Configurações reais de
+conta, provedores e credenciais continuam necessárias para integrações externas.
