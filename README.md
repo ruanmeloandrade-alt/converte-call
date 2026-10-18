@@ -52,3 +52,18 @@ extension/ contém a extensão pronta para carregar no Chrome. ui-source/ conté
 
 ## Pagamentos 0.11
 Mensal US$6,98 e Trimestral US$16,58; sem semestral. Pix em português R$29,90/R$67,90 via WhatsApp e confirmação manual em /admin. Código de Checkout/assinaturas/webhooks implementados; configuração Stripe exclusiva do ambiente privado do servidor; ativação e validação com a conta real pendentes da reconexão/credencial Stripe. Ver PAGAMENTOS.md.
+
+
+### Acessos da versão 0.13
+
+- `/`: página inicial de vendas, sem preços; `/register`: cadastro com sete dias de teste.
+- `/account`: conta, checkout externo, Google Agenda/Gmail e gerador/configurador do Pixel Call.
+- `/account/inbox?module=inbox`: Inbox original para funcionários autorizados; titular utiliza WhatsApp Web.
+- `/admin`: administração, criação de funcionário de teste e publicação de ZIP de atualização.
+- `/checkout`: checkout com acesso de uso único gerado pela conta; não aceita pagamento pela conta administrativa.
+
+Atualizações de ZIP exigem `manifest.json` MV3 na raiz, nome Converte Call e versão maior. O arquivo validado fica no volume persistente; `/v1/releases/latest` anuncia a versão. Atualizar a interface não remove vínculos WhatsApp/Google/chaves no servidor.
+
+Pixel Call: instale o código no `head`, configure eventos na conta e use o seletor visual para botões. Compras externas precisam disparar `PixelCall.track('Nome cadastrado', {orderId:'pedido_123', valueMinor:2990, currency:'BRL'})` após confirmação do checkout. Esse evento é analítico, não libera assinatura nem comissão. Vídeo nativo HTML5 tem play/progresso/conclusão; players de terceiros requerem integração própria.
+
+Limitações operacionais atuais: o motor completo de bots/agentes, recursos avançados de mídia no Inbox e saque de parceiros ainda não estão liberados. Teste de contrato não substitui cobrança/consentimento/pareamento reais. SMS permanece pendente. Deploy por conexão da branch Railway; sem GitHub Actions.

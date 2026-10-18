@@ -1,0 +1,5 @@
+'use strict';
+const invite=new URLSearchParams(location.search).get('invite')||'',form=document.querySelector('#join'),status=document.querySelector('#status');
+history.replaceState(null,'','/join');
+if(!/^[A-Za-z0-9_-]{43}$/.test(invite)){form.hidden=true;status.textContent='Convite inválido. Peça um novo link ao titular da equipe.';}
+form.addEventListener('submit',async e=>{e.preventDefault();if(form.elements.password.value!==form.elements.confirmation.value){status.textContent='As senhas precisam ser iguais.';return;}const button=form.querySelector('button');button.disabled=true;try{const r=await fetch('/v1/auth/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invite,password:form.elements.password.value})}),j=await r.json();if(!r.ok)throw Error(j.error?.message||'Não foi possível aceitar o convite.');form.reset();form.hidden=true;status.textContent='Acesso criado! Abra a extensão Converte Call e entre com o e-mail que recebeu o convite e a senha que você acabou de criar.';}catch(error){status.textContent=error.message;button.disabled=false;}});

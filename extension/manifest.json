@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Converte Call",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "minimum_chrome_version": "116",
   "description": "CRM no WhatsApp Web, funis, bots, agentes, projetos Kanban, UTMs e gravação local.",
   "permissions": [
@@ -93,7 +93,8 @@
         "v10.js",
         "v10.css",
         "v11.js",
-        "v11.css"
+        "v11.css",
+        "recording-analysis.js"
       ],
       "matches": [
         "http://*/*",

@@ -8,7 +8,7 @@ export const extensionWorkspaceId=async()=>{const d=await (window as any).CCWork
 export async function extensionPipelines(){const {rpc}=await import('./repository');const result=await rpc('@/lib/crm.functions','listAllPipelineStages');return result.pipelines;}
 // This is an extension event transport, not a simulated remote login.
 export const supabase={
- auth:{getUser:async()=>({data:{user:null}}),getSession:async()=>({data:{session:null}})},
+ auth:{getUser:async()=>{const a=(await chrome.storage.local.get('ccAccountView')).ccAccountView;return {data:{user:a?.userId?{id:a.userId,email:a.email}:null}};},getSession:async()=>{const a=(await chrome.storage.local.get('ccAccountView')).ccAccountView;return {data:{session:a?.userId?{user:{id:a.userId,email:a.email}}:null}};},onAuthStateChange:(fn:any)=>{const handler=(changes:any,area:string)=>{if(area==='local'&&changes.ccAccountView)fn(changes.ccAccountView.newValue?'SIGNED_IN':'SIGNED_OUT');};chrome.storage.onChanged.addListener(handler);return {data:{subscription:{unsubscribe:()=>chrome.storage.onChanged.removeListener(handler)}}};}},
  channel:()=>{const callbacks:Function[]=[];const handler=()=>callbacks.forEach(fn=>fn());const chain:any={on:(_type:any,_filter:any,fn:any)=>{callbacks.push(fn);return chain;},subscribe:()=>{chrome.storage.onChanged.addListener(handler);chain.unsubscribe=()=>chrome.storage.onChanged.removeListener(handler);return chain;}};return chain;},
  removeChannel:(c:any)=>{c.unsubscribe?.();return Promise.resolve();},
  storage:{from:()=>({createSignedUrl:async(path:string)=>({data:{signedUrl:await localMediaURL(path)},error:null}),upload:async()=>({error:{message:'Use o upload local da extensão.'}})})},

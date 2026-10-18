@@ -1,7 +1,7 @@
 'use strict';
-const slimModules={pipeline:'funnel',automations:'bots',bots:'bots',agents:'agents',brain:'brain',products:'products',orders:'orders',suppliers:'suppliers',inventory:'inventory'};
+const slimModules={audiences:'audiences','employee-inbox':'inbox',dashboard:'dashboard','project-board':'projects',pipeline:'funnel',automations:'bots',bots:'bots',agents:'agents',brain:'brain',products:'products',sales:'orders',orders:'orders',suppliers:'suppliers',inventory:'inventory'};
 let profileLeadId='';
-for(const [view,module]of Object.entries(slimModules))views[view]=()=>`<iframe class="slim-module" title="Converte Call • ${module}" src="slim.html?module=${module}" allow="clipboard-write"></iframe>`;
+for(const [view,module]of Object.entries(slimModules))views[view]=()=>`<iframe class="slim-module" title="Converte Call • ${module}" src="slim.html?module=${module}${view==='project-board'?'&projectId='+encodeURIComponent(data.activeProjectId):''}" allow="clipboard-write"></iframe>`;
 views['lead-profile']=()=>`<iframe class="slim-module" title="Ficha do cliente" src="slim.html?module=lead&leadId=${encodeURIComponent(profileLeadId)}"></iframe>`;
 groupsV4.find(g=>g[0]==='Operação')[1].push(['orders','Tirar pedido','note'],['products','Produtos','note'],['suppliers','Fornecedores','users'],['inventory','Estoque','chart']);
 groupsV4.find(g=>g[0]==='Conta')[1].push(['notifications','Notificações','sms']);
@@ -21,3 +21,7 @@ forms['lead-import-confirm']=f=>{const selected=data.funnels.find(x=>x.id===read
 actions['lead-export']=()=>{const cell=v=>{let s=String(v??'');if(/^[=+@-]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';};const rows=[['nome','telefone','email','origem','etiqueta','etapa','notas'],...data.leads.map(l=>[l.name,l.phone,l.email,l.source,l.tag,l.stage,l.note])];exportFile('converte-call-leads.csv','\ufeff'+rows.map(r=>r.map(cell).join(';')).join('\r\n'),'text/csv;charset=utf-8');};
 const previousCalendarDay=actions['calendar-day'];actions['calendar-day']=e=>{const date=e.dataset.date,events=data.events.filter(e=>e.start?.slice(0,10)===date);if(!events.length)return previousCalendarDay(e);openModal('Agenda • '+date.split('-').reverse().join('/'),`${events.map(e=>`<div class="list-row"><div class="grow"><h3>${esc(e.title)}</h3><p>${e.start.slice(11,16)}</p></div>${button('Editar','event-edit','small',attr('id',e.id))}</div>`).join('')}${button('+ Novo compromisso','calendar-add-day','primary',attr('date',date))}`);};actions['calendar-add-day']=e=>eventV3('',e.dataset.date);
 window.addEventListener('message',async e=>{if(e.origin!==location.origin||e.data?.channel!=='cc-slim'||e.source!==$('.slim-module')?.contentWindow)return;const m=e.data;if(m.type==='navigate')go(m.view);if(m.type==='back'||m.type==='close-profile')actions['nav-back']();});
+
+actions['new-sale']=()=>go('orders');
+
+const clientsBeforeAudiences=views.clients;views.clients=()=>clientsBeforeAudiences().replace('</h1>','</h1><div class="head-actions spaced">'+button('Públicos e disparos','open-audiences')+'</div>');actions['open-audiences']=()=>go('audiences');

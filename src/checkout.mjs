@@ -1,0 +1,12 @@
+import {randomBytes,createHash} from 'node:crypto';
+import {requireOwner} from './teams.mjs';
+import {referredPartner} from './partners.mjs';
+const hash=v=>createHash('sha256').update(v).digest('hex'),fail=(status,message)=>Object.assign(Error(message),{status});
+export class WebCheckout{
+ constructor(store,billing,{url=process.env.CHECKOUT_URL||((billing.publicUrl||'')+'/checkout')}={}){this.store=store;this.billing=billing;this.url=url;store.db.exec(`CREATE TABLE IF NOT EXISTS checkout_access(token_hash TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id),kind TEXT NOT NULL,expires_at INTEGER NOT NULL);INSERT OR IGNORE INTO migrations VALUES(13,datetime('now'));`);}
+ link(user){requireOwner(this.store,user);const target=new URL(this.url);if(target.protocol!=='https:'&&process.env.NODE_ENV!=='test')throw fail(503,'Configure o endereço HTTPS do checkout.');const token=randomBytes(32).toString('hex');this.store.run('DELETE FROM checkout_access WHERE expires_at<?',Date.now());this.store.run('INSERT INTO checkout_access VALUES(?,?,?,?)',hash(token),user.id,'ticket',Date.now()+60000);target.hash='access='+token;return {url:target.href};}
+ exchange(token){return this.store.transaction(()=>{const row=this.store.one("SELECT * FROM checkout_access WHERE token_hash=? AND kind='ticket' AND expires_at>?",hash(String(token||'')),Date.now());if(!row)throw fail(401,'Este acesso expirou. Abra novamente pela sua conta.');this.store.run('DELETE FROM checkout_access WHERE token_hash=?',row.token_hash);const session=randomBytes(32).toString('hex');this.store.run('INSERT INTO checkout_access VALUES(?,?,?,?)',hash(session),row.user_id,'session',Date.now()+30*60000);return session;});}
+ user(cookie){const token=String(cookie||'').split(';').map(p=>p.trim()).find(p=>p.startsWith('ccCheckout='))?.slice(11),row=token&&this.store.one("SELECT u.* FROM checkout_access c JOIN users u ON u.id=c.user_id WHERE c.token_hash=? AND c.kind='session' AND c.expires_at>?",hash(token),Date.now());if(!row)throw fail(401,'Abra o pagamento novamente pela sua conta.');requireOwner(this.store,row);return row;}
+ state(user){return {...this.billing.state(user),pixAllowed:!referredPartner(this.store,user.workspace_id),supportPhone:'5522992888971'};}
+ pix(user,plan,seats,locale){if(referredPartner(this.store,user.workspace_id)||!String(locale).startsWith('pt'))throw fail(403,'O pagamento desta conta é por cartão.');const q=globalThis.CCBillingQuote(plan,seats);return {url:'https://wa.me/5522992888971?text='+encodeURIComponent(q.pixMessage)};}
+}

@@ -48,3 +48,23 @@ Referências oficiais: https://docs.stripe.com/api/checkout/sessions/create , ht
 
 ## Segurança 0.11.1
 Mesmo uma sessão administrativa não pode inserir/trocar a chave pela API. Testes verificam HTTP410 e rejeição de chave de outra conta antes de gravar qualquer configuração. Essa medida impede a troca do recebedor por essa superfície; não representa proteção contra comprometimento do próprio servidor/ambiente privado. Login/pagamentos/cliente inicial foram preservados.
+
+
+## Converte Call Equipe — preços confirmados em 18-10-2026
+O titular está incluído no plano. O seletor varia de 1 a 7 pessoas no total (0 a 6 funcionários adicionais). Atualização do escopo: cada funcionário custa US$1,50 no mensal ou US$4,50 no trimestral; no Pix, R$5 no mensal ou R$15 no trimestral.
+
+| Pessoas no total | Mensal USD | Trimestral USD | Mensal Pix BRL | Trimestral Pix BRL |
+| --- | --- | --- | --- | --- |
+| 1 | 6,98 | 16,58 | 29,90 | 67,90 |
+| 2 | 8,48 | 21,08 | 34,90 | 82,90 |
+| 7 | 15,98 | 43,58 | 59,90 | 157,90 |
+
+O preço vem do catálogo compartilhado `vendor/billing-catalog.js` / `extension/billing-catalog.js`. O cliente informa somente plano e quantidade; o servidor valida inteiro de 1 a 7 e calcula o valor. Checkout usa um item base e um preço recorrente por funcionário, com o mesmo período do plano. O provisionamento idempotente cria dois novos preços de Equipe sem substituir os preços individuais existentes.
+
+Abertura ou retorno do Checkout não concede funcionários. A concessão usa fatura paga, assinatura/cliente/preços/quantidades e período reconsultados no provedor. Recibos Pix exigem confirmação administrativa, registram o total e a quantidade contratada e não podem ser reutilizados com outra quantidade. O painel de confirmação exibe o total antes de salvar. Mensagens individuais de Pix foram preservadas; com Equipe, mostram o total e a composição da equipe.
+
+Renovação conserva convites pendentes dentro da capacidade. Redução paga desativa funcionários excedentes, revoga suas sessões e remove convites excedentes; conserva o titular. O mesmo recibo ou fatura não duplica prazo/acessos. Fatura antiga não reduz os acessos de um período posterior já pago.
+
+Validação local: `test/billing.test.mjs`, `test/team-billing.test.mjs`, `test/teams.test.mjs` e `test/experience.browser.mjs`. Provedor Stripe nas provas de contrato é um adaptador de teste isolado, não uma cobrança real. A conexão Stripe real, atualização de quantidade de assinatura já ativa e Inbox original de funcionários ainda precisam de conclusão/validação antes de anunciar Equipe comercialmente disponível. Não houve publicação desta alteração ainda.
+
+Revisão de preço Equipe: lookup/idempotência dos novos preços usam `0150-v1`. Não atualiza assinaturas já contratadas; qualquer migração de preço vigente exige fluxo explícito. Não houve provisionamento nem cobrança real neste incremento. Pix permanece R$5/R$15 por funcionário. Sistema de parceiros e portais: [escopo](tasks/2026-10-18-partners-web-portals.md).

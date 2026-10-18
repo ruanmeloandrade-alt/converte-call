@@ -1,3 +1,4 @@
+import {workflowRPC} from './workflow-adapter.mjs';
 import { Core } from "./database.mjs";
 import { uploadAsset, signedAsset } from "./assets.mjs";
 const id = () => crypto.randomUUID();
@@ -30,6 +31,7 @@ async function rpc(store, ws, module, name, arg = {}) {
   const d = store.get(ws), baseline = structuredClone(d);
   let result, changed = false;
   const now = () => (/* @__PURE__ */ new Date()).toISOString();
+  if(module==='@/lib/workflow.functions'){const response=workflowRPC(d,name,p,Core);if(response.changed)store.put(ws,d);return response.result;}
   switch (name) {
     case "getActiveWorkspace":
       result = { workspace: { id: d.workspaceId || "local-workspace", name: "Meu espa\xE7o" }, workspaceId: d.workspaceId || "local-workspace" };
@@ -44,7 +46,7 @@ async function rpc(store, ws, module, name, arg = {}) {
       result = { users: store.all("SELECT id,email FROM users WHERE workspace_id=?", ws), departments: [], admins: [] };
       break;
     case "listWorkspaceChannels":
-      result = { whatsapp: { connected: d.connections?.whatsapp?.status === "connected" }, instagram: { connected: false }, facebook: { connected: false }, channels: [] };
+      result = {whatsapp:d.connections?.whatsapp?.status==="connected"?[{id:d.connections.whatsapp.sessionId||"account-whatsapp",label:d.connections.whatsapp.phone||"WhatsApp conectado",status:"connected"}]:[],instagram:[],facebook:[],email:[]};
       break;
     case "listCrmSources":
       result = { sources: d.crmSources };

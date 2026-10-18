@@ -6,3 +6,4 @@ export function useRouter(){return {navigate:navigateExtension,invalidate:()=>Pr
 export function createFileRoute(path:string){return (options:any)=>({options,useSearch:()=>useSyncExternalStore(fn=>{window.addEventListener('cc-search',fn);return()=>window.removeEventListener('cc-search',fn)},()=>location.search,()=>location.search)&&Object.fromEntries(new URLSearchParams(location.search)),useParams:()=>({})});}
 export function Link({to,search,children,...props}:any){return <a {...props} href="#" onClick={e=>{e.preventDefault();navigateExtension({to,search});}}>{children}</a>;}
 export const useLocation=()=>({pathname:location.pathname,search:Object.fromEntries(new URLSearchParams(location.search))});
+export function Navigate({to,...options}:any){React.useEffect(()=>{if(to!=='/sem-acesso')navigateExtension({to,...options});},[to]);return to==='/sem-acesso'?<div role="alert" className="p-6">Seu usuário não tem permissão para acessar este módulo.</div>:null;}

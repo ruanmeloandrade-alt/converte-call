@@ -1,0 +1,6 @@
+{
+  "source": "ruanmeloandrade-alt/saude-slim/src/lib/crm-audiences.functions.ts",
+  "sourceSha256": "068c7b92d03e8e822683bd5b41efc191ae8ba94ed55767af5d7ba6014c05a8c7",
+  "extraction": "queryMatchingLeads unchanged except export",
+  "sourceCommit": "7632a7bc76dbe1e0ef9738eaf5292028b2e0cb6a"
+}

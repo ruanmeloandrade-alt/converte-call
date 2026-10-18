@@ -30,3 +30,19 @@ export function startAccountTrial(store,userId,workspaceId,profile,now=Date.now(
  store.run('INSERT INTO license_audit VALUES(?,?,?,?,?,?)',randomUUID(),userId,workspaceId,'account-trial-started',JSON.stringify({days:TRIAL_DAYS,expiresAt:new Date(now+TRIAL_DAYS*86400000).toISOString()}),now);
 }
 export function accountProfile(store,userId){const row=store.one('SELECT profile FROM account_profiles WHERE user_id=?',userId);return row?store.vault.open(row.profile):null;}
+
+export function updateAccountProfile(store,userId,input){
+ const previous=accountProfile(store,userId)||{},profile=validateProfile({...previous,...input});
+ for(const key of ['company','position','website','country','city','address','postalCode']){
+  const value=String(input[key]??previous[key]??'').trim();if(value.length>500)throw fail('Informação de perfil muito longa.');profile[key]=value;
+ }
+ store.transaction(()=>{
+  for(const number of [profile.whatsapp,profile.whatsappSecondary].filter(Boolean)){
+   const found=store.one('SELECT user_id FROM account_phones WHERE phone_key=?',phoneKey(store,number));
+   if(found&&found.user_id!==userId)throw Object.assign(Error('Este telefone já está cadastrado em outra conta.'),{status:409});
+  }
+  store.run('INSERT INTO account_profiles VALUES(?,?,?) ON CONFLICT(user_id) DO UPDATE SET profile=excluded.profile',userId,store.vault.seal(profile),Date.now());
+  store.run('DELETE FROM account_phones WHERE user_id=?',userId);
+  for(const [slot,number] of [['primary',profile.whatsapp],['secondary',profile.whatsappSecondary]])if(number)store.run('INSERT INTO account_phones VALUES(?,?,?)',phoneKey(store,number),userId,slot);
+ });return profile;
+}

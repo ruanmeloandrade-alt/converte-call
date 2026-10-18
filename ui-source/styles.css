@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "./copied-source";
 @source "./entry.tsx";
+@source "./dashboard-page.tsx";
 @custom-variant dark (&:is(.dark *));
 @theme inline {
  --color-background:var(--background);--color-foreground:var(--foreground);--color-card:var(--card);--color-card-foreground:var(--foreground);--color-popover:var(--card);--color-popover-foreground:var(--foreground);--color-primary:var(--primary);--color-primary-foreground:#fff;--color-secondary:#efebfb;--color-secondary-foreground:#6852a0;--color-muted:#f1eff7;--color-muted-foreground:#89879b;--color-accent:#f0ebff;--color-accent-foreground:#6551a0;--color-destructive:#cc4d6e;--color-destructive-foreground:#fff;--color-border:#e5e1ee;--color-input:#e0dbea;--color-ring:#9f8ade;--color-success:#198568;--color-success-foreground:#fff;--color-warning:#a27332;--color-warning-foreground:#fff;--color-info:#4b81b4;--color-danger:#c44e6d;--radius-sm:4px;--radius-md:7px;--radius-lg:12px;--radius-xl:16px;--font-sans:Arial,Helvetica,sans-serif;--font-display:Arial,Helvetica,sans-serif;
@@ -21,3 +22,7 @@
 
 /* Brain retains the original component; use the same quiet borders as the CRM. */
 .slim-brain-page{background:#f7f6fb;color:#28243d}.slim-brain-page section{border:1px solid #e5e1ee!important;border-radius:14px;background:#fff;box-shadow:0 2px 8px #30204d03}.slim-brain-page .border{border-color:#e5e1ee}.slim-brain-page .divide-y>:not(:last-child){border-color:#edeaf3}.slim-brain-page input:not([type=file]),.slim-brain-page textarea{border:1px solid #e1ddea;border-radius:9px;background:#fcfbfe;color:#28243d;font-size:14px;line-height:1.5;padding:10px 12px}.slim-brain-page input:focus-visible,.slim-brain-page textarea:focus-visible{outline:2px solid #b9a9ee;outline-offset:2px;border-color:#9982df}.slim-brain-page button{border-radius:9px}.slim-brain-page button.border{background:#fff;border-color:#e5e1ee;color:#665985}.slim-brain-page button.bg-primary{background:#7960db;border-color:transparent;color:white}.slim-brain-page button:hover:not(:disabled){filter:brightness(.98)}.slim-brain-page h1{font-size:24px;letter-spacing:-.4px}.slim-brain-page h2{font-size:14px;font-weight:600}.slim-brain-page li.border{background:#fcfbfe;border-radius:9px}.slim-brain-page label{color:#59506b}.slim-brain-page .text-muted-foreground{color:#898294}
+
+#root>main{height:100dvh;overflow:auto;overscroll-behavior:contain}
+
+@source "./workflow-repository.ts";

@@ -43,7 +43,7 @@ export class Store{
  transaction(fn){this.db.exec('BEGIN IMMEDIATE');try{const r=fn();this.db.exec('COMMIT');return r;}catch(e){this.db.exec('ROLLBACK');throw e;}}
  createWorkspace(){const id=randomUUID(),data=this.normalize({workspaceId:id});this.run('INSERT INTO workspaces(id,data,updated_at) VALUES(?,?,?)',id,JSON.stringify(data),new Date().toISOString());return id;}
  normalize(d){Core.migrate(d);for(const k of ['crmSources','companies','catalogs','products','supplierCosts','crmAgents','slimStageAutomations','forms','notifications','leadProducts','orders','brainSources','brainBlockedTerms'])d[k]||=[];return d;}
- get(id){const row=this.one('SELECT data,revision FROM workspaces WHERE id=?',id);if(!row)throw Object.assign(Error('Conta não encontrada.'),{status:404});return this.normalize(JSON.parse(row.data));}
+ get(id){const row=this.one('SELECT data,revision FROM workspaces WHERE id=?',id);if(!row)throw Object.assign(Error('Conta não encontrada.'),{status:404});const data=this.normalize(JSON.parse(row.data));data.members=this.all('SELECT u.id,u.email,p.profile FROM users u LEFT JOIN account_profiles p ON p.user_id=u.id WHERE u.workspace_id=?',id).map(u=>{const profile=u.profile?this.vault.open(u.profile):{};return {id:u.id,name:[profile.firstName,profile.lastName].filter(Boolean).join(' ')||u.email,email:u.email};});return data;}
  revision(id){return this.one('SELECT revision FROM workspaces WHERE id=?',id)?.revision;}
  put(id,data){data.workspaceId=id;this.run('UPDATE workspaces SET data=?,revision=revision+1,updated_at=? WHERE id=?',JSON.stringify(this.normalize(data)),new Date().toISOString(),id);}
  mutate(id,fn){return this.transaction(()=>{const d=this.get(id),r=fn(d);this.put(id,d);return r;});}

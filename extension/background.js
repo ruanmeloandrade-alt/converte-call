@@ -1,5 +1,5 @@
 'use strict';
-importScripts('credential-vault.js','internal-config.js','core.js','core-v4.js','notification-catalog.js','notification-center.js','call-fields.js','services.js','portal-services.js');
+importScripts('credential-vault.js','internal-config.js','core.js','core-v4.js','notification-catalog.js','notification-center.js','call-fields.js','services.js','portal-services.js','cloud-sync.js');
 let creating;
 async function engine(){
  const url=chrome.runtime.getURL('offscreen.html');
@@ -16,11 +16,13 @@ chrome.downloads.onChanged.addListener(delta=>{if(['complete','interrupted'].inc
 async function notify(){for(const tab of await chrome.tabs.query({})){if(tab.id)chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'state-changed'}).catch(()=>{});}}
 async function downloadRecording(id){const result=await media({type:'media-url',id});if(!result.ok)throw Error(result.error);try{const downloadId=await chrome.downloads.download({url:result.url,filename:'Converte Call/'+result.filename,saveAs:false});downloads.set(downloadId,result.token);return {ok:true,downloadId};}catch(e){await media({type:'release-url',token:result.token});throw e;}}
 async function handle(m,sender){
+ if(m.type==='surface-location'&&sender.tab){const key='ccSurface:'+sender.tab.windowId;await chrome.storage.session.set({[key]:{enabled:true,mode:['crm','surface','dock'].includes(m.mode)?m.mode:'dock',view:String(m.view||'home').slice(0,80)}});return {ok:true};}
  if(m.type==='open-recorder')return openRecorder(sender);
  if(m.type==='capture-engine-started'){const recordingContext=await recorderContext();if(recordingContext?.tabId>=0){const recordingTab=await chrome.tabs.get(recordingContext.tabId);await chrome.windows.update(recordingTab.windowId,{state:'minimized'});}const host=(await chrome.storage.session.get('ccRecorderHostTab')).ccRecorderHostTab;if(host){await chrome.tabs.update(host,{active:true}).catch(()=>{});await chrome.tabs.sendMessage(host,{channel:'cc',type:'open',view:'hud'}).catch(()=>{});}await notify();return {ok:true};}
  const portal=await CCPortal.handle(m,sender);if(portal!==undefined)return portal;
  const service=await CCServices.handle(m,sender);if(service!==undefined)return service;
  if(m.type==='open-inbox'){
+  const identity=await CCPortal.request('/v1/account/license');if(identity.membership?.role==='member'){if(!identity.membership.permissions.includes('inbox'))throw Error('Seu usuário não tem acesso ao Inbox.');return {ok:true,employee:true};}
   const tabs=await chrome.tabs.query({url:'https://web.whatsapp.com/*'});const tab=tabs[0]||await chrome.tabs.create({url:'https://web.whatsapp.com/'});
   await chrome.tabs.update(tab.id,{active:true});if(tab.windowId)await chrome.windows.update(tab.windowId,{focused:true});return {ok:true};
  }
@@ -33,7 +35,9 @@ async function handle(m,sender){
  if(m.type==='capture-status')return media({type:'status'});
  if(m.type==='capture-pause'||m.type==='capture-resume')return media({type:m.type==='capture-pause'?'pause':'resume'});
  if(m.type==='capture-stop'){const r=await media({type:'stop'});if(r.ok&&r.id){try{r.download=await downloadRecording(r.id);}catch(e){r.downloadError=e.message;}}if(r.ok&&r.id)await CCNotification.emit({category:'recording',key:'recording:'+r.id,title:'Gravação salva',message:'Sua call está no histórico de gravações.',entityId:r.id,view:'calls'});await notify();return r;}
- if(m.type==='recording-analyse')return media({type:'analyse',id:m.id});
+ if(m.type==='recording-cloud-sync')return media({type:'cloud-sync',id:m.id});
+ if(m.type==='transcript-download'&&sender.url?.startsWith(chrome.runtime.getURL(''))){if(!String(m.url).startsWith('blob:'+chrome.runtime.getURL('')))throw Error('Arquivo de transcrição inválido.');return {ok:true,downloadId:await chrome.downloads.download({url:m.url,filename:'Converte Call/'+String(m.filename).replace(/[\\/:*?"<>|\x00-\x1f]/g,'-'),saveAs:false})};}
+ if(m.type==='recording-analyse')return media({type:'analyse',id:m.id,contentType:m.contentType});
  if(m.type==='recordings-list')return media({type:'list'});
  if(m.type==='recording-url')return media({type:'media-url',id:m.id});
  if(m.type==='recording-release')return media({type:'release-url',token:m.token});
@@ -42,7 +46,7 @@ async function handle(m,sender){
  if(m.type==='call-event'){const r=await media({type:'event',event:m.event});if(r.ok&&m.event?.type==='branch'){const state=await media({type:'status'});try{await CCServices.handle({type:'call-node-action',meta:state.meta,nodeId:m.event.nodeId,entryKey:state.meta.events.length},{url:chrome.runtime.getURL('recorder.html')});}catch(e){await media({type:'event',event:{type:'action-error',text:e.message}});r.warning=e.message;}}return r;}
  if(m.type==='open-mic-permission'){await chrome.windows.create({type:'popup',url:chrome.runtime.getURL('microphone.html'),width:450,height:440});return {ok:true};}
  if(m.type==='engine-ended'){if(m.id){await CCNotification.emit({category:'recording',key:'recording:'+m.id,title:'Gravação salva',message:'Sua call está no histórico de gravações.',entityId:m.id,view:'calls'});try{await downloadRecording(m.id);}catch{}}await notify();return {ok:true};}
- if(m.type==='workspace-changed'){await notify();return {ok:true};}
+ if(m.type==='workspace-changed'){CCCloudSync.sync();await notify();return {ok:true};}
  if(m.type==='show-surface'&&sender.tab){await chrome.tabs.sendMessage(sender.tab.id,{channel:'cc',type:'open',view:m.view});return {ok:true};}
  return {ok:false,error:'Ação desconhecida.'};
 }
@@ -55,3 +59,8 @@ chrome.action.onClicked.addListener(async tab=>{
  try{await chrome.scripting.executeScript({target:{tabId:tab.id},files:['content.js']});await chrome.action.setBadgeText({tabId:tab.id,text:''});}
  catch{await chrome.action.setBadgeBackgroundColor({tabId:tab.id,color:'#CA4962'});await chrome.action.setBadgeText({tabId:tab.id,text:'!'});await chrome.action.setTitle({tabId:tab.id,title:'Abra o WhatsApp Web, Meet ou outro site comum para usar os controles.'});}
 });
+
+let surfaceSwitch=Promise.resolve();
+async function followActiveTab(tabId,windowId){const key='ccSurface:'+windowId,state=(await chrome.storage.session.get(key))[key];if(!state?.enabled)return;const active=(await chrome.tabs.query({active:true,windowId}))[0];if(active?.id!==tabId)return;const tab=await chrome.tabs.get(tabId);if(!/^https?:/.test(tab.url||''))return;for(const other of await chrome.tabs.query({windowId}))if(other.id!==tabId)await chrome.tabs.sendMessage(other.id,{channel:'cc',type:'surface-suspend'}).catch(()=>{});try{await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-ping'});}catch{try{await chrome.scripting.executeScript({target:{tabId},files:['content.js']});}catch{return;}}const latest=(await chrome.tabs.query({active:true,windowId}))[0];if(latest?.id!==tabId)return;await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-restore',state}).catch(()=>{});}
+chrome.tabs.onActivated.addListener(({tabId,windowId})=>{surfaceSwitch=surfaceSwitch.catch(()=>{}).then(()=>followActiveTab(tabId,windowId));});
+chrome.tabs.onUpdated.addListener((tabId,change,tab)=>{if(change.status==='complete'&&tab.active)surfaceSwitch=surfaceSwitch.catch(()=>{}).then(()=>followActiveTab(tabId,tab.windowId));});

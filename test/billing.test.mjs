@@ -13,7 +13,7 @@ test('real HTTP billing authorizes admin/Pix, verifies signed payments, deduplic
   const path=new URL(url).pathname,form=Object.fromEntries(new URLSearchParams(init.body));calls.push({path,method:init.method,form,key:init.headers.Authorization,version:init.headers['Stripe-Version'],idempotency:init.headers['Idempotency-Key']});
   if(path==='/v1/account')return Response.json({id:'acct_LOCAL',charges_enabled:true});
   if(path==='/v1/products')return Response.json({id:'prod_LOCAL'});
-  if(path==='/v1/prices')return Response.json({id:Number(form['recurring[interval_count]'])===1?'price_monthly':'price_quarterly'});
+  if(path==='/v1/prices')return Response.json({id:(form['metadata[kind]']==='team-seat'?'price_team_':'price_')+(Number(form['recurring[interval_count]'])===1?'monthly':'quarterly')});
   if(path==='/v1/webhook_endpoints')return Response.json({id:'we_LOCAL',secret:SECRET});
   if(path==='/v1/billing_portal/configurations')return Response.json({id:'bpc_LOCAL'});
   if(path==='/v1/customers')return Response.json({id:'cus_LOCAL'});
@@ -34,7 +34,7 @@ test('real HTTP billing authorizes admin/Pix, verifies signed payments, deduplic
   assert.equal((await call('/v1/admin/billing',customer.accessToken,{apiKey:API_KEY})).status,403);
   assert.equal((await call('/v1/billing/checkout',customer.accessToken,{plan:'monthly'})).status,503);
   assert.equal((await call('/v1/admin/billing',admin.accessToken,{apiKey:API_KEY})).status,410,'even an administrator cannot replace Stripe through HTTP');const actor=app.store.one('SELECT * FROM users WHERE workspace_id=?',admin.workspaceId);await assert.rejects(()=>app.billing.connect(actor,{apiKey:API_KEY,accountId:'acct_WRONG'}),e=>e.status===409);assert.equal(app.billing.config(),null,'wrong receiver cannot save credentials');const connected=await app.billing.connect(actor,{apiKey:API_KEY,accountId:'acct_LOCAL'});assert(connected.configured);assert.equal(connected.livemode,false);assert(!JSON.stringify(connected).includes(API_KEY));assert(!JSON.stringify(app.store.all('SELECT * FROM secrets')).includes(API_KEY));
-  const prices=calls.filter(c=>c.path==='/v1/prices');assert.deepEqual(prices.map(p=>[p.form.unit_amount,p.form.currency,p.form['recurring[interval_count]']]),[['698','usd','1'],['1658','usd','3']]);
+  const prices=calls.filter(c=>c.path==='/v1/prices');assert.deepEqual(prices.map(p=>[p.form.unit_amount,p.form.currency,p.form['recurring[interval_count]']]),[['698','usd','1'],['1658','usd','3'],['150','usd','1'],['450','usd','3']]);
   assert.equal((await call('/v1/billing/checkout',customer.accessToken,{plan:'semiannual'})).status,400);
   const before=app.store.one('SELECT * FROM subscriptions WHERE workspace_id=?',workspace).expires_at;
   const checkout=await call('/v1/billing/checkout',customer.accessToken,{plan:'monthly',amount:1,workspaceId:other.workspaceId,locale:'pt-BR'});assert.equal(checkout.status,200);assert(checkout.data.url.startsWith('https://checkout.stripe.com/'));
