@@ -536,3 +536,13 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Mantidas preferência de movimento reduzido, interrupção fora da tela/aba oculta e layout. Sem dependências ou alterações na extensão.
 - Navegador real: hover alterou 15.328 pixels de opacidade, retorno capturado, movimento reduzido estático. Teste do fundo interativo passou. Screenshot revisado.
 - Arquivos: public/sales.js e docs/CODEX_STATUS.md.
+
+
+## 2026-10-18 — Globo, follow-ups e movimento automático
+- Painel de vendas simuladas substituído pelo globo em canvas com mapa real dos continentes, giro automático inicial, arraste, teclado, 27 pontos selecionáveis e seletor acessível. Alocação criada para visualização soma 2.455, Brasil com 1.575; distribuição explicitamente ilustrativa, sem atribuir dados medidos à plataforma. Total agregado informado pelo usuário.
+- Base geográfica local: Natural Earth, ne_110m_land, domínio público (https://www.naturalearthdata.com/about/terms-of-use/). Coordenadas reduzidas a duas casas; nenhuma consulta externa no navegador, nenhuma dependência adicionada.
+- Órbita da seção “O cliente não espera” substituída por carrossel transparente de seis follow-ups. Rotação automática, anterior/próximo, seleção de cards/indicadores, arraste e teclado. Pausa durante hover/foco para leitura; respeita movimento reduzido e aba oculta. Percentuais são metas ilustrativas e estrelas são avaliação editorial, sem alegar conversões medidas.
+- Campo visual em movimento contínuo sem precisar de clique, inclusive na CTA final; mantém reação ao mouse, preferência de movimento reduzido e suspensão em aba oculta. Limitado a aproximadamente 30fps/DPR1.5.
+- WhatsApp sem botão de pausa e sem barras de stories. Identificação longa substituída por “Prévia demonstrativa de conversas” até receber material real. Mantidos contatos, navegação e avanço automático.
+- Quatro cenários de navegador passaram: globo desktop/mobile (arraste/pontos/teclado/soma/overflow), follow-ups automáticos e navegação, fundo automático na abertura/CTA e estático com movimento reduzido, jornada pública completa incluindo ZIP/tutorial e Android. Screenshots revisados.
+- Arquivos: public/sales.html, public/sales.css, public/sales.js, public/globe-land.json, src/public-experience.mjs (somente rota estática), test/globe.browser.mjs, test/followup-carousel.browser.mjs, test/public-experience.browser.mjs e docs/CODEX_STATUS.md. Sem alterações na extensão, integrações, contas ou dados de clientes.

@@ -1,6 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {latestRelease} from './release-uploads.mjs';
 const files={
+ '/globe-land.json':['globe-land.json','application/json'],
  '/access':['access.html','text/html'],
  '/story-portraits.png':['story-portraits.png','image/png'],
  '/':['sales.html','text/html'],'/sales':['sales.html','text/html'],'/sales.css':['sales.css','text/css'],'/sales.js':['sales.js','text/javascript'],'/experience-base.css':['experience-base.css','text/css'],'/brand.svg':['brand.svg','image/svg+xml'],
