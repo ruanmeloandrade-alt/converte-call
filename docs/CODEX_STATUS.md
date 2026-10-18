@@ -521,3 +521,11 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - No frontend das superfícies /account, /account/app, módulos e editor de eventos, clientes no computador são direcionados à orientação da extensão. Administrador continua com sua área web e parceiros com seu portal. Android preservado. Esta é uma regra de navegação/interface; APIs continuam com autenticação, autorização e isolamento existentes, sem substituição de mecanismos de segurança.
 - Callbacks de integração e troca de sessão continuam sendo processados antes do redirecionamento da interface da conta; nenhuma sessão de extensão foi revogada.
 - Validação:49 testes gerais e4 testes de navegador passaram. Jornada nova valida links, tema, ZIP, tutorial de conta existente, redirecionamento desktop nas superfícies, continuidade de conta Android e validade do token da extensão. Admin web, Inbox no Android, editor Pixel do administrador, página/PWA e download de publicação ADM também passaram. Screenshots desktop/Android revisados.
+
+
+## 2026-10-18 — FAQ abaixo do convite e preparação da faixa de marcas
+- FAQ movido para depois da CTA final, preservando respostas e links.
+- Estrutura de duas linhas de logos com movimento contínuo em sentidos opostos e bordas esmaecidas preparada abaixo do FAQ. Permanece oculta até o usuário enviar as logos reais; nenhuma marca fictícia da referência foi publicada. Respeita movimento reduzido.
+- Crédito do rodapé preparado: Dev Media aponta para https://dev.midia.com, conforme informado. RB Media permanece texto até confirmação do endereço do site.
+- Validação em navegador desktop (1440px) e mobile (393px): ordem CTA → FAQ → marcas, abertura de resposta e ausência de overflow passaram.
+- Arquivos: public/sales.html, public/sales.css e docs/CODEX_STATUS.md. Sem dependências nem atualização da extensão.
