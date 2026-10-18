@@ -449,3 +449,12 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Migração de chaves locais antigas só preenche provedor ausente no servidor; não sobrescreve chave mais recente. Após confirmação elimina somente a cópia local. FAQ não regrava credenciais ao responder pergunta.
 - Teste HTTP + ponte real da extensão comprova reinício do servidor, armazenamento local vazio, edição sem redigitar chave, separação entre contas, ausência da chave nas respostas e falha de rede sem exclusão. Regressão do login comprova cópia antiga não sobrescrevendo segredo atual.
 - Pendências externas preservadas: análise pública Google depende de vídeo demonstrativo do titular; domínios aguardam remoção manual autorizada na Railway, pois ferramenta rejeitou operação. SMS/repasse automático adiados pelo titular. Nenhuma dependência nova, alteração de credencial real ou anúncio automático de atualização.
+
+
+## Encerramento de testes solicitado pelo titular — 18/10/2026
+- Bot aprovado expressamente pelo titular como finalizado. Resposta do agente IA não testada pelo titular; ele aceitou seguir usando e relatar ajustes posteriormente. Aprovação de uso não equivale a resposta real de IA verificada.
+- Teste de checkout encerrado pelo titular com recusa bancária por insufficient_funds. Tentativa BRL3839centavos chegou ao emissor; não houve compra paga nem concessão confirmada por webhook. Essa etapa financeira fica não validada, sem bloquear por decisão do titular o início de uso.
+- Escopo ativo restante: subdomínios e verificação pública Google. Domínios consultados: raiz e ADM ainda existem; ferramenta rejeitou duas vezes a remoção anterior. Solicitada remoção manual do ADM, preservando raiz, para liberar o curinga sem upgrade.
+
+- Piloto confirmado: titular e três clientes na semana seguinte, com uso real e relatos de melhoria. Não criar automaticamente contas não identificadas, não renovar testes nem conceder licenças com base só nessa descrição.
+- Branding Google: análise automática executada; falha específica de propriedade da home. Search Console preparou TXT para convertecall.pro na conta do suporte aprovada. Registro TXT preparado, não publicado sem confirmação pontual de concessão de propriedade. Google pede24horas após comprovação antes da nova tentativa.
