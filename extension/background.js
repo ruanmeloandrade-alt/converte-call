@@ -21,6 +21,7 @@ async function handle(m,sender){
  if(m.type==='capture-engine-started'){const recordingContext=await recorderContext();if(recordingContext?.tabId>=0){const recordingTab=await chrome.tabs.get(recordingContext.tabId);await chrome.windows.update(recordingTab.windowId,{state:'minimized'});}const host=(await chrome.storage.session.get('ccRecorderHostTab')).ccRecorderHostTab;if(host){await chrome.tabs.update(host,{active:true}).catch(()=>{});await chrome.tabs.sendMessage(host,{channel:'cc',type:'open',view:'hud'}).catch(()=>{});}await notify();return {ok:true};}
  const portal=await CCPortal.handle(m,sender);if(portal!==undefined)return portal;
  const service=await CCServices.handle(m,sender);if(service!==undefined)return service;
+ if(m.type==='native-inbox-access'){if(!sender.url?.startsWith('https://web.whatsapp.com/'))throw Error('Abra o WhatsApp Web.');const identity=await CCPortal.request('/v1/account/license');return {ok:true,owner:identity.membership?.role==='owner'};}
  if(m.type==='open-inbox'){
   const identity=await CCPortal.request('/v1/account/license');if(identity.membership?.role==='member'){if(!identity.membership.permissions.includes('inbox'))throw Error('Seu usuário não tem acesso ao Inbox.');return {ok:true,employee:true};}
   const tabs=await chrome.tabs.query({url:'https://web.whatsapp.com/*'});const tab=tabs[0]||await chrome.tabs.create({url:'https://web.whatsapp.com/'});

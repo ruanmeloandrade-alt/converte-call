@@ -3,7 +3,7 @@ let recordingRows=[],recordingSelected=null,mediaToken=null,loadRequest=0;
 const bridge=(action,p={})=>parent.postMessage({channel:'cc-ui',action,...p},'*');
 const runtime=(type,p={})=>chrome.runtime.sendMessage({channel:'cc',type,...p});
 function nativeCapture(){bridge('surface',{view:'recorder'});}
-async function nativeInboxOpen(){const r=await runtime('open-inbox');if(!r.ok)toast(r.error);else if(r.employee)go('employee-inbox');else bridge('hide');}
+async function nativeInboxOpen(){go('employee-inbox');}
 function nativeInbox(){return head('WhatsApp Web','Os controles aparecem junto da conversa no WhatsApp real.',button('Abrir WhatsApp Web','native-inbox','primary'))+'<section class="card"><h2>Continue na conversa</h2><p>Use Bot, IA e Cliente no cabeçalho da conversa. Os campos personalizados aparecem na ficha do cliente, sem substituir o WhatsApp.</p></section>';}
 async function refreshRecordings(){const seq=++loadRequest;const r=await runtime('recordings-list');if(seq!==loadRequest)return;if(r.ok)recordingRows=r.recordings;if(['calls','home'].includes(screen))render();}
 function nativeNavigation(s){bridge('navigation',{view:s});if(s==='calls'||s==='home')refreshRecordings();if(s==='detail')loadMedia();}
@@ -34,7 +34,7 @@ forms['import-form']=f=>{const file=f.querySelector('input[type=file]').files[0]
 let savedSnapshot=null;
 function same(a,b){return JSON.stringify(a)===JSON.stringify(b);}
 async function save(){try{const next=structuredClone(data),base=savedSnapshot||{},latest=await CCWorkspace.get();for(const key of Object.keys(next)){if(same(next[key],base[key]))continue;if(Array.isArray(next[key])&&next[key].every(x=>x&&typeof x==='object'&&x.id)&&Array.isArray(base[key])){const oldMap=new Map(base[key].map(x=>[x.id,x]));const nextMap=new Map(next[key].map(x=>[x.id,x]));let rows=Array.isArray(latest[key])?latest[key]:[];rows=rows.filter(x=>!oldMap.has(x.id)||nextMap.has(x.id));for(const item of next[key]){const old=oldMap.get(item.id);if(same(item,old))continue;const index=rows.findIndex(x=>x.id===item.id);if(index<0)rows.push(item);else for(const field of Object.keys(item))if(!same(item[field],old?.[field]))rows[index][field]=item[field];}latest[key]=rows;}else latest[key]=next[key];}await CCWorkspace.set(latest);savedSnapshot=structuredClone(latest);data=latest;}catch{toast('Não foi possível salvar. Exporte um backup e verifique o espaço disponível.');}}
-async function boot(){data=await CCWorkspace.get();savedSnapshot=structuredClone(data);screen=decodeURIComponent(location.hash.slice(1))||'home';if(screen==='inbox'){nativeInboxOpen();screen='home';}if(!views[screen])screen='home';render();refreshRecordings();}
+async function boot(){data=await CCWorkspace.get();savedSnapshot=structuredClone(data);screen=decodeURIComponent(location.hash.slice(1))||'home';if(screen==='inbox')screen='employee-inbox';if(!views[screen])screen='home';render();refreshRecordings();}
 window.addEventListener("DOMContentLoaded",boot);
 window.addEventListener('hashchange',()=>{const next=decodeURIComponent(location.hash.slice(1));if(views[next])go(next);});
 window.addEventListener('beforeunload',()=>{if(mediaToken)runtime('recording-release',{token:mediaToken});});

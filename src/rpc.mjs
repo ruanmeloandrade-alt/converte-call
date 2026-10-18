@@ -1,3 +1,4 @@
+import {normalizeProduct, prepareOrder, applyOrderStock} from './product-policy.mjs';
 import {workflowRPC} from './workflow-adapter.mjs';
 import { Core } from "./database.mjs";
 import { uploadAsset, signedAsset } from "./assets.mjs";
@@ -164,12 +165,13 @@ async function rpc(store, ws, module, name, arg = {}) {
         Core.log(d, "lead-created", l.id, "Cliente criado: " + l.name);
       }
       if (p.order) {
-        const order = { id: id(), leadId: l.id, ...p.order, createdAt: now(), status: "registered" };
+        const selectedProduct = d.products.find(x => x.id === p.order.productId);
+        const order = { id: id(), leadId: l.id, ...prepareOrder(p.order, selectedProduct), createdAt: now(), status: "registered" };
         if (!Number.isFinite(order.amount) || order.amount < 0) throw Error("Total do pedido inv\xE1lido.");
         d.orders.push(order);
         d.sales.push({ id: order.id, lead: l.id, title: order.productName || "Pedido", amount: order.amount, created: order.createdAt });
         const product = d.products.find((p2) => p2.id === order.productId);
-        if (product && product.stock > 0) product.stock--;
+        applyOrderStock(product, order);
         if (product && !d.leadProducts.some((x) => x.leadId === l.id && x.productId === product.id && x.kind === "comprou")) d.leadProducts.push({ id: id(), leadId: l.id, productId: product.id, kind: "comprou" });
         l.status = "won";
         Core.log(d, "order-created", l.id, "Pedido registrado: " + order.productName);
@@ -301,7 +303,7 @@ async function rpc(store, ws, module, name, arg = {}) {
       result = { ok: true };
       break;
     case "saveProduct": {
-      const product = { ...p, id: p.id || id() };
+      const product = normalizeProduct({ ...p, id: p.id || id() }, d.products.find(x => x.id === p.id));
       upsert(d.products, product);
       changed = true;
       result = { id: product.id };

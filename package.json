@@ -1,6 +1,6 @@
 {
   "name": "converte-call-server",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,5 +9,8 @@
   "scripts": {
     "start": "node src/server.mjs",
     "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "date-fns-tz": "3.2.0"
   }
 }
