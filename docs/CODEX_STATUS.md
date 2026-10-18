@@ -559,3 +559,12 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Arquivos: public/sales.html, public/sales.css, public/sales.js, public/client-logos/*.png (57), src/public-experience.mjs, test/client-logos.browser.mjs, test/followup-carousel.browser.mjs, test/globe.browser.mjs, test/sales-background.browser.mjs e docs/CODEX_STATUS.md.
 
 - Complemento: faixa de logos usa Web Animations com velocidade mais suave em movimento reduzido, preservando o avanço contínuo pedido pelo usuário no próprio Codex. Pausa fora da tela/aba oculta. Teste cobre movimento nessa configuração também.
+
+
+## 2026-10-18 — Dados reais de países recebidos
+- Prints 01.PNG a 10.PNG transcritos: 50 países, posições 6–55, com suas contagens exatas. Cabeçalho confirma 88 países. A imagem “DADOS REAIS PAISES.PNG” não está disponível no caminho informado. Solicitado ao usuário o total geral e as posições 1–5; posições 56–88 também não constam nos arquivos recebidos.
+- Alcance atualizado de 27 para 88 países no indicador. Globo e seletor agora exibem os 50 países com contagem comprovada nos prints. Tooltip mostra quantidade recebida por país. Não recalculados percentuais nem estimados os países ausentes.
+- Contagens verificadas em todas as páginas: Turquia 69, Taiwan 37, Canadá 32, Japão 27, Bélgica 2, entre outras. A soma 658 é apenas parcial e não foi usada como total de usuários. O número agregado anterior (+2.455) permanece até receber o total novo; esta parte do pedido continua pendente.
+- Fonte e transcrição completas em docs/COUNTRY_REPORT_2026-10-18.md. Coordenadas são pontos geográficos de visualização, sem localização individual.
+- Navegador desktop/mobile: 50 marcadores, contagens selecionadas, giro por arraste/teclado, clique e ausência de overflow passaram. Jornada pública completa com download/tutorial/Android também passou. O teste de arraste foi movido para uma área de oceano após o conjunto novo de marcadores ocupar a coordenada anterior.
+- Arquivos: public/sales.html, public/sales.js, test/globe.browser.mjs, test/public-experience.browser.mjs, docs/COUNTRY_REPORT_2026-10-18.md e docs/CODEX_STATUS.md. Sem dependências nem alteração da extensão.
