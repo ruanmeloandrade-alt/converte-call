@@ -23,7 +23,7 @@ test('sales background reacts across sections without blocking clicks, respects 
   assert.equal(await page.locator('#toggle-motion').count(),0);await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>document.body.classList.contains('motion-paused'));
   const frozen=await field.evaluate(e=>e.toDataURL());await page.mouse.move(1100,600);
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
-  assert.equal(await field.evaluate(e=>e.toDataURL()),frozen,'paused background stays still');
+  assert.notEqual(await field.evaluate(e=>e.toDataURL()),frozen,'direct cursor feedback remains available with reduced motion');
   await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForFunction(()=>!document.body.classList.contains('motion-paused'));
   await page.locator('#depoimentos').scrollIntoViewIfNeeded();await page.getByRole('button',{name:'Ver conversa de Camila',exact:true}).click();
   assert.equal(await page.locator('#story-name').textContent(),'Camila · exemplo');
@@ -33,7 +33,7 @@ test('sales background reacts across sections without blocking clicks, respects 
   const reduced=await browser.newPage({reducedMotion:'reduce',viewport:{width:393,height:851}});
   await reduced.goto(base);const still=await reduced.locator('#interaction-field').evaluate(e=>e.toDataURL());
   await reduced.mouse.move(100,350);await reduced.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
-  assert.equal(await reduced.locator('#interaction-field').evaluate(e=>e.toDataURL()),still,'reduced-motion keeps field static');
+  assert.notEqual(await reduced.locator('#interaction-field').evaluate(e=>e.toDataURL()),still,'reduced-motion keeps deliberate cursor feedback');
   assert.equal(await reduced.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   assert.deepEqual(errors,[]);
  }finally{await browser.close();await app.close();rmSync(dir,{recursive:true,force:true});}
