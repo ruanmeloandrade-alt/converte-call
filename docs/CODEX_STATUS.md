@@ -476,3 +476,10 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Verde: /download/info e o anúncio de atualização usam a mesma publicação do ADM. O download consulta essa fonte novamente em cada clique, sem cache, inclusive em páginas abertas antes de uma publicação e no botão baixar novamente.
 - Validado em navegador com servidor/banco isolados: publicar 9.0.0, abrir página, publicar 9.0.1, baixar bytes exatos; publicar 9.0.2, baixar novamente; falha 503 mantém tutorial e permite nova tentativa. Nenhuma publicação de teste foi feita em produção.
 - Arquivos: public/download.js; test/download-release.browser.mjs; test/release-uploads.test.mjs; test/fixtures/release-zip.mjs; docs/CODEX_STATUS.md. Sem alteração de versão da extensão ou conexões.
+
+## 2026-10-18 — Direção punk e stories na página de vendas
+- Página pública com fundo escuro, tipografia em partículas roxo/magenta/laranja, reação ao ponteiro, brilho e composição ampliada. Tema isolado em body.sales-page para preservar download/conta. Pausa de animação, reduced-motion e suspensão de canvas fora da tela/aba oculta. Sem novas dependências.
+- Seção de stories no formato de referência: sete avatares, telefone, progresso automático, anterior/próximo, clique/toque, pausa, pressionar para segurar, swipe e teclado. Sete personagens explicitamente demonstrativos, autorizados para apresentação; não apresentados como clientes reais. Indicadores +2.455 ativos, 4,9/5 e 96% em20dias fornecidos pelo proprietário, sem validação estatística independente.
+- Preservados: CTA7dias, UTMs/ref, ZIP da publicação ADM, tutorial, conta, módulos e PWA. Sem mudanças de integrações, preços, dados ou versão da extensão.
+- Validação: jornada real desktop/Android passou (sem overflow/erros JS, pausa da animação, seleção/próximo/anterior dos stories, downloadZIP/tutorial e módulosPWA); teste de publicação deZIP com página já aberta passou. Screenshots revisados.
+- Arquivos alterados: public/sales.html, public/sales.css, public/sales.js, test/public-experience.browser.mjs, docs/CODEX_STATUS.md.
