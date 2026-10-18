@@ -4,3 +4,5 @@
 
 .currency-stage .checkout{display:none}.currency-step{max-width:540px;margin:10vh auto;padding:40px;border:1px solid #e6e0f0;border-radius:24px;background:#fff;box-shadow:0 20px 80px #3925680c}.currency-step h1{font-size:32px;margin:40px 0 24px}.currency-step select{width:100%;padding:14px;border:1px solid #d7cee9;border-radius:12px;margin:10px 0}.currency-step button{width:100%;padding:15px;border-radius:12px}.currency-step[hidden]{display:none}@media(max-width:600px){.currency-step{margin:20px;padding:24px}}
 .currency-step .primary{background:#7352e7;color:#fff;font-weight:700;border:0;cursor:pointer}.currency-step .primary:hover{background:#6141ce}.currency-step .pix{background:transparent;color:#665481;border:0;cursor:pointer}
+
+:root{--accent:#b22f78;--brand-gradient:linear-gradient(120deg,#a83cdb,#d63b91 54%,#f49339)}

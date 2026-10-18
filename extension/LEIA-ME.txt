@@ -1,55 +1,38 @@
-CONVERTE CALL 0.12.0
+CONVERTE CALL 0.13.8
 
-Se já usa a extensão, mantenha a pasta Converte Call v0.2.0 da Área de Trabalho.
-Ela foi atualizada no mesmo caminho. Em chrome://extensions, clique em Recarregar.
-Não remova a extensão nem limpe os dados do navegador. Depois atualize o WhatsApp.
+INSTALAR NO CHROME
+Extraia o ZIP em uma pasta na Área de Trabalho. Abra chrome://extensions,
+ative o Modo do desenvolvedor, clique em Carregar sem compactação e selecione
+essa pasta (a que contém manifest.json). Entre com sua conta Converte Call.
 
-Novo cadastro: https://converte-api-production.up.railway.app/register
-Administração: https://converte-api-production.up.railway.app/admin
+ATUALIZAR SEM PERDER A INSTALAÇÃO
+Mantenha a pasta já utilizada pela extensão. Substitua os arquivos dessa pasta
+pelos arquivos do ZIP novo e clique em Recarregar em chrome://extensions.
+Depois atualize as páginas do Chrome em que utiliza a extensão.
+Não remova a extensão, não limpe seus dados e não crie outra instalação.
+As configurações e integrações da conta permanecem no servidor.
 
-CADASTRO
-Nome, sobrenome, nascimento, e-mail, senha e WhatsApp principal. Não pedimos documento.
-Segundo WhatsApp opcional. A conta recebe 7 dias grátis ao ser criada; sem código.
-E-mails e ambos os telefones não podem ser reutilizados em outra conta.
-Telefones somente com números, incluindo código do país e DDD (5522992888971). O administrador libera o plano manualmente.
-Os dois WhatsApps são contatos de cadastro; não representam duas conexões de automação.
+ACESSOS
+Página de vendas e download: https://convertecall.pro
+Conta e aplicativo web: https://convertecall.pro/account/app
+Cadastro com sete dias grátis: https://convertecall.pro/register
+Administração: https://convertecall.pro/admin
+Suporte humano: https://wa.me/5522992888971
 
-FACULDADE E SUPORTE
-No menu Conta, Faculdade fica acima de Integrações e Suporte abaixo de Notificações.
-Use Entrar na conta e autorize o acesso ao servidor. A Faculdade mostra as aulas
-publicadas pelo administrador. O cadastro e edição de vídeos ficam em /admin.
-Suporte humano: WhatsApp (22) 99288-8971. FAQ: escreva sua pergunta na própria tela.
-Com chave e modelo de IA configurados em Integrações, a resposta usa a IA e o guia
-do produto. Sem chave/modelo, aparece Resposta do guia. Não é uma resposta de IA.
+NESTA VERSÃO
+Identidade visual em roxo, magenta e laranja; ícones atualizados.
+Menu compacto: logo (expandir/arrastar), gravar call, funil, Inbox e registrar venda.
+Cores de sucesso, venda registrada e erro mantêm seu significado.
+Controles do modo compacto da gravação também aparecem na primeira abertura.
+Nenhuma alteração de chaves, conexões, banco ou regras de pagamento.
 
-LIMITES ATUAIS
-A conta está conectada para Faculdade e FAQ. O gateway integral do CRM permanece
-pendente para preservar seus dados locais. Bots/agentes no servidor, WhatsApp real,
-sincronização integral, OAuth e transcrição hospedada ainda não estão liberados.
-O bloqueio por assinatura já protege o servidor; a proteção integral do CRM local
-ainda não está concluída. Não distribuir como versão comercial final.
-Os módulos aprovados de Inbox, funil, gravação, workflows e projetos foram preservados.
+PUBLICAR A ATUALIZAÇÃO
+O administrador publica o ZIP no ADM quando decidir disponibilizar a versão.
+Somente essa publicação aciona o aviso de nova versão para os clientes.
+O download público usa o arquivo publicado. Alterações no servidor não exigem
+uma nova instalação da extensão.
 
-IDIOMAS
-Configurações > Idioma da interface: português Brasil/Portugal, inglês, espanhol,
-mandarim, japonês, francês, alemão e italiano. Preferência salva neste navegador.
-Catálogo inicial cobre menus e comandos; textos explicativos e partes dos
-construtores originais ainda podem aparecer em português. Conteúdos dos usuários
-não são traduzidos. Não usamos serviço externo de tradução.
-
-PAGAMENTOS
-Mensal US$6,98; Trimestral US$16,58. Semestral removido.
-Em português, Quero pagar no pix abre seu WhatsApp com a mensagem do plano.
-Pix: R$29,90 mensal ou R$67,90 trimestral; liberação manual pelo administrador.
-Stripe: conexão/credencial e conta recebedora são configuradas somente no
-ambiente privado do servidor. O administrador apenas consulta o estado.
-Não envie chaves pelo chat. Consulte docs/PAGAMENTOS.md no GitHub.
-
-ATUALIZACOES E RB MIDIA
-Abaixo de Conta: verde = interface atualizada; vermelho = nova versão publicada.
-Baixe a versão atualizada entrega o ZIP do servidor. Extraia na MESMA pasta
-já instalada e use Recarregar; não remova a extensão nem troque de pasta.
-Credenciais agora são preservadas em cofre cifrado e o login da conta é renovado.
-Se a sessão antiga já foi perdida, pode ser necessário um primeiro login.
-Não há limpeza das configurações existentes durante atualização.
-Convite RB Mídia no rodapé usa a situação real da assinatura para compor a mensagem.
+A gravação da tela e os controles sobre o WhatsApp Web são recursos do Chrome
+no computador. O Android utiliza os módulos web com a mesma conta.
+O provedor de IA usa a chave do próprio usuário, com consumo cobrado pelo provedor.
+As conversas e vendas da página de vendas são demonstrações, sem dados de clientes.

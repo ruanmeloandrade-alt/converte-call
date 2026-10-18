@@ -20,15 +20,16 @@ test('sales background reacts across sections without blocking clicks, respects 
   const before=await field.evaluate(e=>e.toDataURL());await page.mouse.move(150,500);
   await page.waitForFunction(before=>document.querySelector('#interaction-field').toDataURL()!==before,before);
   if(process.env.SCREENSHOT_DIR){mkdirSync(process.env.SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:join(process.env.SCREENSHOT_DIR,'Converte-Call-background-interativo.png')});}
-  await page.getByRole('button',{name:'Pausar animações',exact:true}).click();
+  assert.equal(await page.locator('#toggle-motion').count(),0);await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>document.body.classList.contains('motion-paused'));
   const frozen=await field.evaluate(e=>e.toDataURL());await page.mouse.move(1100,600);
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
   assert.equal(await field.evaluate(e=>e.toDataURL()),frozen,'paused background stays still');
-  await page.getByRole('button',{name:'Reproduzir animações',exact:true}).click();
-  await page.locator('#depoimentos').scrollIntoViewIfNeeded();await page.getByRole('button',{name:'Ver story de Camila',exact:true}).click();
+  await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForFunction(()=>!document.body.classList.contains('motion-paused'));
+  await page.locator('#depoimentos').scrollIntoViewIfNeeded();await page.getByRole('button',{name:'Ver conversa de Camila',exact:true}).click();
   assert.equal(await page.locator('#story-name').textContent(),'Camila · exemplo');
   const atStories=await field.evaluate(e=>e.toDataURL());await page.mouse.move(80,300);
   await page.waitForFunction(before=>document.querySelector('#interaction-field').toDataURL()!==before,atStories);
+  await page.locator('.professional-footer').scrollIntoViewIfNeeded();const stars=page.locator('#footer-space');const spaceBefore=await stars.evaluate(e=>e.toDataURL());await page.waitForFunction(before=>document.querySelector('#footer-space').toDataURL()!==before,spaceBefore);
   const reduced=await browser.newPage({reducedMotion:'reduce',viewport:{width:393,height:851}});
   await reduced.goto(base);const still=await reduced.locator('#interaction-field').evaluate(e=>e.toDataURL());
   await reduced.mouse.move(100,350);await reduced.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));

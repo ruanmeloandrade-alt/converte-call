@@ -1,3 +1,11 @@
+# Alterações — 0.13.8
+
+- Menu compacto com logo expansível/arrastável, gravar call, funil, Inbox interno e registrar venda; clique e arraste separados.
+- Nova paleta da Converte Call em ícones e destaques da interface, com cores semânticas preservadas.
+- Atualização do guia de instalação, acessos e publicação manual do ZIP.
+- Correção da primeira renderização dos controles de modo compacto do HUD.
+- Sem alteração de credenciais, integração, banco ou regras comerciais.
+
 # Alterações — 0.12.0
 
 - Status de atualização real sob Conta; download da versão publicada pelo servidor.
