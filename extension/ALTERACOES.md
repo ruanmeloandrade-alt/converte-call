@@ -1,3 +1,9 @@
+# Alterações — 0.11.1
+
+- Removido formulário de chave Stripe do painel; API de alteração bloqueada inclusive para administrador.
+- Recebedor fixado internamente por identificador da conta e configuração privada do servidor.
+- Autorização real Stripe ainda depende da reconexão e credencial interna.
+
 # Alterações — 0.11.0
 
 - Planos em USD: Mensal US$6,98, Trimestral US$16,58; removida oferta semestral.

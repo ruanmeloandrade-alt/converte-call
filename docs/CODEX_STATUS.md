@@ -164,3 +164,11 @@ Arquivos alterados:
 - test/licensing.browser.mjs
 - test/portal.browser.mjs
 - vendor/billing-catalog.js
+
+## 0.11.1 — recebedor Stripe fixado internamente
+Usuário rejeitou formulário de chave no administrador e pediu priorizar conexão Stripe. Removido formulário do HTML e handler do JS; POST /v1/admin/billing agora HTTP410 inclusive para admin. GET permanece somente leitura. Provisionamento apenas na inicialização interna com STRIPE_API_KEY e STRIPE_ACCOUNT_ID do ambiente privado; conta da chave deve ser exatamente o ID fixado, e uma configuração existente não pode mudar para outra conta. Sem credenciais inventadas e sem alterar ambiente real sem a autorização da conta. Nenhuma dependência nova, nenhum dado/senha removido.
+App Stripe: manage_stripe_accounts novamente UNAUTHORIZED/requires reauthentication; não retornou reconsent_url. Plugin Search confirma Stripe instalado/ENABLED, portanto não sugerir nova instalação nem inventar URL OAuth. Foi fornecido login oficial https://dashboard.stripe.com/login e explicado que login é distinto da autorização do app Codex. Reconexão ainda depende do proprietário. Pagamento real não ativado.
+Pix já registra pagamento e libera plano; pedido formal integrado ao restante do CRM ainda deve ser construído, não confundir receipt de billing_payments com pedido ERP.
+Solicitações registradas para sequência, com prioridade atual Stripe: Faculdade deve ter mesma visão aluno/admin com botão Editar apenas admin, banner e organização de cursos/módulos/aulas editados na própria Faculdade, não listagem avulsa no painel de assinaturas. Dashboard do proprietário deve exibir métricas globais reais de clientes/trials/assinaturas, com autorização no servidor, nunca para outros clientes. Personalização de tema e links públicos, mantendo domínio Railway por enquanto e domínio próprio depois. Pedido Pix deve ser vinculado ao cliente/plano/recebimento/liberação. Não afirmar que esses pedidos já foram implementados nesta correção.
+Verificações: testes de billing validam bloqueio HTTP410 e recebedor divergente sem gravação. Demais checks registrados no relatório da entrega.
+Arquivos: public/admin.html, public/admin.js, src/billing.mjs, src/server.mjs, test/billing.test.mjs, package.json, extension/manifest.json, extension/LEIA-ME.txt, README.md, docs/PAGAMENTOS.md e docs/CODEX_STATUS.md.

@@ -50,4 +50,4 @@ Referências oficiais: [Railway autodeploy](https://docs.railway.com/deployments
 extension/ contém a extensão pronta para carregar no Chrome. ui-source/ contém os fontes e o build dos componentes originais reutilizados, sem node_modules. Veja ui-source/REPRODUZIR.txt.
 
 ## Pagamentos 0.11
-Mensal US$6,98 e Trimestral US$16,58; sem semestral. Pix em português R$29,90/R$67,90 via WhatsApp e confirmação manual em /admin. Código de Checkout/assinaturas/webhooks e configuração Stripe no administrador implementados; ativação e validação com a conta real pendentes da reconexão/credencial Stripe. Ver PAGAMENTOS.md.
+Mensal US$6,98 e Trimestral US$16,58; sem semestral. Pix em português R$29,90/R$67,90 via WhatsApp e confirmação manual em /admin. Código de Checkout/assinaturas/webhooks implementados; configuração Stripe exclusiva do ambiente privado do servidor; ativação e validação com a conta real pendentes da reconexão/credencial Stripe. Ver PAGAMENTOS.md.

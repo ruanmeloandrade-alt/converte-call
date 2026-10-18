@@ -1,4 +1,4 @@
-CONVERTE CALL 0.11.0
+CONVERTE CALL 0.11.1
 
 Se já usa a extensão, mantenha a pasta Converte Call v0.2.0 da Área de Trabalho.
 Ela foi atualizada no mesmo caminho. Em chrome://extensions, clique em Recarregar.
@@ -41,6 +41,6 @@ PAGAMENTOS
 Mensal US$6,98; Trimestral US$16,58. Semestral removido.
 Em português, Quero pagar no pix abre seu WhatsApp com a mensagem do plano.
 Pix: R$29,90 mensal ou R$67,90 trimestral; liberação manual pelo administrador.
-Stripe: conexão/credencial da conta ainda precisa ser configurada em /admin >
-Pagamentos e Stripe. A tela identifica modo de teste ou produção.
+Stripe: conexão/credencial e conta recebedora são configuradas somente no
+ambiente privado do servidor. O administrador apenas consulta o estado.
 Não envie chaves pelo chat. Consulte docs/PAGAMENTOS.md no GitHub.
