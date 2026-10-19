@@ -2504,5 +2504,726 @@
   "Sigue en cero. Sin tarjeta ni cobro automático.",
   "依然为零。无需银行卡，不会自动扣款。",
   "ゼロのまま。カード不要、自動請求なし。"
+ ],
+ [
+  "Seja parceiro · Converte Call",
+  "Become a partner · Converte Call",
+  "Hazte socio · Converte Call",
+  "成为合作伙伴 · Converte Call",
+  "パートナーになる · Converte Call"
+ ],
+ [
+  "A parceria",
+  "The partnership",
+  "La colaboración",
+  "合作计划",
+  "パートナーシップ"
+ ],
+ [
+  "Simule seus ganhos",
+  "Estimate your earnings",
+  "Simula tus comisiones",
+  "模拟佣金收益",
+  "報酬をシミュレーション"
+ ],
+ [
+  "Como começar",
+  "Get started",
+  "Cómo empezar",
+  "如何开始",
+  "始め方"
+ ],
+ [
+  "Área do parceiro ↗",
+  "Partner portal ↗",
+  "Área de socios ↗",
+  "合作伙伴专区 ↗",
+  "パートナー専用ページ ↗"
+ ],
+ [
+  "Quero ser parceiro ↗",
+  "Become a partner ↗",
+  "Quiero ser socio ↗",
+  "我要成为合作伙伴 ↗",
+  "パートナーになる ↗"
+ ],
+ [
+  "TRABALHE CONOSCO · SEJA PARCEIRO",
+  "WORK WITH US · BECOME A PARTNER",
+  "COLABORA CON NOSOTROS · HAZTE SOCIO",
+  "与我们合作 · 成为合作伙伴",
+  "一緒に働こう · パートナー募集"
+ ],
+ [
+  "Sua rede de contatos.",
+  "Your network.",
+  "Tu red de contactos.",
+  "你的人脉网络。",
+  "あなたのつながりを。"
+ ],
+ [
+  "Seu próximo negócio.",
+  "Your next opportunity.",
+  "Tu próximo negocio.",
+  "你的下一次商机。",
+  "次のビジネスへ。"
+ ],
+ [
+  "Apresente uma plataforma que conecta atendimento, IA e vendas. Transforme suas indicações em uma parceria que continua a cada renovação.",
+  "Introduce a platform connecting customer support, AI and sales. Turn referrals into a partnership that continues with every renewal.",
+  "Presenta una plataforma que conecta atención, IA y ventas. Convierte tus recomendaciones en una colaboración que continúa con cada renovación.",
+  "推荐一个连接客户服务、AI 与销售的平台，让推荐关系随着每次续费持续发展。",
+  "顧客対応、AI、営業をつなぐプラットフォームをご紹介ください。紹介を、更新のたびに続くパートナーシップへ。"
+ ],
+ [
+  "Quero fazer parte",
+  "I want to join",
+  "Quiero formar parte",
+  "我要加入",
+  "参加する"
+ ],
+ [
+  "Veja quanto você pode ganhar ↓",
+  "Explore your potential earnings ↓",
+  "Descubre cuánto podrías ganar ↓",
+  "看看可以获得多少佣金 ↓",
+  "報酬の例を見る ↓"
+ ],
+ [
+  "Parceria comercial por indicação. Você indica. A Converte Call cuida da plataforma.",
+  "A commercial referral partnership. You make referrals. Converte Call runs the platform.",
+  "Colaboración comercial por recomendación. Tú recomiendas. Converte Call se encarga de la plataforma.",
+  "商业推荐合作。你负责推荐，Converte Call 负责平台。",
+  "紹介によるビジネスパートナーシップ。紹介はあなた、プラットフォームの運営はConverte Call。"
+ ],
+ [
+  "80% na primeira compra e 50% nas renovações",
+  "80% on the first purchase and 50% on renewals",
+  "80% en la primera compra y 50% en renovaciones",
+  "首购80%，续费50%",
+  "初回購入80%、更新50%"
+ ],
+ [
+  "PRIMEIRA COMPRA",
+  "FIRST PURCHASE",
+  "PRIMERA COMPRA",
+  "首次购买",
+  "初回購入"
+ ],
+ [
+  "Uma boa indicação abre o caminho.",
+  "A good referral opens the door.",
+  "Una buena recomendación abre el camino.",
+  "好的推荐打开机会之门。",
+  "良い紹介が道を開く。"
+ ],
+ [
+  "RENOVAÇÕES",
+  "RENEWALS",
+  "RENOVACIONES",
+  "续费",
+  "更新"
+ ],
+ [
+  "O relacionamento continua.",
+  "The relationship continues.",
+  "La relación continúa.",
+  "关系持续发展。",
+  "関係は続いていく。"
+ ],
+ [
+  "Comissões sobre o líquido após taxas.",
+  "Commissions on the net amount after fees.",
+  "Comisiones sobre el importe neto tras las tasas.",
+  "佣金按扣除手续费后的净额计算。",
+  "手数料控除後の純額を基準に計算。"
+ ],
+ [
+  "na primeira compra",
+  "on the first purchase",
+  "en la primera compra",
+  "首次购买",
+  "初回購入時"
+ ],
+ [
+  "nas renovações pagas",
+  "on paid renewals",
+  "en renovaciones pagadas",
+  "已支付的续费",
+  "支払い済みの更新時"
+ ],
+ [
+  "15 dias",
+  "15 days",
+  "15 días",
+  "15天",
+  "15日間"
+ ],
+ [
+  "de retenção das comissões",
+  "commission holding period",
+  "de retención de comisiones",
+  "佣金保留期",
+  "報酬の保留期間"
+ ],
+ [
+  "Sua marca",
+  "Your brand",
+  "Tu marca",
+  "你的品牌",
+  "あなたのブランド"
+ ],
+ [
+  "junto dos seus indicados",
+  "alongside your referrals",
+  "junto a tus recomendados",
+  "陪伴你推荐的客户",
+  "紹介した顧客のそばに"
+ ],
+ [
+  "VOCÊ JÁ CONECTA PESSOAS.",
+  "YOU ALREADY CONNECT PEOPLE.",
+  "YA CONECTAS PERSONAS.",
+  "你已经在连接人与人。",
+  "すでに人をつないでいるあなたへ。"
+ ],
+ [
+  "Agora, conecte",
+  "Now connect",
+  "Ahora conecta",
+  "现在，也连接",
+  "今度は、"
+ ],
+ [
+  "oportunidades também.",
+  "opportunities too.",
+  "oportunidades también.",
+  "更多机会。",
+  "機会をつなごう。"
+ ],
+ [
+  "Uma parceria para quem entende o valor de uma boa conversa e quer levar mais organização à rotina dos seus clientes.",
+  "For people who value good conversations and want to help their customers organize their daily work.",
+  "Una colaboración para quienes valoran una buena conversación y quieren ayudar a organizar la rutina de sus clientes.",
+  "适合重视良好沟通、希望帮助客户更好地组织日常工作的人。",
+  "良い会話の価値を知り、顧客の日々の業務をより整理したい方のためのパートナーシップ。"
+ ],
+ [
+  "Agências e profissionais de marketing",
+  "Agencies and marketers",
+  "Agencias y profesionales de marketing",
+  "代理机构和营销人员",
+  "代理店・マーケティング担当者"
+ ],
+ [
+  "Apresente uma ferramenta que acompanha o atendimento e a operação dos negócios que você já atende.",
+  "Introduce a tool supporting customer service and operations for the businesses you already serve.",
+  "Presenta una herramienta que acompaña la atención y la operación de los negocios que ya atiendes.",
+  "向现有客户推荐支持客户服务和业务运营的工具。",
+  "現在支援している企業に、顧客対応と業務運営をサポートするツールをご紹介ください。"
+ ],
+ [
+  "Consultores e especialistas",
+  "Consultants and specialists",
+  "Consultores y especialistas",
+  "顾问与专家",
+  "コンサルタント・専門家"
+ ],
+ [
+  "Conecte sua experiência comercial a uma plataforma com funil, bots e assistência de IA nas calls.",
+  "Connect your sales expertise with a platform offering pipelines, bots and AI call assistance.",
+  "Conecta tu experiencia comercial con una plataforma con embudos, bots y asistencia de IA en llamadas.",
+  "将你的销售经验与销售漏斗、机器人和通话 AI 辅助相结合。",
+  "営業の専門知識を、パイプライン、ボット、通話中のAI支援を備えたプラットフォームにつなげましょう。"
+ ],
+ [
+  "Criadores e comunidades",
+  "Creators and communities",
+  "Creadores y comunidades",
+  "创作者与社群",
+  "クリエイター・コミュニティ"
+ ],
+ [
+  "Compartilhe a Converte Call com uma audiência que confia nas suas recomendações.",
+  "Share Converte Call with an audience that trusts your recommendations.",
+  "Comparte Converte Call con una audiencia que confía en tus recomendaciones.",
+  "向信赖你推荐的受众介绍 Converte Call。",
+  "あなたのおすすめを信頼する人々にConverte Callをご紹介ください。"
+ ],
+ [
+  "COLOQUE SUAS POSSIBILIDADES NA CONTA.",
+  "PUT YOUR POSSIBILITIES INTO NUMBERS.",
+  "HAZ NÚMEROS CON TUS POSIBILIDADES.",
+  "算一算你的收益空间。",
+  "可能性を数字で確かめる。"
+ ],
+ [
+  "50, 100 ou 120 clientes.",
+  "50, 100 or 120 customers.",
+  "50, 100 o 120 clientes.",
+  "50、100 或120位客户。",
+  "50、100、120社の顧客。"
+ ],
+ [
+  "Qual é o seu próximo passo?",
+  "What's your next step?",
+  "¿Cuál es tu próximo paso?",
+  "你的下一步是什么？",
+  "あなたの次の一歩は？"
+ ],
+ [
+  "Experimente os cenários e ajuste a base líquida de cada pagamento para simular a sua comissão.",
+  "Explore the scenarios and adjust the net amount of each payment to estimate your commission.",
+  "Prueba los escenarios y ajusta la base neta de cada pago para simular tu comisión.",
+  "体验不同场景，调整每笔支付的净额，模拟你的佣金。",
+  "各支払いの純額を調整し、ケース別の報酬を試算できます。"
+ ],
+ [
+  "SIMULADOR DE COMISSÕES",
+  "COMMISSION CALCULATOR",
+  "SIMULADOR DE COMISIONES",
+  "佣金计算器",
+  "報酬シミュレーター"
+ ],
+ [
+  "Faça a conta do seu jeito.",
+  "Run your own numbers.",
+  "Haz tus propias cuentas.",
+  "按你的情况计算。",
+  "自分の条件で計算する。"
+ ],
+ [
+  "O exemplo começa com R$ 25,00 líquidos por pagamento. Altere esse valor para explorar outros cenários.",
+  "The example starts with BRL 25.00 net per payment. Change this amount to explore other scenarios.",
+  "El ejemplo parte de 25,00 BRL netos por pago. Cambia este valor para explorar otros escenarios.",
+  "示例从每笔支付净额25巴西雷亚尔开始。修改金额即可探索其他场景。",
+  "例は1回の支払いあたり純額25レアルから始まります。金額を変更して別のケースを試してください。"
+ ],
+ [
+  "Valor líquido por pagamento (R$)",
+  "Net amount per payment (BRL)",
+  "Importe neto por pago (BRL)",
+  "每笔支付净额（巴西雷亚尔）",
+  "1回の支払いの純額（BRL）"
+ ],
+ [
+  "Valor depois das taxas de pagamento, antes da comissão.",
+  "Amount after payment fees, before commission.",
+  "Importe después de las tasas de pago, antes de la comisión.",
+  "扣除支付手续费后、计算佣金前的金额。",
+  "決済手数料を差し引いた後、報酬計算前の金額。"
+ ],
+ [
+  "clientes",
+  "customers",
+  "clientes",
+  "位客户",
+  "顧客"
+ ],
+ [
+  "NA PRIMEIRA COMPRA",
+  "ON THE FIRST PURCHASE",
+  "EN LA PRIMERA COMPRA",
+  "首次购买时",
+  "初回購入時"
+ ],
+ [
+  "por ciclo de renovação",
+  "per renewal cycle",
+  "por ciclo de renovación",
+  "每个续费周期",
+  "更新サイクルごと"
+ ],
+ [
+  "Explorar cenário ↗",
+  "Explore scenario ↗",
+  "Explorar escenario ↗",
+  "查看场景 ↗",
+  "このケースを見る ↗"
+ ],
+ [
+  "Sua quantidade de clientes pagantes",
+  "Your number of paying customers",
+  "Tu número de clientes de pago",
+  "你的付费客户数量",
+  "支払いを行う顧客数"
+ ],
+ [
+  "Ajustar quantidade de clientes",
+  "Adjust customer count",
+  "Ajustar número de clientes",
+  "调整客户数量",
+  "顧客数を調整"
+ ],
+ [
+  "Quantidade de clientes pagantes",
+  "Number of paying customers",
+  "Número de clientes de pago",
+  "付费客户数量",
+  "支払いを行う顧客数"
+ ],
+ [
+  "Na primeira compra",
+  "On the first purchase",
+  "En la primera compra",
+  "首次购买时",
+  "初回購入時"
+ ],
+ [
+  "Em cada ciclo de renovação pago",
+  "On each paid renewal cycle",
+  "En cada ciclo de renovación pagado",
+  "每个已付费的续费周期",
+  "支払い済みの更新サイクルごと"
+ ],
+ [
+  "Simulação: todos os clientes compram e, no cenário de renovação, todos pagam novamente o mesmo valor líquido. A frequência acompanha o plano contratado. As comissões reais usam as taxas confirmadas de cada pagamento.",
+  "Simulation: all customers buy and, in the renewal scenario, all pay the same net amount again. Frequency follows the chosen plan. Actual commissions use each payment's confirmed fees.",
+  "Simulación: todos compran y, en el escenario de renovación, todos vuelven a pagar el mismo importe neto. La frecuencia sigue el plan contratado. Las comisiones reales usan las tasas confirmadas de cada pago.",
+  "模拟假设所有客户购买，并在续费场景中再次支付相同净额。频率由订阅套餐决定。实际佣金使用每笔支付确认的手续费计算。",
+  "試算では全顧客が購入し、更新時も同じ純額を支払うと仮定します。頻度は契約プランに従います。実際の報酬は各決済の確定手数料をもとに計算されます。"
+ ],
+ [
+  "Quero começar minhas indicações ↗",
+  "Start making referrals ↗",
+  "Quiero empezar a recomendar ↗",
+  "开始推荐客户 ↗",
+  "紹介を始める ↗"
+ ],
+ [
+  "UMA PARCERIA COM ESTRUTURA.",
+  "A PARTNERSHIP WITH SUPPORT.",
+  "UNA COLABORACIÓN CON ESTRUCTURA.",
+  "配套完善的合作。",
+  "仕組みの整ったパートナーシップ。"
+ ],
+ [
+  "Você faz conexões.",
+  "You make connections.",
+  "Tú conectas personas.",
+  "你负责建立联系。",
+  "あなたがつながりを作る。"
+ ],
+ [
+  "Seu painel acompanha.",
+  "Your dashboard tracks them.",
+  "Tu panel las acompaña.",
+  "你的面板跟踪进展。",
+  "ダッシュボードで確認する。"
+ ],
+ [
+  "Link de indicação e campanhas",
+  "Referral links and campaigns",
+  "Enlaces de recomendación y campañas",
+  "推荐链接与活动",
+  "紹介リンクとキャンペーン"
+ ],
+ [
+  "Seu link associa os cadastros a você. Crie links com UTMs para organizar a divulgação de cada campanha.",
+  "Your link associates signups with you. Create UTM links to organize each campaign's promotion.",
+  "Tu enlace asocia los registros contigo. Crea enlaces con UTMs para organizar la difusión de cada campaña.",
+  "通过链接关联推荐注册，使用 UTM 链接整理不同推广活动。",
+  "紹介リンクで登録者を紐づけます。UTM付きリンクで各キャンペーンの告知を整理できます。"
+ ],
+ [
+  "Visibilidade do seu financeiro",
+  "Clear commission tracking",
+  "Visibilidad de tus comisiones",
+  "清晰的佣金记录",
+  "報酬の状況を把握"
+ ],
+ [
+  "Acompanhe comissões, valores em retenção, saldo disponível e solicitações de saque na área de parceiros.",
+  "Track commissions, held amounts, available balances and withdrawal requests in the partner portal.",
+  "Consulta comisiones, importes retenidos, saldo disponible y solicitudes de retiro en el área de socios.",
+  "在合作伙伴专区查看佣金、保留金额、可用余额和提现申请。",
+  "パートナー専用ページで報酬、保留額、利用可能残高、出金申請を確認できます。"
+ ],
+ [
+  "Sua agência na plataforma",
+  "Your agency on the platform",
+  "Tu agencia en la plataforma",
+  "平台中的你的代理品牌",
+  "プラットフォームにあなたの代理店を"
+ ],
+ [
+  "Personalize o nome, a logo e o WhatsApp da sua agência no convite exibido aos seus indicados.",
+  "Customize your agency's name, logo and WhatsApp in the invitation shown to your referrals.",
+  "Personaliza el nombre, el logotipo y el WhatsApp de tu agencia en la invitación mostrada a tus recomendados.",
+  "自定义推荐客户所见邀请中的代理机构名称、标志和 WhatsApp。",
+  "紹介先に表示される案内に、代理店の名前、ロゴ、WhatsAppを設定できます。"
+ ],
+ [
+  "Faculdade de vendas",
+  "Sales academy",
+  "Academia de ventas",
+  "销售学院",
+  "営業アカデミー"
+ ],
+ [
+  "Acesse a área de aulas para parceiros e acompanhe seu progresso nos conteúdos disponibilizados.",
+  "Access partner lessons and track your progress through the available content.",
+  "Accede a las clases para socios y sigue tu progreso en los contenidos disponibles.",
+  "访问合作伙伴课程，跟踪学习进度。",
+  "パートナー向け講座にアクセスし、公開されている教材の学習状況を確認できます。"
+ ],
+ [
+  "DA PRIMEIRA CONEXÃO À PARCERIA.",
+  "FROM FIRST CONNECTION TO PARTNERSHIP.",
+  "DE LA PRIMERA CONEXIÓN A LA COLABORACIÓN.",
+  "从第一次联系到合作。",
+  "最初のつながりからパートナーへ。"
+ ],
+ [
+  "Comece em",
+  "Get started in",
+  "Empieza en",
+  "只需",
+  "始め方は"
+ ],
+ [
+  "3 passos.",
+  "3 steps.",
+  "3 pasos.",
+  "3步。",
+  "3ステップ。"
+ ],
+ [
+  "Crie sua conta",
+  "Create your account",
+  "Crea tu cuenta",
+  "创建账户",
+  "アカウントを作成"
+ ],
+ [
+  "Cadastre seus dados. Se já usa a Converte Call, entre com o mesmo e-mail e senha.",
+  "Register your details. If you already use Converte Call, sign in with the same email and password.",
+  "Registra tus datos. Si ya usas Converte Call, accede con el mismo correo y contraseña.",
+  "填写资料。如果已经使用 Converte Call，请使用相同邮箱和密码登录。",
+  "情報を登録します。Converte Callをご利用中の場合は同じメールアドレスとパスワードでログインできます。"
+ ],
+ [
+  "Ative sua parceria",
+  "Activate your partnership",
+  "Activa tu colaboración",
+  "激活合作伙伴身份",
+  "パートナー登録を有効化"
+ ],
+ [
+  "Na área de parceiros, ative seu cadastro e encontre seu link exclusivo de indicação.",
+  "Activate your registration in the partner portal and find your unique referral link.",
+  "Activa tu registro en el área de socios y encuentra tu enlace exclusivo de recomendación.",
+  "在合作伙伴专区激活注册，获取专属推荐链接。",
+  "パートナー専用ページで登録を有効化し、専用の紹介リンクを確認します。"
+ ],
+ [
+  "Indique e acompanhe",
+  "Refer and track",
+  "Recomienda y acompaña",
+  "推荐并跟踪",
+  "紹介して確認"
+ ],
+ [
+  "Compartilhe seu link. Acompanhe os cadastros e as comissões das compras confirmadas pelo painel.",
+  "Share your link. Track signups and commissions on confirmed purchases in your dashboard.",
+  "Comparte tu enlace. Sigue los registros y las comisiones de compras confirmadas en tu panel.",
+  "分享链接，通过面板查看注册和已确认购买产生的佣金。",
+  "リンクを共有し、ダッシュボードで登録状況と確定購入の報酬を確認します。"
+ ],
+ [
+  "Criar minha conta de parceiro ↗",
+  "Create my partner account ↗",
+  "Crear mi cuenta de socio ↗",
+  "创建合作伙伴账户 ↗",
+  "パートナーアカウントを作成 ↗"
+ ],
+ [
+  "Já tenho conta · entrar ↗",
+  "I have an account · sign in ↗",
+  "Ya tengo cuenta · entrar ↗",
+  "已有账户 · 登录 ↗",
+  "アカウントをお持ちの方 · ログイン ↗"
+ ],
+ [
+  "PARCERIA COM CLAREZA.",
+  "A CLEAR PARTNERSHIP.",
+  "COLABORACIÓN CON CLARIDAD.",
+  "合作规则清晰明确。",
+  "明確なパートナーシップ。"
+ ],
+ [
+  "Antes de começar,",
+  "Before you start,",
+  "Antes de empezar,",
+  "开始之前，",
+  "始める前に、"
+ ],
+ [
+  "tudo às claras.",
+  "know where you stand.",
+  "todo claro.",
+  "了解所有细节。",
+  "すべてを明確に。"
+ ],
+ [
+  "Falar sobre a parceria ↗",
+  "Talk about the partnership ↗",
+  "Consultar sobre la colaboración ↗",
+  "咨询合作计划 ↗",
+  "パートナーシップを相談 ↗"
+ ],
+ [
+  "Como a comissão é calculada?",
+  "How is commission calculated?",
+  "¿Cómo se calcula la comisión?",
+  "佣金如何计算？",
+  "報酬はどのように計算されますか？"
+ ],
+ [
+  "Você recebe 80% na primeira compra e 50% nas renovações. A base é o valor líquido após as taxas confirmadas do pagamento. O simulador permite escolher essa base líquida; ele não calcula taxas do processador.",
+  "You receive 80% on the first purchase and 50% on renewals, based on the net amount after confirmed payment fees. The calculator lets you choose that net amount; it does not calculate processor fees.",
+  "Recibes el 80% en la primera compra y el 50% en renovaciones, sobre el neto tras las tasas confirmadas del pago. El simulador permite elegir esa base neta; no calcula las tasas del procesador.",
+  "首购佣金80%，续费50%，按扣除已确认支付手续费后的净额计算。计算器让你自行选择净额，不计算处理商手续费。",
+  "初回購入80%、更新50%です。確定した決済手数料控除後の純額が基準です。シミュレーターでは純額を指定でき、決済代行会社の手数料は計算しません。"
+ ],
+ [
+  "Quando a comissão fica disponível?",
+  "When does commission become available?",
+  "¿Cuándo está disponible la comisión?",
+  "佣金何时可用？",
+  "報酬はいつ利用可能になりますか？"
+ ],
+ [
+  "A retenção é de 15 dias ou até a liquidação do pagamento, se posterior. Cancelamentos e estornos podem alterar o saldo.",
+  "Commissions are held for 15 days or until payment settlement, whichever is later. Cancellations and refunds can change the balance.",
+  "Las comisiones se retienen 15 días o hasta la liquidación del pago, si es posterior. Cancelaciones y devoluciones pueden alterar el saldo.",
+  "佣金保留15天，或直至支付结算，以较晚者为准。取消和退款可能影响余额。",
+  "15日間、または決済の精算完了までのうち遅い方まで保留されます。キャンセルや返金で残高が変わる場合があります。"
+ ],
+ [
+  "Como recebo minhas comissões?",
+  "How do I receive my commissions?",
+  "¿Cómo recibo mis comisiones?",
+  "如何领取佣金？",
+  "報酬はどう受け取りますか？"
+ ],
+ [
+  "Cadastre seus dados de recebimento na área de parceiros. É possível solicitar saque a cada 7 dias, conforme o saldo disponível. Os repasses são conferidos e realizados manualmente pela administração.",
+  "Register your payout details in the partner portal. You can request a withdrawal every 7 days, subject to available balance. Transfers are reviewed and made manually by the administration.",
+  "Registra tus datos de cobro en el área de socios. Puedes solicitar un retiro cada 7 días según el saldo disponible. La administración revisa y realiza los pagos manualmente.",
+  "在合作伙伴专区登记收款信息。根据可用余额，每7天可申请一次提现。管理方审核并手动转账。",
+  "専用ページで受取情報を登録します。利用可能残高に応じて7日ごとに出金申請できます。管理者が確認し、手動で送金します。"
+ ],
+ [
+  "O cadastro indicado já gera comissão?",
+  "Does a referred signup earn commission?",
+  "¿Un registro recomendado ya genera comisión?",
+  "推荐注册就会产生佣金吗？",
+  "紹介した登録だけで報酬が発生しますか？"
+ ],
+ [
+  "O cadastro associa a conta ao seu link. A comissão é registrada quando existe uma compra elegível confirmada. Contas em teste gratuito ainda não representam uma venda paga.",
+  "Signup associates the account with your link. Commission is recorded when an eligible purchase is confirmed. Free trial accounts are not paid sales.",
+  "El registro asocia la cuenta con tu enlace. La comisión se registra cuando se confirma una compra elegible. Las cuentas en prueba gratuita todavía no son ventas pagadas.",
+  "注册会将账户关联到你的链接。符合条件的购买确认后才产生佣金。免费试用账户不属于付费销售。",
+  "登録によりアカウントが紹介リンクに紐づきます。対象となる購入の確定時に報酬が記録されます。無料お試しの登録は有料購入には含まれません。"
+ ],
+ [
+  "Já tenho uma conta. Preciso criar outra?",
+  "Do I need a new account if I already have one?",
+  "¿Necesito otra cuenta si ya tengo una?",
+  "已有账户还需要重新创建吗？",
+  "既存のアカウントがあれば新規作成は必要ですか？"
+ ],
+ [
+  "Não. Use seu e-mail e senha na área de parceiros e ative sua parceria por lá.",
+  "No. Sign in to the partner portal with your email and password, then activate your partnership there.",
+  "No. Accede al área de socios con tu correo y contraseña y activa allí tu colaboración.",
+  "不需要。使用原邮箱和密码登录合作伙伴专区，并在那里激活身份。",
+  "不要です。同じメールアドレスとパスワードで専用ページにログインし、パートナー登録を有効化してください。"
+ ],
+ [
+  "Os valores do simulador são meus ganhos garantidos?",
+  "Are the calculator amounts guaranteed earnings?",
+  "¿Los importes del simulador son ganancias garantizadas?",
+  "计算器金额是保证收入吗？",
+  "シミュレーターの金額は保証された収入ですか？"
+ ],
+ [
+  "São cenários para você fazer as contas. O resultado depende das compras e renovações pagas dos seus indicados, dos valores líquidos e de eventuais cancelamentos ou estornos.",
+  "These scenarios help you run the numbers. Results depend on paid purchases and renewals by your referrals, net amounts and any cancellations or refunds.",
+  "Son escenarios para hacer tus cuentas. El resultado depende de las compras y renovaciones pagadas de tus recomendados, los importes netos y posibles cancelaciones o devoluciones.",
+  "这些场景用于帮助计算。结果取决于推荐客户的实际购买和付费续费、净额以及可能的取消或退款。",
+  "計算のためのケース例です。実際の結果は紹介先の購入・有料更新、純額、キャンセルや返金によって変わります。"
+ ],
+ [
+  "SUA PRÓXIMA CONEXÃO COMEÇA AQUI.",
+  "YOUR NEXT CONNECTION STARTS HERE.",
+  "TU PRÓXIMA CONEXIÓN EMPIEZA AQUÍ.",
+  "下一次联系，从这里开始。",
+  "次のつながりはここから。"
+ ],
+ [
+  "Leve a Converte Call.",
+  "Bring Converte Call to your network.",
+  "Lleva Converte Call.",
+  "把 Converte Call 推荐出去。",
+  "Converte Callを広めよう。"
+ ],
+ [
+  "Cresça com a gente.",
+  "Grow with us.",
+  "Crece con nosotros.",
+  "与我们共同成长。",
+  "一緒に成長しよう。"
+ ],
+ [
+  "Tem gente na sua rede procurando um jeito melhor de atender, vender e organizar a operação. Faça essa conexão.",
+  "People in your network are looking for a better way to serve, sell and organize their work. Make that connection.",
+  "Hay personas en tu red buscando una forma mejor de atender, vender y organizar su operación. Haz esa conexión.",
+  "你的人脉中，有人在寻找更好的客服、销售和运营方式。帮助他们建立联系。",
+  "あなたの周りにも、顧客対応、営業、業務運営を改善したい人がいます。そのつながりを作りましょう。"
+ ],
+ [
+  "Quero ser parceiro Converte Call ↗",
+  "Become a Converte Call partner ↗",
+  "Quiero ser socio Converte Call ↗",
+  "成为 Converte Call 合作伙伴 ↗",
+  "Converte Callのパートナーになる ↗"
+ ],
+ [
+  "Já sou parceiro · acessar meu painel ↗",
+  "Already a partner · open my dashboard ↗",
+  "Ya soy socio · acceder a mi panel ↗",
+  "已是合作伙伴 · 进入面板 ↗",
+  "登録済みの方 · ダッシュボードへ ↗"
+ ],
+ [
+  "Conversas conectadas. Negócios em movimento.",
+  "Connected conversations. Business in motion.",
+  "Conversaciones conectadas. Negocios en movimiento.",
+  "连接对话，推动业务。",
+  "会話をつなぎ、ビジネスを動かす。"
+ ],
+ [
+  "Página inicial",
+  "Home",
+  "Página de inicio",
+  "首页",
+  "ホーム"
+ ],
+ [
+  "Área do parceiro",
+  "Partner portal",
+  "Área de socios",
+  "合作伙伴专区",
+  "パートナー専用ページ"
+ ],
+ [
+  "Trabalhe conosco · Seja parceiro ↗",
+  "Work with us · Become a partner ↗",
+  "Colabora con nosotros · Hazte socio ↗",
+  "与我们合作 · 成为合作伙伴 ↗",
+  "一緒に働こう · パートナーになる ↗"
  ]
 ]

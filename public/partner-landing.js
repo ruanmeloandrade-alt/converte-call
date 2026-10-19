@@ -1,0 +1,9 @@
+'use strict';
+(()=>{
+ const net=document.querySelector('#partner-net'),count=document.querySelector('#partner-count'),range=document.querySelector('#partner-count-range');if(!net||!count)return;
+ const cents=()=>Math.round(Number(net.value)*100),money=value=>new Intl.NumberFormat(document.documentElement.lang||'pt-BR',{style:'currency',currency:'BRL'}).format(value/100);
+ function render(){const base=cents(),volume=Number(count.value);if(!Number.isSafeInteger(base)||base<1||base>10000000||!Number.isInteger(volume)||volume<1||volume>500)return;const first=Math.floor(base*80/100),renew=Math.floor(base*50/100);for(const output of document.querySelectorAll('[data-first]'))output.textContent=money(first*Number(output.dataset.first));for(const output of document.querySelectorAll('[data-renew]'))output.textContent=money(renew*Number(output.dataset.renew));document.querySelector('#partner-first-total').textContent=money(first*volume);document.querySelector('#partner-renew-total').textContent=money(renew*volume);range.value=String(volume);for(const button of document.querySelectorAll('[data-partner-count]'))button.setAttribute('aria-pressed',String(Number(button.dataset.partnerCount)===volume));}
+ net.addEventListener('input',render);count.addEventListener('input',render);range.addEventListener('input',()=>{count.value=range.value;render();});for(const button of document.querySelectorAll('[data-partner-count]'))button.addEventListener('click',()=>{count.value=button.dataset.partnerCount;render();});document.addEventListener('cc:site-language',render);
+ const params=new URLSearchParams(location.search);for(const link of document.querySelectorAll('[data-partner-register]')){const url=new URL(link.href);for(const key of ['ref','utm_source','utm_medium','utm_campaign','utm_content','utm_term'])if(params.has(key))url.searchParams.set(key,params.get(key).slice(0,200));link.href=url.pathname+url.search;}
+ render();
+})();

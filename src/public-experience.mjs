@@ -1,6 +1,10 @@
 import {readFileSync} from 'node:fs';
 import {latestRelease} from './release-uploads.mjs';
 const files={
+ '/seja-parceiro':['partner-landing.html','text/html'],
+ '/trabalhe-conosco':['partner-landing.html','text/html'],
+ '/partner-landing.css':['partner-landing.css','text/css'],
+ '/partner-landing.js':['partner-landing.js','text/javascript'],
  '/trial-guarantee.css':['trial-guarantee.css','text/css'],
  '/sales-i18n.js':['sales-i18n.js','text/javascript'],
  '/sales-locales.json':['sales-locales.json','application/json'],

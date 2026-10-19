@@ -607,3 +607,12 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Padronizado “7 dias” nos CTAs, FAQ, rodapé, garantia, selo, rótulos acessíveis, página de parceiros e termos. Traduções também usam 7 em vez de sete/seven/siete/七.
 - Sem mudança do prazo ou das regras do teste. Testes da garantia, cinco idiomas e jornada pública download/Android passaram.
 - Arquivos alterados nesta padronização: public/sales.html, public/sales-locales.json, public/partners.html, public/terms.html, test/sales-languages.browser.mjs e docs/CODEX_STATUS.md.
+
+## Landing pública de parceiros — 2026-10-18
+- Nova landing /seja-parceiro, também acessível por /trabalhe-conosco. Identidade escura da campanha, percentuais 80%/50%, público da parceria, ferramentas reais, três passos de ativação, FAQ e CTAs de cadastro.
+- Botão “Trabalhe conosco · Seja parceiro” adicionado ao rodapé da página principal. Área operacional /partners preservada.
+- Regras extraídas de src/partners.mjs: primeira compra 80%, renovações 50%, base líquida após taxas confirmadas, retenção de 15 dias. Solicitações de saque/repasse conforme portal existente. Nenhuma estimativa de taxa do processador criada.
+- Simulador editável com 50, 100 e 120 clientes e quantidade personalizada de 1 a 500. Exemplo declarado de R$ 25 líquidos por pagamento, não um preço de plano nem rendimento garantido. Calcula comissão em centavos, arredondada por pagamento como no backend. Cada cenário discrimina primeira compra e ciclo de renovação pago.
+- Seleção de cinco idiomas reutilizada. Motor de tradução mantém o título próprio de cada página e o idioma nos links de cadastro/portal. Referências e UTMs preservadas. Cadastro next=partners agora oferece botão para /partners após criação da conta, sem alterar autenticação ou ativar a parceria automaticamente.
+- Validação: cenários/cálculos, alteração de base/quantidade, truncamento por centavo, links/rodapé, FAQ, tradução integral e ausência de escrita no simulador; desktop/mobile. Fluxo real em banco temporário: criar conta, entrar no portal e ativar parceria explicitamente passou. Jornada pública e teste dos cinco idiomas da página principal também passaram.
+- Arquivos: public/partner-landing.html, public/partner-landing.css, public/partner-landing.js, public/sales.html, public/sales.css, public/sales-locales.json, public/sales-i18n.js, public/partners.html, public/setup.js, src/public-experience.mjs, test/partner-landing.browser.mjs e docs/CODEX_STATUS.md. Sem dependências, alterações de comissão ou ZIP.

@@ -1,4 +1,5 @@
 'use strict';
+const partnerNext=new URLSearchParams(location.search).get('next')==='partners';
 const mobileNext=new URLSearchParams(location.search).get('next')==='app';
 const referralCode=new URLSearchParams(location.search).get('ref')||'',fragment=location.hash.slice(1),initial=location.pathname==='/setup',form=document.querySelector('#setup'),status=document.querySelector('#status');
 history.replaceState(null,'',location.pathname);
@@ -15,6 +16,6 @@ form.addEventListener('submit',async e=>{
   form.reset();form.hidden=true;
   if(j.role==='admin'){sessionStorage.setItem('ccAdminSession',j.accessToken);location.assign('/admin');return;}
   status.textContent='Conta criada! Seu teste termina em '+new Date(j.license.expiresAt).toLocaleString('pt-BR')+'. Guarde seu e-mail e senha para entrar no Converte Call.';
-  const next=document.createElement('a');next.className='button';next.href=mobileNext?'/account/app':'/download';next.textContent=mobileNext?'Entrar no aplicativo web →':'Instalar extensão →';status.after(next);
+  const next=document.createElement('a');next.className='button';next.href=partnerNext?'/partners':mobileNext?'/account/app':'/download';next.textContent=partnerNext?'Ativar minha área de parceiro →':mobileNext?'Entrar no aplicativo web →':'Instalar extensão →';status.after(next);
  }catch(error){status.textContent=error.message;button.disabled=false;}
 });
