@@ -602,3 +602,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Removida a paleta clara roxa/verde da referência. Escala do medidor, números, selo e detalhes dos cards agora seguem as cores do site. Mantidos selo grande sobreposto, inclinações, sete cards expansíveis, medidor e cinco idiomas.
 - Testes da garantia e da página multilíngue passaram; revisão visual desktop/mobile concluída.
 - Arquivos alterados: public/trial-guarantee.css, public/sales.html, test/trial-guarantee.browser.mjs e docs/CODEX_STATUS.md. Escopo restrito à identidade visual da garantia.
+
+## Prazo do teste sempre em algarismo — 2026-10-18
+- Padronizado “7 dias” nos CTAs, FAQ, rodapé, garantia, selo, rótulos acessíveis, página de parceiros e termos. Traduções também usam 7 em vez de sete/seven/siete/七.
+- Sem mudança do prazo ou das regras do teste. Testes da garantia, cinco idiomas e jornada pública download/Android passaram.
+- Arquivos alterados nesta padronização: public/sales.html, public/sales-locales.json, public/partners.html, public/terms.html, test/sales-languages.browser.mjs e docs/CODEX_STATUS.md.
