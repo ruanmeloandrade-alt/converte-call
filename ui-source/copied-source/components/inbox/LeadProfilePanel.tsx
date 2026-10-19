@@ -11,6 +11,7 @@ import { setLeadKeepFiles } from "@/lib/crm-arquivos.functions";
 import { Archive } from "lucide-react";
 import { CreateGroupFromLeadDialog } from "./CreateGroupFromLeadDialog";
 import { supabase } from "@/integrations/supabase/client";
+import {LeadSalesPanel,isSaleLabel} from "./LeadSalesPanel";
 import { Lead360Section } from "@/components/crm/Lead360Section";
 import { listProductCatalogs } from "@/lib/products.functions";
 
@@ -519,7 +520,7 @@ export function LeadProfilePanel({
  {group.toUpperCase()}
  </div>
  <div className="space-y-2">
- {fields.map((f) => (
+ {fields.filter(f=>!isSaleLabel(f.label)||["select","multiselect"].includes(f.type)).map((f) => (
  <FieldRow key={f.key} field={f} value={data[f.key]?? ""} products={productOptions} onChange={(v) => update(f.key, v)} />
  ))}
  </div>
@@ -531,6 +532,7 @@ export function LeadProfilePanel({
  </div>
  )}
 
+ <LeadSalesPanel leadId={leadId}/>
  {/* Visão 360º: empresa, produtos, formulários, arquivos, tarefas e IA */}
  <div className="-mx-4 border-t" style={{ borderColor: "var(--chat-divider)" }}>
  <Lead360Section leadId={leadId} />

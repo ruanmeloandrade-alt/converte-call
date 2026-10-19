@@ -18,7 +18,7 @@
     },
     {
       "path": "legacy\\crm.funis-de-venda.legacy.tsx",
-      "sha256": "24a074fde0e3e5b6d3e19ff50d79d6b2181daaa2af090a11a5def70d5fa32db7",
+      "sha256": "30211b0fa02c63c6fb6b9073773916a99e33bd87f71d86810d3ecac72f8747e0",
       "platformAdapted": true
     },
     {
@@ -53,7 +53,7 @@
     },
     {
       "path": "components\\inbox\\LeadProfilePanel.tsx",
-      "sha256": "c02779531f1cdd1c55de69e7df0d2e26f376c1abe02d28c040cf86885fadd479",
+      "sha256": "0411d5e2c8a03e554942d370c68857590075067d076fe1a2165a7d6b12973586",
       "platformAdapted": true
     },
     {
@@ -63,7 +63,7 @@
     },
     {
       "path": "components\\dashboard\\DashboardV4ConfigurableBoard.tsx",
-      "sha256": "33f357c168cb8779e77d588c3c862efab8f94cc842ec9e5453bf09fe9caae292",
+      "sha256": "f36c1a5eaf2e19d5d709267d8e50c57da1276c08f77ce7c7cefea0caabde87c9",
       "platformAdapted": true
     },
     {
@@ -360,17 +360,22 @@
       "path": "lib\\text-vars.ts",
       "sha256": "4402ace26f439e75345726f052334948bac3d95c9f2026e60de41c899e821048",
       "platformAdapted": false
+    },
+    {
+      "path": "components\\inbox\\LeadSalesPanel.tsx",
+      "sha256": "e83854bfecbc379df2bcf6fb7b6639e239f3946d21679dd99674b22cd77cacb7",
+      "platformAdapted": false
     }
   ],
   "platformAdaptations": [
-    "routes\\crm.publicos.tsx",
-    "legacy\\crm.automacoes.legacy.tsx",
-    "legacy\\crm.funis-de-venda.legacy.tsx",
-    "legacy\\crm.produtos.legacy.tsx",
     "routes\\fluxo-trabalho.tsx",
+    "routes\\crm.publicos.tsx",
+    "legacy\\crm.funis-de-venda.legacy.tsx",
+    "legacy\\crm.automacoes.legacy.tsx",
     "components\\automations\\ConversationAgentsPanel.tsx",
-    "routes\\crm.estoque.tsx",
+    "legacy\\crm.produtos.legacy.tsx",
     "routes\\pedidos.tsx",
+    "routes\\crm.estoque.tsx",
     "routes\\crm.empresas.tsx",
     "components\\inbox\\LeadProfilePanel.tsx",
     "components\\inbox\\InboxPage.legacy.tsx",

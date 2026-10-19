@@ -69,7 +69,9 @@
     "setLeadCustomFieldValue",
     "listLeads",
     "normalizeEvolutionDeliveryStatus",
-    "isEvolutionConnectionClosedMessage"
+    "isEvolutionConnectionClosedMessage",
+    "getLeadSales",
+    "saveLeadSale"
   ],
   "@/lib/companies.functions": [
     "listCompanies",

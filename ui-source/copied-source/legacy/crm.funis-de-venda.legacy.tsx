@@ -1,3 +1,4 @@
+import {LeadSalesPanel,isSaleLabel} from "@/components/inbox/LeadSalesPanel";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
@@ -1825,7 +1826,7 @@ function QuickEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edição rápida</DialogTitle>
         </DialogHeader>
@@ -1889,6 +1890,7 @@ function QuickEditDialog({
               {selectedFunnel?.stages.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
+          {lead&&<LeadSalesPanel leadId={lead.id}/>}
           {/* Campos Personalizados */}
           <div className="space-y-3 pt-2 border-t border-border/50">
             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Campos Personalizados</p>
@@ -1902,7 +1904,7 @@ function QuickEditDialog({
               <p className="text-xs text-muted-foreground">Nenhum campo personalizado criado nesta conta.</p>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                {customFieldDefs.map((cf) => (
+                {customFieldDefs.filter(cf=>!isSaleLabel(cf.name)||["select","multiselect"].includes(cf.fieldType)).map((cf) => (
                   <div key={cf.id} className="space-y-1.5">
                     <label className="text-xs font-medium text-muted-foreground">{cf.name}</label>
                     {cf.fieldType === "select" && cf.options.length > 0 ? (

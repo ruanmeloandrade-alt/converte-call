@@ -64,6 +64,7 @@ import {
 import { cn } from "@/lib/utils";
 
 type Props = {
+  saleCount?: number;
   metrics: DashboardMetricsResponse;
   leads: DrilldownLead[];
   liveData?: DashboardV4LiveResponse;
@@ -195,7 +196,7 @@ export function DashboardV4ConfigurableBoard(props: Props) {
     switch (metricId) {
       case "executive.revenue": return { label: "Receita", value: formatCurrency(revenue), note: "leads ganhos", icon: CircleDollarSign, onClick: () => drilldownByIds("Receita ganha", "Leads que compõem a receita", wonLeads.map((lead) => lead.lead_id)) };
       case "executive.leads": return { label: "Leads", value: leads.length.toLocaleString("pt-BR"), note: metrics.period_label, icon: Users, onClick: () => drilldownByIds("Leads", "Base do período", leads.map((lead) => lead.lead_id)) };
-      case "executive.sales": return { label: "Vendas", value: wonLeads.length.toLocaleString("pt-BR"), note: "ganhas no CRM", icon: Trophy, onClick: () => drilldownByIds("Vendas ganhas", "Leads ganhos no período", wonLeads.map((lead) => lead.lead_id)) };
+      case "executive.sales": return { label: "Vendas", value: (props.saleCount ?? wonLeads.length).toLocaleString("pt-BR"), note: "vendas registradas", icon: Trophy, onClick: () => drilldownByIds("Vendas ganhas", "Leads ganhos no período", wonLeads.map((lead) => lead.lead_id)) };
       case "executive.conversion": return { label: "Conversão", value: formatPercent(conversion), note: "lead → venda", icon: Target, onClick: () => drilldownByIds("Conversão comercial", "Base usada no cálculo", leads.map((lead) => lead.lead_id)) };
       case "executive.open_leads": return { label: "Leads em aberto", value: openLeads.length.toLocaleString("pt-BR"), note: "negócios ativos", icon: BriefcaseBusiness, onClick: () => drilldownByIds("Leads em aberto", "Negócios ativos no período", openLeads.map((lead) => lead.lead_id)) };
       case "executive.pipeline_value": return { label: "Valor em pipeline", value: formatCurrency(pipelineValue), note: "negócios em aberto", icon: CircleDollarSign, onClick: () => drilldownByIds("Valor em pipeline", "Negócios que compõem o pipeline", openLeads.map((lead) => lead.lead_id)) };

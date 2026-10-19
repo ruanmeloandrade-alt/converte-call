@@ -1,4 +1,5 @@
 import {objectivePixelOptions} from './pixel-leads.mjs';
+import {leadSales} from './lead-sales.mjs';
 import {normalizeProduct, prepareOrder, applyOrderStock} from './product-policy.mjs';
 import {workflowRPC} from './workflow-adapter.mjs';
 import { Core } from "./database.mjs";
@@ -35,6 +36,11 @@ async function rpc(store, ws, module, name, arg = {}) {
   const now = () => (/* @__PURE__ */ new Date()).toISOString();
   if(module==='@/lib/workflow.functions'){const response=workflowRPC(d,name,p,Core);if(response.changed)store.put(ws,d);return response.result;}
   switch (name) {
+    case 'getLeadSales':
+      return leadSales(d,name,p);
+    case 'saveLeadSale': {
+      const result=leadSales(d,name,p);store.put(ws,d);return result;
+    }
     case "getActiveWorkspace":
       result = { workspace: { id: d.workspaceId || "local-workspace", name: "Meu espa\xE7o" }, workspaceId: d.workspaceId || "local-workspace" };
       break;
