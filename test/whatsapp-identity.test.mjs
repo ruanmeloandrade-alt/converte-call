@@ -6,7 +6,7 @@ import {join} from 'node:path';
 import {createApp} from '../src/server.mjs';
 import {digest} from '../src/security.mjs';
 import {messageIdentity} from '../src/whatsapp-identity.mjs';
-import {inboxContext} from '../src/inbox-context.mjs';
+import {inboxRPC} from '../src/inbox.mjs';
 
 const pn='5522991234567@s.whatsapp.net',lid='123456789123456@lid';
 function fixture(){
@@ -43,5 +43,23 @@ test('recovery reprocesses previously discarded webhooks without replaying bots 
   for(const row of [outgoing,reply,unresolved])store.run("INSERT INTO inbound(id,workspace_id,payload,status,created_at) VALUES(?,?,?,'done',?)",row.id,f.ws,row.payload,new Date().toISOString());
   f.app.worker.repairIdentities();const d=store.get(f.ws);assert.equal(d.leads.find(l=>l.id===lead.id).name,'Nara');assert.equal(d.leads.length,2);assert.equal(d.inboxEvents.length,3);assert.equal(store.one("SELECT count(*) n FROM jobs WHERE type='incoming'").n,0);assert.equal(store.one("SELECT count(*) n FROM jobs WHERE type='inbox-history'").n,1);
   f.app.worker.repairIdentities();assert.equal(store.get(f.ws).leads.length,2);assert.equal(store.one("SELECT count(*) n FROM jobs WHERE type='inbox-history'").n,1);assert(store.one('SELECT id FROM inbox_messages WHERE id=?',digest(f.ws+':sent')));
+ }finally{await f.close();}
+});
+
+test('one phone has one Inbox conversation with both histories, while assigned-only users see only authorized messages',async()=>{
+ const f=fixture();try{
+  const store=f.app.store,user={id:'owner',workspace_id:f.ws},member={id:'member',workspace_id:f.ws};
+  for(const u of [user,member])store.run('INSERT INTO users VALUES(?,?,?,?,?,?)',u.id,u.id+'@fixture.test','x','x',f.ws,new Date().toISOString());
+  store.run('INSERT INTO team_members VALUES(?,?,?,?,1)',user.id,f.ws,'owner',store.vault.seal(['inbox','allLeads']));store.run('INSERT INTO team_members VALUES(?,?,?,?,1)',member.id,f.ws,'member',store.vault.seal(['inbox']));
+  store.mutate(f.ws,d=>{
+   const base={funnelId:d.funnels[0].id,stage:d.funnels[0].stages[0].name,createdAt:'2026-01-01T00:00:00.000Z',custom:{}};
+   d.leads.push({...base,id:'old',name:'Nome antigo',phone:'552291234567',assigneeId:member.id},{...base,id:'current',name:'Nome WhatsApp',phone:'5522991234567'});
+   d.inboxEvents.push({id:'a',type:'message',leadId:'old',direction:'in',text:'Histórico antigo',at:'2026-01-01T01:00:00.000Z'},{id:'b',type:'message',leadId:'current',direction:'in',text:'Histórico novo',at:'2026-01-01T02:00:00.000Z'});
+  });
+  const call=(u,name,input={})=>inboxRPC(store,u,f.app.evolution,name,input);
+  let list=await call(user,'listLeadConversations');assert.equal(list.conversations.length,1);assert.equal(list.conversations[0].id,'current');assert.equal(list.conversations[0].unreadCount,2);
+  assert.deepEqual((await call(user,'listLeadActivities',{leadId:'current'})).activities.map(a=>a.text),['Histórico antigo','Histórico novo']);
+  assert.deepEqual((await call(member,'listLeadActivities',{leadId:'old'})).activities.map(a=>a.text),['Histórico antigo']);await assert.rejects(call(member,'listLeadActivities',{leadId:'current'}),/Cliente não encontrado/);
+  await call(user,'markLeadConversationRead',{leadId:'current'});list=await call(user,'listLeadConversations');assert.equal(list.conversations[0].unreadCount,0);assert.equal(store.get(f.ws).leads.length,2,'CRM deals and all history remain stored');
  }finally{await f.close();}
 });
