@@ -4,6 +4,9 @@ import {readFileSync} from 'node:fs';
 import {release} from './releases.mjs';
 import {latestRelease} from './release-uploads.mjs';
 const files={
+ '/signup-modal.js':['signup-modal.js','text/javascript'],
+ '/signup-modal.css':['signup-modal.css','text/css'],
+ '/download-landing.css':['download-landing.css','text/css'],
  '/browser-download.js':['browser-download.js','text/javascript'],
  '/edge':['edge.html','text/html'],
  '/firefox':['firefox.html','text/html'],

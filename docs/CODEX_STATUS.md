@@ -737,3 +737,12 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Removida da página /access toda a seção “Acessos pelo site / Administração e parceiros”, incluindo os dois links e informativos. Rotas administrativas e de parceiros permanecem intactas.
 - Escopo: public/access.html, public/download.css e este registro. Nenhuma alteração de autenticação, download, backend ou dados.
 - Validação: rolagem das páginas /access e /download em 1440, 1024, 768, 390 e 320 px; sem sobreposição da introdução sobre vídeo, sem overflow horizontal e sem links dos portais na página de acesso.
+
+
+## Cadastro na própria landing e novo download — 2026-10-19
+- CTAs de teste grátis abrem um único dialog nativo na landing, somente após clique. Cadastro rápido com nome, e-mail, WhatsApp, Instagram opcional e senha; usa POST /v1/auth/register existente. Sucesso leva a /download?registered=1; erro conserva os campos e oferece nova tentativa. Sem alteração de conta/licença/backend de cadastro.
+- Modal fecha por botão, Esc e fundo, restaura foco, bloqueia rolagem da página de fundo e mostra/oculta senha. Português, inglês, espanhol, chinês e japonês acompanham o seletor da landing. Links /register preservados como fallback sem JavaScript e para navegação direta.
+- /download reformulado: progresso conta/instalação/acesso, arquivo com versão real consultada no servidor, seletor Chrome/Android, atalhos Edge/Firefox/iOS, demonstração visual do menu de extensões, passos de instalação, FAQ e suporte. Identidade existente preservada com base escura e acentos roxos. CSS novo isolado da página /access; sem portais administrativos.
+- Redirecionamento após baixar com conta criada permanece /access?downloaded=1. Download consulta versão atual e mantém integridade e tratamento de erro anteriores. Instalação web mobile preservada.
+- Validação: todos os CTAs de cadastro abrem o modal sem trocar de página; cadastro real em banco descartável > download real > acesso > recuperação passou. Cinco larguras (1440, 1024, 768, 390 e 320 px), modal sem overflow, fechamento e idioma inglês conferidos. Registros dos testes são fixtures, sem criação de contas de produção.
+- Arquivos: public/sales.html, public/signup-modal.js, public/signup-modal.css, public/download.html, public/download.js, public/download-landing.css, src/public-experience.mjs (somente mapa de assets), test/signup-entry.browser.mjs, test/quick-signup.browser.mjs e este documento. Sem dependências novas.
