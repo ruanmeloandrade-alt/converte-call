@@ -3,6 +3,13 @@ import {mobileRevision} from './mobile-release.mjs';
 import {readFileSync} from 'node:fs';
 import {latestRelease} from './release-uploads.mjs';
 const files={
+ '/ios':['ios.html','text/html'],
+ '/device.js':['device.js','text/javascript'],
+ '/legal.css':['legal.css','text/css'],
+ '/legal-footer.css':['legal-footer.css','text/css'],
+ '/assinatura':['subscription-terms.html','text/html'],
+ '/cookies':['cookies.html','text/html'],
+ '/plataformas':['platforms.html','text/html'],
  '/seja-parceiro':['partner-landing.html','text/html'],
  '/trabalhe-conosco':['partner-landing.html','text/html'],
  '/partner-landing.css':['partner-landing.css','text/css'],

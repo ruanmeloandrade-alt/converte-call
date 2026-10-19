@@ -1,4 +1,5 @@
  'use strict';
+if(window.CCDevice?.ios)location.replace('/ios');
 const $=s=>document.querySelector(s),params=new URLSearchParams(location.search);let release;
 const safe=['ref','utm_source','utm_medium','utm_campaign','utm_content','utm_term'];for(const id of ['register-link','android-register']){const a=$('#'+id),url=new URL(a.href);for(const k of safe)if(params.has(k))url.searchParams.set(k,params.get(k).slice(0,200));a.href=url.pathname+url.search;}
 const existingAccount=params.get('existing')==='1';if(existingAccount){$('#android-register').hidden=true;$('#register-link').href='/access';$('#register-link').textContent='Ver como entrar na minha conta ↗';document.querySelector('.download-copy .fine').textContent='Use o mesmo e-mail e senha. Sua conta e suas conexões continuam preservadas.';document.querySelector('#chrome-tutorial .install-steps li:last-child b').textContent='Abra a extensão e entre na sua conta';document.querySelector('#chrome-tutorial .install-steps li:last-child>span').textContent='Clique no quebra-cabeça do Chrome, fixe o Converte Call e abra a extensão. Entre com seu e-mail e senha já cadastrados. Você não precisa criar outra conta.';}
