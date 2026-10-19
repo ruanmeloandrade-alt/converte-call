@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {createApp} from '../src/server.mjs';import {mobileBaseline} from '../src/mobile-release.mjs';import {zip} from './fixtures/release-zip.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync,readFileSync,writeFileSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {createApp} from '../src/server.mjs';import {mobileBaseline} from '../src/mobile-release.mjs';import {zip} from './fixtures/release-zip.mjs';
 test('only an authenticated administrator publishes a ZIP; Chrome and Edge use its exact bytes after restart',async()=>{
  const dir=mkdtempSync(join(tmpdir(),'cc-authority-')),master='a'.repeat(64);let app=createApp({dir,master,bootstrap:'authority'});await new Promise(r=>app.server.listen(0,'127.0.0.1',r));let base='http://127.0.0.1:'+app.server.address().port;
  const request=async(path,body,token)=>{const r=await fetch(base+path,{method:body?'POST':'GET',headers:{...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined});return {status:r.status,...await r.json()};};
@@ -10,4 +10,8 @@ test('only an authenticated administrator publishes a ZIP; Chrome and Edge use i
 });
 test('mobile baseline survives a different deploy candidate without becoming an administrator publication',()=>{
  const dir=mkdtempSync(join(tmpdir(),'cc-baseline-')),store={dir};try{const initial=mobileBaseline(store,{seed:'a'.repeat(64),js:'original runtime',css:'original styles'});const deploy=mobileBaseline(store,{seed:'b'.repeat(64),js:'unpublished runtime',css:'unpublished styles'});assert.deepEqual(deploy,initial);assert.equal(deploy.js,'original runtime');}finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test('adopting the release policy preserves the existing mobile baseline instead of activating a historical ZIP',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'cc-baseline-migration-')),store={dir};try{const initial=mobileBaseline(store,{seed:'a'.repeat(64),js:'working runtime',css:'working styles'}),file=join(dir,'mobile-runtime-baseline.json'),legacy=JSON.parse(readFileSync(file,'utf8'));delete legacy.publicationAtPin;writeFileSync(file,JSON.stringify(legacy));const migrated=mobileBaseline(store,undefined,{version:'0.14.2',sha256:'b'.repeat(64)});assert.equal(migrated.js,initial.js);assert.equal(migrated.css,initial.css);assert.equal(migrated.publicationAtPin,'b'.repeat(64));assert.equal(mobileBaseline(store).publicationAtPin,'b'.repeat(64));}finally{rmSync(dir,{recursive:true,force:true});}
 });
