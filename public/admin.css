@@ -13,3 +13,5 @@
 .exchange-grid{display:grid;grid-template-columns:minmax(140px,1fr) minmax(140px,1fr) auto;gap:18px;align-items:end;margin:22px 0}.exchange-grid label{margin:0}@media(max-width:700px){.exchange-grid{grid-template-columns:1fr}}
 
 :root{--accent:#b22f78;--brand-gradient:linear-gradient(120deg,#a83cdb,#d63b91 54%,#f49339)}
+
+.coupon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px;align-items:end;margin:24px 0}.coupon-grid [hidden]{display:none}.coupon-grid input[name=code]{text-transform:uppercase}

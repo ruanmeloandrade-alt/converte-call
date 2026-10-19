@@ -6,3 +6,5 @@
 .currency-step .primary{background:#7352e7;color:#fff;font-weight:700;border:0;cursor:pointer}.currency-step .primary:hover{background:#6141ce}.currency-step .pix{background:transparent;color:#665481;border:0;cursor:pointer}
 
 :root{--accent:#b22f78;--brand-gradient:linear-gradient(120deg,#a83cdb,#d63b91 54%,#f49339)}
+
+.coupon-box{border-top:1px solid #dedbe8;padding-top:20px;margin-top:20px}.coupon-box label{font-weight:650;font-size:14px}.coupon-entry{display:flex;gap:8px;margin-top:10px}.coupon-entry input{width:100%;min-width:0;padding:11px;border:1px solid #d6d0e2;border-radius:10px;text-transform:uppercase}.coupon-entry button{border:0;border-radius:10px;background:var(--accent);color:white;padding:10px 16px;cursor:pointer}.coupon-entry button:disabled{opacity:.6;cursor:wait}.coupon-breakdown p{display:flex;justify-content:space-between;gap:12px}.coupon-breakdown strong{color:#21765a}[hidden]{display:none!important}
