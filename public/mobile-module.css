@@ -1,1 +1,9 @@
-body[data-cc-webapp] footer{display:none}body[data-cc-webapp]{overscroll-behavior-x:contain}body[data-cc-webapp] button,body[data-cc-webapp] a{touch-action:manipulation}
+body[data-cc-webapp] footer{display:none}body[data-cc-webapp]{overscroll-behavior-x:contain}body[data-cc-webapp] button,body[data-cc-webapp] a{touch-action:manipulation}/* Android thread actions stay in normal flow; parent navigation remains reachable. */
+body[data-cc-webapp] .cc-inbox-thread-header{height:auto!important;min-height:64px;flex-wrap:wrap;padding:12px 14px;gap:10px}
+body[data-cc-webapp] .cc-inbox-thread-header>.cc-inbox-automation{flex:0 0 100%;order:10;margin-top:4px}
+body[data-cc-webapp] .cc-inbox-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+body[data-cc-webapp] .cc-inbox-buttons>button{min-height:40px;padding:9px 12px;font-size:12px;line-height:1.4;white-space:normal}
+body[data-cc-webapp] .cc-inbox-buttons>button:last-child{grid-column:1/-1}
+body[data-cc-webapp] .cc-inbox-picker{position:relative;top:auto;right:auto;margin-top:10px;min-width:0;width:100%;max-height:35dvh;overflow-y:auto}
+body[data-cc-webapp] a[title="Abrir conversa no WhatsApp Web/Desktop"],body[data-cc-webapp] span[title="Sem número de WhatsApp neste lead. Adicione o número do lead pra abrir o WhatsApp aqui."]{display:none!important}
+body[data-cc-webapp] [data-chat-surface]{min-width:0}
