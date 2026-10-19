@@ -4,7 +4,7 @@ import {announcedRelease,latestRelease,inspectZip,compareVersion} from './releas
 
 const digest=value=>createHash('sha256').update(value).digest('hex'),caches=new WeakMap();let localRevision;
 const bundledVersion=JSON.parse(readFileSync(new URL('../extension/manifest.json',import.meta.url),'utf8')).version;
-const localFiles=['../public/device.js','../public/install.js','../public/app.webmanifest','../public/employee.html','../public/mobile.html','../public/mobile.js','../public/mobile.css','../public/mobile-update.js','../public/mobile-recordings.js','../public/mobile-module.css','../public/web-bridge.js','../public/app-sw.js','./contact-identity.mjs','../extension/slim/runtime.js','../extension/slim/runtime.css'];
+const localFiles=['../public/account-security.js','../public/device.js','../public/install.js','../public/app.webmanifest','../public/employee.html','../public/mobile.html','../public/mobile.js','../public/mobile.css','../public/mobile-update.js','../public/mobile-recordings.js','../public/mobile-module.css','../public/web-bridge.js','../public/app-sw.js','./contact-identity.mjs','../extension/slim/runtime.js','../extension/slim/runtime.css'];
 const runtimeFiles=new Set(['slim/mobile-runtime.json','slim/runtime.js','slim/runtime.css']);
 function state(store){
  if(!localRevision)localRevision=digest(Buffer.concat(localFiles.map(file=>readFileSync(new URL(file,import.meta.url)))));

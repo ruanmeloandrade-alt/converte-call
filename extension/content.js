@@ -1,5 +1,7 @@
 (() => {
  'use strict';
+ if(/Android/i.test(navigator.userAgent))return;
+ if(location.hostname==='convertecall.pro'||location.hostname.endsWith('.convertecall.pro'))return;
  const ID='converte-call-native-root',old=document.getElementById(ID);
  if(old)return;
  const host=document.createElement('div');host.id=ID;host.style.cssText='all:initial!important;position:fixed!important;inset:0!important;z-index:2147483646!important;pointer-events:none!important;';

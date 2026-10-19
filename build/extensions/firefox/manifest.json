@@ -1,0 +1,145 @@
+{
+  "manifest_version": 3,
+  "name": "Converte Call",
+  "version": "0.15.0",
+  "description": "CRM no WhatsApp Web, funis, bots, agentes, projetos Kanban, UTMs e gravação local.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "downloads",
+    "alarms",
+    "notifications",
+    "identity",
+    "clipboardWrite"
+  ],
+  "action": {
+    "default_title": "Abrir controles do Converte Call",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "background": {
+    "scripts": [
+      "browser-compat.js",
+      "credential-vault.js",
+      "internal-config.js",
+      "core.js",
+      "core-v4.js",
+      "notification-catalog.js",
+      "notification-center.js",
+      "call-fields.js",
+      "services.js",
+      "portal-services.js",
+      "cloud-sync.js",
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://meet.google.com/*",
+        "https://*.zoom.us/*",
+        "https://app.zoom.us/*"
+      ],
+      "js": [
+        "browser-compat.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "panel.html",
+        "app.css",
+        "app.js",
+        "surface.html",
+        "surface.js",
+        "surface.css",
+        "icons/*",
+        "workspace.js",
+        "native.js",
+        "core.js",
+        "release.js",
+        "release.css",
+        "builders.js",
+        "slim-catalog.js",
+        "surface-extra.js",
+        "v4.js",
+        "v4.css",
+        "fields.js",
+        "core-v4.js",
+        "slim-holidays.js",
+        "slim.html",
+        "slim/*",
+        "internal-config.js",
+        "v5.js",
+        "v5.css",
+        "surface-v5.js",
+        "surface-inbox.js",
+        "v6.js",
+        "v6.css",
+        "notification-catalog.js",
+        "call-fields.js",
+        "v7.js",
+        "v7.css",
+        "v8.js",
+        "v8.css",
+        "v9.js",
+        "v9.css",
+        "locale-catalog.js",
+        "i18n.js",
+        "billing-catalog.js",
+        "v10.js",
+        "v10.css",
+        "v11.js",
+        "v11.css",
+        "recording-analysis.js",
+        "surface-controls.js",
+        "browser-compat.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline'; frame-src 'self' https://www.youtube-nocookie.com"
+  },
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "addon@convertecall.pro",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "authenticationInfo",
+          "personallyIdentifyingInfo",
+          "personalCommunications",
+          "websiteContent",
+          "websiteActivity",
+          "financialAndPaymentInfo"
+        ]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  }
+}

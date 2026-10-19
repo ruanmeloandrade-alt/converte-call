@@ -5,7 +5,7 @@
  try{
   let sharedIdentity;try{if(window.parent!==window)sharedIdentity=window.parent.CCWebIdentity;}catch{}
   const identity=sharedIdentity?.membership?structuredClone(sharedIdentity):await request('/v1/account/license'),mobile=location.pathname==='/account/module',module=new URLSearchParams(location.search).get('module')||'inbox',permissions={lead:'inbox',inbox:'inbox',funnel:'pipeline',projects:'projects',dashboard:'pipeline',audiences:'clients',bots:'automations',agents:'automations',products:'erp',orders:'erp',inventory:'erp',suppliers:'erp',brain:'brain'};
-  if(!window.CCDevice.mobile&&identity.license.status!=='admin'){location.replace('/access');return;}
+  if(!window.CCDevice.webApp&&identity.license.status!=='admin'){location.replace('/access');return;}
   if(mobile){document.body.dataset.ccWebapp='true';if(!permissions[module]||identity.membership.role!=='owner'&&!identity.membership.permissions.includes(permissions[module]))throw Error('Seu usuário não tem permissão para este módulo.');document.title=(module==='inbox'?'Inbox':'Seu espaço')+' · Converte Call';}else if(identity.membership.role!=='member'||!identity.membership.permissions.includes('inbox'))throw Error('Este inbox é exclusivo dos funcionários com permissão. O titular utiliza o WhatsApp Web.');
   const {uniqueLeadCards}=await import('/account/contact-identity.js');
   const listeners=new Set(),cache={ccAccountView:identity};let workspacePromise=null,workspaceUntil=0;const readWorkspace=()=>{if(!workspacePromise||Date.now()>workspaceUntil){workspaceUntil=Date.now()+1000;workspacePromise=request('/v1/workspace').then(r=>r.workspace).catch(error=>{workspacePromise=null;throw error;});}return workspacePromise.then(d=>structuredClone(d));};
