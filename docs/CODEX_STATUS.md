@@ -712,3 +712,10 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 ## Correção urgente: entrada do cadastro — 2026-10-19
 - CTAs de teste grátis da landing passam diretamente a /register. Fluxo /download?existing=1 deixa de substituir o destino do botão de criar conta por /access. Página de acesso ganha link explícito de novo cadastro. Login e criação ficam separados. Nenhuma alteração de cadastro, teste ou cobrança no backend.
 - Arquivos: public/sales.html, public/download.js, public/access.html, test/signup-entry.browser.mjs e este documento. Validação de navegador cobre CTA inicial, formulário de cadastro, destino do CTA em download existing=1 e link de novo cadastro no acesso.
+
+
+## Fluxo de venda rápido e recuperação de senha — 2026-10-19
+- Site impede a sobreposição do painel de versões antigas da própria extensão nas páginas de venda/cadastro/download/acesso. Não abre modal nem navega sem clique. Cadastro pode ser fechado pelo link Fechar.
+- Novo cadastro rápido pede nome, e-mail, WhatsApp, Instagram opcional e senha; sem data de nascimento inventada. Perfil antigo permanece compatível. Após criar a conta segue automaticamente para /download?registered=1; baixar segue para /access?downloaded=1 com instruções de entrada na extensão. Conta já criada não é pedida novamente.
+- Mostrar/ocultar senha e link de recuperação nas interfaces web. Redefinição por token aleatório com hash no servidor, validade de 15 minutos e consumo único; altera hash da senha e revoga sessões. Resposta não revela se o e-mail existe. Envio transacional utiliza Gmail autorizado do administrador; sem remetente conectado, informa indisponibilidade e suporte, sem fingir envio.
+- Migração 28: password_resets. Teste cobre cadastro rápido sem nascimento, Instagram, link único/expirado e revogação. Browser cobre entrada por CTA, retirada do painel antigo, criação real em banco isolado, download, navegação para acesso e formulário de recuperação.

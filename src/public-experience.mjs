@@ -3,6 +3,12 @@ import {mobileRevision} from './mobile-release.mjs';
 import {readFileSync} from 'node:fs';
 import {latestRelease} from './release-uploads.mjs';
 const files={
+ '/site-guard.js':['site-guard.js','text/javascript'],
+ '/password-fields.js':['password-fields.js','text/javascript'],
+ '/password-fields.css':['password-fields.css','text/css'],
+ '/esqueci-senha':['password-recovery.html','text/html'],
+ '/redefinir-senha':['password-recovery.html','text/html'],
+ '/password-recovery.js':['password-recovery.js','text/javascript'],
  '/ios':['ios.html','text/html'],
  '/device.js':['device.js','text/javascript'],
  '/legal.css':['legal.css','text/css'],

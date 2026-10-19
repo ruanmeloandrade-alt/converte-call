@@ -32,7 +32,7 @@ export function startAccountTrial(store,userId,workspaceId,profile,now=Date.now(
 export function accountProfile(store,userId){const row=store.one('SELECT profile FROM account_profiles WHERE user_id=?',userId);return row?store.vault.open(row.profile):null;}
 
 export function updateAccountProfile(store,userId,input){
- const previous=accountProfile(store,userId)||{},profile=validateProfile({...previous,...input});
+ const previous=accountProfile(store,userId)||{},profile=previous.registrationMode==='quick'?validateQuickProfile({...previous,...input}):validateProfile({...previous,...input});
  for(const key of ['company','position','website','country','city','address','postalCode']){
   const value=String(input[key]??previous[key]??'').trim();if(value.length>500)throw fail('Informação de perfil muito longa.');profile[key]=value;
  }
@@ -45,4 +45,11 @@ export function updateAccountProfile(store,userId,input){
   store.run('DELETE FROM account_phones WHERE user_id=?',userId);
   for(const [slot,number] of [['primary',profile.whatsapp],['secondary',profile.whatsappSecondary]])if(number)store.run('INSERT INTO account_phones VALUES(?,?,?)',phoneKey(store,number),userId,slot);
  });return profile;
+}
+
+export function validateQuickProfile(input){
+ const name=String(input.name||[input.firstName,input.lastName].filter(Boolean).join(' ')).trim(),parts=name.split(/\s+/),instagram=String(input.instagram||'').trim().replace(/^@/,'');
+ if(!name||name.length>160)throw fail('Informe seu nome.');
+ if(instagram&&!/^[A-Za-z0-9._]{1,30}$/.test(instagram))throw fail('Informe somente o @ do Instagram, sem link.');
+ return {firstName:parts.shift(),lastName:parts.join(' '),whatsapp:validPhone(input.whatsapp),whatsappSecondary:null,instagram:instagram?'@'+instagram:'',registrationMode:'quick'};
 }
