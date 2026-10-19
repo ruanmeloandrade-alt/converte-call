@@ -656,3 +656,15 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - ZIP 0.14.1 gerado com manifesto de compatibilidade web e hashes de runtime/estilo validados. Pacote inspecionado contra traversal, corrupção e arquivos sensíveis; arquivo do usuário em outputs/Converte-Call-v0.14.1.zip. Nenhuma credencial alterada.
 - Validações: recuperação de conta normal em teste Android (503 e arquivo de módulo abortado), Funil/Inbox/Projetos/Dashboard/Cérebro/Bots após recuperação, jornada Android completa, atualização automática, publicação/ZIP e permissões passaram. Página de parceiros e Funil com cadastros conferidos na sessão real pelo navegador.
 - Arquivos: extension/cloud-sync.js, extension/manifest.json, public/employee.html, public/mobile-module.css, public/mobile.js, public/web-bridge.js, src/mobile-release.mjs, src/public-experience.mjs, src/server.mjs, test/cloud-sync.browser.mjs, test/mobile-recovery.browser.mjs, test/static-response.test.mjs e docs/CODEX_STATUS.md.
+
+
+## Identidade WhatsApp e recuperação de contatos — 2026-10-18
+- Conferência na conta real encontrou dois registros chamados Ruan Barone com telefones diferentes; isso não autoriza unir contatos pelo nome. Nenhum cadastro ou histórico foi apagado.
+- Webhooks com somente LID passam a registrar o contato e a mensagem, sem inventar telefone. PN/remoteJidAlt/senderPn confirmados vinculam identificadores ao mesmo cadastro; senderPn de envio não identifica o destinatário. Grupos/status continuam excluídos.
+- Mensagens enviadas pela conta não copiam pushName do remetente para o cliente. Respostas recebidas atualizam somente nomes automáticos ainda controlados pelo WhatsApp, preservando nomes editados.
+- Contexto da extensão normaliza o telefone com o mesmo critério do worker e não usa coincidência de nome quando um número diferente está explícito.
+- Recuperação automática limitada a 100 webhooks já concluídos por lote, com progresso persistido e criptografado por workspace. Não consome eventos pendentes ao vivo. Reprocessa mensagens anteriormente descartadas e solicita nova importação de histórico, sem repetir bots. Nome legado só é corrigido com evidência do envio salvo, preservando o nome anterior.
+- Sem nova tabela, dependência ou credencial. Metadados compatíveis nos leads: whatsappJids, whatsappNameSource, whatsappPushName, whatsappPreviousName. Progresso na tabela secrets existente. Telefones e identidades de outros workspaces permanecem isolados.
+- Limite: sem PN confirmado, o cadastro fica sem telefone; automações de envio aguardam número identificável. Não há inferência por nome nem fusão de números distintos. Confirmação específica da Nara depende de identificar o número e verificar seu evento real após publicação.
+- Validação: 55 testes do servidor passaram; regressão direcionada de recuperação/nome e agente HTTP passou após conferir também a evidência criptografada independente da sincronização local.
+- Arquivos: src/whatsapp-identity.mjs, src/worker.mjs, src/inbox-context.mjs, test/whatsapp-identity.test.mjs, test/inbox-context.test.mjs e docs/CODEX_STATUS.md. Correção no servidor; ZIP 0.14.1 existente permanece compatível.

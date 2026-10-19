@@ -13,5 +13,7 @@ test('native conversation resolves persisted phone, creates once, uses actual in
  assert.equal(JSON.parse(request.input).lastReceived,'Vocês atendem aos sábados?');assert(request.input.includes('8h às 12h'));assert(draft.text.startsWith('Sim!'));assert.equal(app.store.get(ws).inboxEvents.length,1,'draft cannot send');assert.equal(app.store.get(ws).smartReplies.length,1);
  const other=app.store.createWorkspace();app.store.mutate(other,d=>d.leads.push({id:'other-private-lead',name:'Outro',phone:'5522999999999'}));assert.equal((await call({leadId:'other-private-lead'})).status,404);
  assert.equal((await call({name:'Sem número identificável',ensure:true})).status,404,'never invent a phone or bind ambiguous names');
+ const normalized=await call({name:'Contato real',phone:'+55 (22) 9123-4567',ensure:true});assert.equal(normalized.lead.id,leadId,'Brazil digit variants reuse the contact');
+ const distinct=await call({name:'Contato real',phone:'5511998765432',ensure:true});assert.notEqual(distinct.lead.id,leadId,'an explicit different phone never falls back to a matching name');
  }finally{await app.close();rmSync(dir,{recursive:true,force:true});}
 });

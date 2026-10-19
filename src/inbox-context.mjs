@@ -1,20 +1,23 @@
+import {canonicalPhone} from './contact-identity.mjs';
+import {whatsappJid} from './whatsapp-identity.mjs';
 import {randomUUID} from 'node:crypto';
 import {requirePermission,requireLead,requireOwner} from './teams.mjs';
 import {providerText} from './ai.mjs';
 import {knowledge,guardOutgoing} from './brain.mjs';
 const fail=(status,message)=>Object.assign(Error(message),{status});
-const phone=value=>String(value||'').replace(/\D/g,'');
+const phone=value=>canonicalPhone(value)||'';
 
 export function inboxContext(store,user,input={}){
  requirePermission(store,user,'inbox');const ws=user.workspace_id;let d=store.get(ws),lead;
  if(input.leadId)lead=d.leads.find(l=>l.id===input.leadId);
  else{
   requireOwner(store,user);
-  const jid=String(input.remoteJid||''),number=phone(input.phone||(/^\d{8,15}@s\.whatsapp\.net$/.test(jid)?jid.split('@')[0]:''));
+  const jid=whatsappJid(input.remoteJid),number=phone(input.phone||(/^\d{8,15}@s\.whatsapp\.net$/.test(jid)?jid.split('@')[0]:''));
   if(number)lead=d.leads.find(l=>phone(l.phone)===number);
+  if(!lead&&jid)lead=d.leads.find(l=>(l.whatsappJids||[]).includes(jid));
   if(!lead&&jid){const event=d.inboxEvents.find(e=>e.remoteJid===jid);if(event)lead=d.leads.find(l=>l.id===event.leadId);}
-  if(!lead&&input.name){const matching=d.leads.filter(l=>l.name===input.name&&phone(l.phone)&&d.inboxEvents.some(e=>e.leadId===l.id));if(matching.length===1)lead=matching[0];}
-  if(!lead&&/^\d{8,15}$/.test(number)&&input.ensure===true){const funnel=d.funnels[0];if(!funnel?.stages?.length)throw fail(409,'Crie o primeiro funil para cadastrar o contato.');lead={id:randomUUID(),name:String(input.name||number).slice(0,160),phone:number,funnelId:funnel.id,stage:funnel.stages[0].name,status:'open',custom:{},createdAt:new Date().toISOString(),source:'WhatsApp'};store.mutate(ws,data=>data.leads.push(lead));store.event(ws,{type:'lead',leadId:lead.id,name:lead.name,phone:number,source:'WhatsApp'});d=store.get(ws);}
+  if(!lead&&!number&&!jid&&input.name){const matching=d.leads.filter(l=>l.name===input.name&&phone(l.phone)&&d.inboxEvents.some(e=>e.leadId===l.id));if(matching.length===1)lead=matching[0];}
+  if(!lead&&/^\d{8,15}$/.test(number)&&input.ensure===true){const funnel=d.funnels[0];if(!funnel?.stages?.length)throw fail(409,'Crie o primeiro funil para cadastrar o contato.');lead={id:randomUUID(),name:String(input.name||number).slice(0,160),phone:number,whatsappJids:jid?[jid]:[],funnelId:funnel.id,stage:funnel.stages[0].name,status:'open',custom:{},createdAt:new Date().toISOString(),source:'WhatsApp'};store.mutate(ws,data=>data.leads.push(lead));store.event(ws,{type:'lead',leadId:lead.id,name:lead.name,phone:number,source:'WhatsApp'});d=store.get(ws);}
  }
  if(!lead)throw fail(404,'Ainda não identifiquei esta conversa. Aguarde a sincronização ou abra uma conversa com número identificável.');
  requireLead(store,user,lead);
