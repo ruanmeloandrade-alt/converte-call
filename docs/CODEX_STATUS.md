@@ -729,3 +729,11 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Corrigido contrato real de mensagens internas de projetos que retornava 500; lista filtrada ao destinatário/workspace, envio exclusivo do titular e leitura isolada. Não reinsere eventos de protocolo do WhatsApp no Inbox.
 - Validação: 61 testes de servidor passaram. Chrome e Edge executáveis reais com pacote minificado, login, módulos e mutação CRM persistida sem 500; Firefox executável real com addon temporário, login e mutação CRM persistida. Lint Firefox: 0 erros, 34 avisos de bibliotecas/templates existentes; requer revisão para marketplace. Browser web variantes, sessões revogáveis, cadastro rápido, checkout, site mobile/carrossel e atualização silenciosa passaram. Aparelhos físicos Android/iOS e assinatura marketplace não validados.
 - Sem novas dependências de produção. Fontes preexistentes não rastreadas de integrações foram preservadas fora da entrega. Relação completa de arquivos acompanha o relatório de entrega.
+
+
+## Página de acesso/download: rolagem e portais — 2026-10-19
+- Introdução deixa de usar position:sticky no grid compartilhado de download/acesso; permanecia presa ao container inteiro e avançava sobre a linha do tutorial em vídeo. Agora acompanha a rolagem no próprio espaço.
+- Tutorial em vídeo recebe card próprio com espaçamento e limites responsivos. Links auxiliares de acesso organizados em linhas distintas.
+- Removida da página /access toda a seção “Acessos pelo site / Administração e parceiros”, incluindo os dois links e informativos. Rotas administrativas e de parceiros permanecem intactas.
+- Escopo: public/access.html, public/download.css e este registro. Nenhuma alteração de autenticação, download, backend ou dados.
+- Validação: rolagem das páginas /access e /download em 1440, 1024, 768, 390 e 320 px; sem sobreposição da introdução sobre vídeo, sem overflow horizontal e sem links dos portais na página de acesso.
