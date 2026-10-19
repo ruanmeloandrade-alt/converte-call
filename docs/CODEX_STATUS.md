@@ -596,3 +596,9 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Medidor com escala e botão “Tente aumentar” funcionando: animação breve do ponteiro e confirmação de custo zero. CTA continua o fluxo de teste gratuito; sem prometer reembolso.
 - Novas mensagens traduzidas nos cinco idiomas. Testes de navegador da garantia e da página multilíngue passaram, incluindo proporção/sobreposição do selo, cores, cards, interação do medidor, CTA com referência de campanha e ausência de overflow mobile. Capturas desktop/mobile revisadas.
 - Arquivos alterados: public/sales.html, public/sales.css, public/trial-guarantee.css, public/sales.js, public/sales-locales.json, src/public-experience.mjs, test/trial-guarantee.browser.mjs, test/sales-languages.browser.mjs e docs/CODEX_STATUS.md. Demais seções, indicadores, backend e ZIP preservados.
+
+## Garantia com a identidade visual Converte Call — 2026-10-18
+- Aplicada a identidade existente da campanha: fundo #09090f com brilho discreto, painéis escuros, texto claro, degradê violeta/magenta/laranja do título principal e CTA branco com brilho lateral.
+- Removida a paleta clara roxa/verde da referência. Escala do medidor, números, selo e detalhes dos cards agora seguem as cores do site. Mantidos selo grande sobreposto, inclinações, sete cards expansíveis, medidor e cinco idiomas.
+- Testes da garantia e da página multilíngue passaram; revisão visual desktop/mobile concluída.
+- Arquivos alterados: public/trial-guarantee.css, public/sales.html, test/trial-guarantee.browser.mjs e docs/CODEX_STATUS.md. Escopo restrito à identidade visual da garantia.
