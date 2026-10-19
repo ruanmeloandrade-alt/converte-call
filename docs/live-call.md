@@ -1,0 +1,11 @@
+# Copiloto de call — 0.15.3
+
+A captura auxiliar identifica pausas acústicas (480 ms após atividade de voz, mínimo de 900 ms de trecho) e fecha o áudio em até 5 segundos. O analisador local não faz identificação de locutor nem garante compreensão semântica; a IA recebe a última transcrição, um histórico textual limitado e o contexto do negócio. Áudio compartilhado tem preferência para a assistência; a gravação principal continua guardando as fontes escolhidas, incluindo microfone. Sem áudio compartilhado, o sinal é misturado e o prompt não deve presumir quem falou.
+
+O contrato pede ready, clientQuote literal, uma ou duas frases prontas para o usuário falar (até 320 caracteres), situação, justificativa curta e saída válida do bloco. ready:false, evidência ausente, citações inventadas, respostas excessivas e comandos genéricos ao vendedor não são exibidos. Falas repetidas não substituem o conselho por uma cópia. Chamadas sem workflow usam contexto; conteúdo explicitamente marcado como aula/vídeo mantém seu papel próprio.
+
+Há um processamento ativo e somente o trecho pendente mais recente. A gravação completa permanece independente dessa fila. Isso evita acumular conselhos antigos quando o provedor demora. Novas respostas com origem há mais de 10 segundos não são apresentadas; pausa/encerramento impedem publicação tardia ou ação de workflow. O limite de 5 segundos é da captura, não uma garantia de latência total: transcrição e geração continuam dependendo de rede/provedor. O cliente mantém o modelo e as credenciais que escolheu.
+
+O painel começa compacto, ajusta sua altura ao conteúdo, prioriza a fala sugerida e permite expandir contexto/roteiro. O polling compara sugestão, sequência, fase, erros e estado da gravação, atualizando a janela sem reabri-la. Pausar, marcar e encerrar continuam disponíveis no modo compacto. O mesmo layout atende painel encaixado e janela destacada.
+
+Validações: test/live-advice.test.mjs cobre pausas, silêncio, limite, contrato, fila e encerramento. test/live-call.browser.mjs captura WebM real do microfone de teste do navegador, usa adaptadores de provedor com respostas HTTP controladas, persiste no servidor de teste e observa duas sugestões no HUD sem reabertura. A qualidade semântica com uma conta/provedor real e participantes reais não foi medida; as falas nas imagens são fixtures de teste.
