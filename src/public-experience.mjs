@@ -1,6 +1,8 @@
 import {readFileSync} from 'node:fs';
 import {latestRelease} from './release-uploads.mjs';
 const files={
+ '/sales-i18n.js':['sales-i18n.js','text/javascript'],
+ '/sales-locales.json':['sales-locales.json','application/json'],
  '/globe-land.json':['globe-land.json','application/json'],
  '/access':['access.html','text/html'],
  '/story-portraits.png':['story-portraits.png','image/png'],
