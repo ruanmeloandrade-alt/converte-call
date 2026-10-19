@@ -5,6 +5,8 @@ const files={
  '/sales-locales.json':['sales-locales.json','application/json'],
  '/globe-land.json':['globe-land.json','application/json'],
  '/access':['access.html','text/html'],
+ '/access-tutorial.js':['access-tutorial.js','text/javascript'],
+ '/access-tutorial.json':['access-tutorial.json','application/json'],
  '/story-portraits.png':['story-portraits.png','image/png'],
  '/':['sales.html','text/html'],'/sales':['sales.html','text/html'],'/sales.css':['sales.css','text/css'],'/sales.js':['sales.js','text/javascript'],'/experience-base.css':['experience-base.css','text/css'],'/brand.svg':['brand.svg','image/svg+xml'],
  '/download':['download.html','text/html'],'/download.css':['download.css','text/css'],'/download.js':['download.js','text/javascript'],'/install.js':['install.js','text/javascript'],
@@ -14,5 +16,5 @@ const files={
 for(const id of [1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,20,21,22,23,25,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60])files['/client-logos/'+id+'.png']=['client-logos/'+id+'.png','image/png'];
 export function publicExperience(req,res,path,store){if(req.method!=='GET')return false;
  if(path==='/download/info'){const r=latestRelease(store);res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify({version:r.version,filename:r.filename,sha256:r.sha256,downloadUrl:'/downloads/'+r.filename}));return true;}
- const file=files[path];if(!file)return false;res.writeHead(200,{'Content-Type':file[1]+(file[1].startsWith('image/')?'':'; charset=utf-8'),'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...(path==='/account/sw.js'?{'Service-Worker-Allowed':'/account/'}:{}),'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'"});res.end(readFileSync(new URL('../public/'+file[0],import.meta.url)));return true;
+ const file=files[path];if(!file)return false;res.writeHead(200,{'Content-Type':file[1]+(file[1].startsWith('image/')?'':'; charset=utf-8'),'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...(path==='/account/sw.js'?{'Service-Worker-Allowed':'/account/'}:{}),'Content-Security-Policy':`default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src 'self'${path==='/access'?' https://www.youtube-nocookie.com':''}; frame-ancestors 'none'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'`});res.end(readFileSync(new URL('../public/'+file[0],import.meta.url)));return true;
 }
