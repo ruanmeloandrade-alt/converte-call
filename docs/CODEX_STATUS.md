@@ -707,3 +707,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Referências consultadas: LGPD https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm ; CDC https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm ; instalação web Apple https://support.apple.com/pt-br/guide/iphone/iphea86e5236/ios . Preservadas as condições comerciais e o programa de parceiros já existentes.
 - Sem dependência nova, migração de banco, exclusão de dados ou alteração de credenciais. Arquivos não rastreados preexistentes em ui-source/copied-server-source foram preservados fora da entrega.
 - Validação: build do runtime e 58 testes de servidor; Android percorreu todos os módulos, Inbox, gravação e isolamento; checkout/planos/equipe/parceiros passou. Novo teste usa conta comum em período de teste (não admin), login Android/iPhone/iPad, Dashboard com eventos recebidos via HTTP real e restrições de funcionário. Números e identidade nas capturas de teste são fixtures, nunca dados alegados da produção. Sem aparelho iPhone físico/Safari real nesta validação: perfis móveis simulados em Chromium.
+
+
+## Correção urgente: entrada do cadastro — 2026-10-19
+- CTAs de teste grátis da landing passam diretamente a /register. Fluxo /download?existing=1 deixa de substituir o destino do botão de criar conta por /access. Página de acesso ganha link explícito de novo cadastro. Login e criação ficam separados. Nenhuma alteração de cadastro, teste ou cobrança no backend.
+- Arquivos: public/sales.html, public/download.js, public/access.html, test/signup-entry.browser.mjs e este documento. Validação de navegador cobre CTA inicial, formulário de cadastro, destino do CTA em download existing=1 e link de novo cadastro no acesso.
