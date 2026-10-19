@@ -626,3 +626,10 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Upload web preserva CSRF, permissão calls, isolamento e expiração existente de 48 horas; MP4 validado por cabeçalho e MIME. Sem novas dependências.
 - Validação: 51 testes de servidor passaram; Android em Chromium com viewport/toque/UA móveis passou por Inbox, funil sem duplicata, Projetos, Públicos, Cérebro, Dashboard, bots, catálogo, estoque, pedidos, fornecedores, agenda, faculdade, tracking e assinatura. Microfone com dispositivo de teste, envio real, prévia, importação MP4 e bloqueio de usuário sem calls passaram. Regressão da extensão Inbox, pipeline WebM e jornada pública passaram.
 - Landing de parceiros conferida em https://convertecall.pro/seja-parceiro: botão no rodapé, cenário de 120 clientes e valores publicados corretos.
+
+## Revisão do site público mobile — 2026-10-18
+- Títulos reduzidos para a largura móvel, cabeçalho sem disputa entre marca, idioma e CTA; em 320 px os controles ficam em linha própria. Grade dos depoimentos usa minmax(0,1fr), corrigindo transbordamento do telefone em telas estreitas.
+- Retirado apenas no mobile o wordmark CONVERTE CALL inferior. Marca principal preservada. Rodapé em coluna, links legíveis e CTA de parceiros ocupando uma linha inteira com altura mínima de 52 px.
+- Logos: todas as imagens das duas cópias carregam ao aproximar a seção, antes do início da animação. Eliminada observação individual de SVG em movimento, que deixava a segunda linha vazia. Falhas de arquivo usam o nome da marca na mesma posição; dimensões iguais e retomada do loop preservadas.
+- Validação: 320/360/393/430/768 px, limites de títulos e CTAs, cabeçalho sem sobreposição, idiomas, loop nas duas direções em quatro posições, ida/volta pela página e arquivo de logo indisponível. Testes de logos e cinco idiomas passaram.
+- Arquivos: public/sales.css, public/sales.js, test/sales-mobile.browser.mjs e docs/CODEX_STATUS.md.
