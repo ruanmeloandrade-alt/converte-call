@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import {announcedRelease,latestRelease,inspectZip} from './release-uploads.mjs';
 
 const digest=value=>createHash('sha256').update(value).digest('hex'),caches=new WeakMap();let localRevision;
-const localFiles=['../public/mobile.html','../public/mobile.js','../public/mobile.css','../public/mobile-update.js','../public/mobile-recordings.js','../public/mobile-module.css','../public/web-bridge.js','../public/app-sw.js','./contact-identity.mjs','../extension/slim/runtime.js','../extension/slim/runtime.css'];
+const localFiles=['../public/employee.html','../public/mobile.html','../public/mobile.js','../public/mobile.css','../public/mobile-update.js','../public/mobile-recordings.js','../public/mobile-module.css','../public/web-bridge.js','../public/app-sw.js','./contact-identity.mjs','../extension/slim/runtime.js','../extension/slim/runtime.css'];
 const runtimeFiles=new Set(['slim/mobile-runtime.json','slim/runtime.js','slim/runtime.css']);
 function state(store){
  if(!localRevision)localRevision=digest(Buffer.concat(localFiles.map(file=>readFileSync(new URL(file,import.meta.url)))));

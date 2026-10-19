@@ -7,3 +7,5 @@ body[data-cc-webapp] .cc-inbox-buttons>button:last-child{grid-column:1/-1}
 body[data-cc-webapp] .cc-inbox-picker{position:relative;top:auto;right:auto;margin-top:10px;min-width:0;width:100%;max-height:35dvh;overflow-y:auto}
 body[data-cc-webapp] a[title="Abrir conversa no WhatsApp Web/Desktop"],body[data-cc-webapp] span[title="Sem número de WhatsApp neste lead. Adicione o número do lead pra abrir o WhatsApp aqui."]{display:none!important}
 body[data-cc-webapp] [data-chat-surface]{min-width:0}
+
+.cc-module-loading{margin:24px;padding:24px;border:1px solid #e2d8ef;border-radius:16px;background:#faf7ff;color:#30213f;font:14px/1.7 system-ui,sans-serif}.cc-module-loading strong{display:block;font-size:17px}.cc-module-loading button{min-height:44px;padding:10px 18px;border:1px solid #bfa5dc;border-radius:12px;color:#573176;background:white;cursor:pointer}
