@@ -1,0 +1,12 @@
+import test from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import vm from'node:vm';
+test('live call assistance produces and saves contextual advice with no workflow or client and survives optional field errors',async()=>{
+ for(const withWorkflow of [false,true]){
+  const persisted=[],writes=[],requests=[];let latest={id:'call',transcript:'',segments:[]};
+  class Recorder{constructor(){this.state='inactive';this.mimeType='audio/webm';}start(){this.state='recording';}stop(){this.state='inactive';this.ondataavailable?.({data:new Blob(['audio'])});this.onstop?.();}}
+  const a={meta:{id:'call',liveAI:true,contentType:'call',workflowPurpose:'call',workflow:withWorkflow?[{id:'node',captureEnabled:true}]:[],workflowNode:withWorkflow?'node':undefined,lead:withWorkflow?'client':'',events:[]}};
+  const context=vm.createContext({Blob,MediaRecorder:Recorder,MediaStream:class{constructor(tracks){this.tracks=tracks;}},console,structuredClone,setTimeout:()=>1,clearTimeout(){},active:a,elapsed:()=>15000,put:async meta=>writes.push(structuredClone(meta)),chrome:{storage:{local:{get:async()=>({converteCallWorkspace:{providers:{ai:'openai'},analyses:[latest]}})}},runtime:{sendMessage:async m=>{if(m.type==='portal-ai-text'){requests.push(m.input);return {ok:true,text:JSON.stringify({suggestion:'Qual é a sua prioridade para resolver isso?',situation:'Dúvida do cliente',reason:'Aprofundar o contexto',nextNode:'invented'})};}if(m.type==='call-fields-sync')return {ok:false,error:'Campo indisponível'};if(m.type==='call-analysis-commit'){latest=structuredClone(m.next);persisted.push(latest);return {ok:true};}throw Error('Unexpected '+m.type);}}}});
+  vm.runInContext(readFileSync(new URL('../extension/recording-analysis.js',import.meta.url),'utf8'),context);vm.runInContext(readFileSync(new URL('../extension/ai-media.js',import.meta.url),'utf8'),context);
+  vm.runInContext("transcribeBlob=async()=> 'O cliente precisa melhorar seu atendimento.';parseCallJSON=JSON.parse;startLiveAI(active,[{}]);active.live.recorder.stop();",context);await vm.runInContext('aiPipeline',context);
+  assert.equal(a.meta.livePhase,'listening');assert.match(a.meta.liveAdvice.suggestion,/prioridade/);assert.equal(a.meta.liveAdvice.nextNode,withWorkflow?'node':null);assert.equal(latest.suggestions.length,1);assert.match(requests[0].input,/cliente precisa/);assert.match(requests[0].instructions,/Sem workflow/);if(withWorkflow)assert.equal(a.meta.fieldExtractionError,'Campo indisponível');
+ }
+});

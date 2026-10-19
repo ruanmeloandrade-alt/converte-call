@@ -331,7 +331,7 @@ function Rank({index}:{index:number}) { return <div className="flex h-8 w-8 item
 function StatCell({label,value}:{label:string;value:string}) { return <div><div className="text-[9px] uppercase text-muted-foreground">{label}</div><div className="font-mono text-[11px] font-semibold">{value}</div></div>; }
 function TableHeader({cols,labels}:{cols:string;labels:string[]}) { return <div className={cn("grid gap-3 border-b border-border/60 pb-2 text-[9px] font-bold uppercase tracking-widest text-muted-foreground",cols)}>{labels.map((label)=><span key={label}>{label}</span>)}</div>; }
 function EmptyState({title,text}:{title:string;text:string}) { return <div className="rounded-2xl border border-dashed border-border bg-muted/10 p-5 text-center"><Package className="mx-auto h-5 w-5 text-muted-foreground"/><div className="mt-2 text-xs font-semibold">{title}</div><p className="mt-1 text-[10px] leading-5 text-muted-foreground">{text}</p></div>; }
-function formatCurrency(value:number) { return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}).format(value); }
+function formatCurrency(value:number) { return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:2}).format(value); }
 function formatMaybeCurrency(value:number|null) { return value==null?"—":formatCurrency(value); }
 function formatMaybeNumber(value:number|null) { return value==null?"—":Math.round(value).toLocaleString("pt-BR"); }
 function formatPercent(value:number) { return `${(value*100).toFixed(1).replace(".",",")}%`; }

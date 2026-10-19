@@ -1,6 +1,7 @@
 'use strict';
 window.CCWorkspace={
  key:'converteCallWorkspace',
+ async refresh(){const result=await chrome.runtime.sendMessage({channel:'cc',type:'workspace-read'});if(!result?.ok)throw Error(result?.error||'Não foi possível atualizar seus dados.');return CCCore.migrate(result.workspace);},
  async get(){const all=await chrome.storage.local.get(['converteCallWorkspace','converteCallPreview']);if(all.converteCallWorkspace){const d=CCCore.migrate(all.converteCallWorkspace);return d;}
   const old=all.converteCallPreview;const workflow=old?.workflow||[
    {id:'s1',name:'Abertura e acordo',time:'3',goal:'Alinhar o objetivo da reunião.',questions:'O que você espera resolver nesta conversa?',material:'',criteria:'Objetivo confirmado.'},
