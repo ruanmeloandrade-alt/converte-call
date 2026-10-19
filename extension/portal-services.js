@@ -3,12 +3,12 @@ globalThis.CCPortal=(()=>{
  const origin=()=>new URL(CCDeployment.accountUrl).origin;
  let refreshing;
  async function refresh(){if(refreshing)return refreshing;refreshing=(async()=>{const refreshToken=await CCCredentials.get('ccRefreshToken');if(!refreshToken)throw Object.assign(Error('Entre na sua conta do Converte Call.'),{status:401});const r=await request('/v1/auth/refresh',{method:'POST',anonymous:true,body:{refreshToken}});await CCCredentials.set('ccAccountToken',r.accessToken);return r.accessToken;})().finally(()=>{refreshing=null;});return refreshing;}
- async function request(path,{method='GET',body,anonymous=false,retry=true,headers={}}={}){
+ async function request(path,{method='GET',body,anonymous=false,retry=true,headers={},timeoutMs}={}){
   if(!CCDeployment.accountUrl)throw Error('O acesso à conta ainda não foi configurado nesta versão.');
   if(!await chrome.permissions.contains({origins:[origin()+'/*']}))throw Error('Autorize a conexão com sua conta primeiro.');
   let accessToken=anonymous?null:await CCCredentials.get('ccAccountToken');if(!anonymous&&!accessToken)accessToken=await refresh();
-  const r=await fetch(origin()+path,{method,headers:{...headers,...(!anonymous?{Authorization:'Bearer '+accessToken}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(path.startsWith('/v1/ai/')?120000:55000)}),data=await r.json().catch(()=>({}));
-  if(r.status===401&&!anonymous&&retry){await refresh();return request(path,{method,body,anonymous,retry:false,headers});}
+  const r=await fetch(origin()+path,{method,headers:{...headers,...(!anonymous?{Authorization:'Bearer '+accessToken}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(timeoutMs||(path==='/v1/ai/credentials'?10000:path.startsWith('/v1/ai/')?120000:path.startsWith('/v1/auth/')||path==='/v1/account/license'?10000:30000))}),data=await r.json().catch(()=>({}));
+  if(r.status===401&&!anonymous&&retry){await refresh();return request(path,{method,body,anonymous,retry:false,headers,timeoutMs});}
   if(r.status===401){await CCCredentials.remove('ccAccountToken');await CCCredentials.remove('ccRefreshToken');}
   if(!r.ok)throw Object.assign(Error(data.error?.message||'Não foi possível acessar sua conta.'),{status:r.status});return data;
  }

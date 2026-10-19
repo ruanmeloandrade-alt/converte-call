@@ -65,7 +65,7 @@ async function handle(m,sender){
 }
 chrome.runtime.onMessage.addListener((m,sender,reply)=>{
  if(sender.id!==chrome.runtime.id||m?.target==='media-engine'||!m?.channel||m.channel!=='cc')return;
- handle(m,sender).then(reply,e=>reply({ok:false,error:e.message||'Não foi possível concluir a ação.'}));return true;
+ handle(m,sender).then(reply,e=>reply({ok:false,error:e.message||'Não foi possível concluir a ação.',status:Number.isInteger(e.status)?e.status:undefined}));return true;
 });
 chrome.action.onClicked.addListener(async tab=>{
  if(!tab.id)return;
