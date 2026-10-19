@@ -32,14 +32,14 @@ test('an already open sales download page downloads the newly published ADM ZIP,
    assert.equal(announcement.version,newest.info.version);
   };
   await checkDownload('#download-extension');
-  await page.getByRole('heading',{name:/Download iniciado/}).waitFor();
+  await page.getByRole('heading',{name:/Agora, instale/}).waitFor();
   newest=publish('9.0.2');
   await checkDownload('#download-again');
-  await page.route('**/download/info',r=>r.fulfill({status:503,body:'unavailable'}));
+  await page.route('**/download/info*',r=>r.fulfill({status:503,body:'unavailable'}));
   await page.locator('#download-again').click();
-  await page.locator('#tutorial-status').filter({hasText:'Clique em baixar para tentar novamente'}).waitFor();
+  await page.locator('#tutorial-status').filter({hasText:'Não foi possível consultar o download'}).waitFor();
   assert.equal(await page.locator('#download-again').isEnabled(),true);
-  await page.unroute('**/download/info');
+  await page.unroute('**/download/info*');
   await checkDownload('#download-again');
  }finally{await browser.close();await app.close();rmSync(dir,{recursive:true,force:true});}
 });
