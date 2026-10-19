@@ -642,3 +642,9 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Service worker aceita a versão nova automaticamente, atualiza sem cache do script e mantém a API fora do cache. Nenhum botão/aviso de atualização adicionado ao usuário.
 - Validação: upload real de três versões por API administrativa em banco temporário, entrega do módulo novo no app, preservação de rascunho e gravação, fallback para ZIP antigo e hash incorreto, sessão preservada e zero requisições/downloads ZIP no Android. O teste acelera apenas os intervalos de espera. Regressão final: oito testes de navegador (Android, atualizações, site, logos, mobile, idiomas e parceiros) passaram; testes de publicação e permissões passaram.
 - Arquivos: src/mobile-release.mjs, src/release-uploads.mjs, src/server.mjs, src/public-experience.mjs, public/mobile-update.js, public/mobile.html, public/mobile-recordings.js, public/app-sw.js, public/install.js, ui-source/build.mjs, extension/slim/mobile-runtime.json, test/mobile-updates.browser.mjs e docs/CODEX_STATUS.md. Sem nova dependência.
+
+## Desbloqueio de carregamento geral — 2026-10-18
+- Reproduzido no domínio o Funil permanecendo no estado de conexão, com recursos baixados novamente ao trocar de módulo. Site, landing de parceiros e módulos eram servidos sem compressão.
+- Entrega estática passa a negociar Brotli/Gzip, reaproveitar conteúdo comprimido por hash e responder 304 para código/estilo inalterados. HTML/revisão/sessões permanecem sem cache; políticas CSP e permissões preservadas.
+- Teste HTTP real conferiu descompressão byte a byte, negociação q=0, redução de transferência e 304 sem corpo. Dois testes de transporte/permissões passaram.
+- Arquivos: src/static-response.mjs, src/public-experience.mjs, src/server.mjs, test/static-response.test.mjs e docs/CODEX_STATUS.md.
