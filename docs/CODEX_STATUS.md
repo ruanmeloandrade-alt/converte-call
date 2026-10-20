@@ -774,3 +774,12 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Link de cadastro vem do servidor com dominio publico, removendo prefixo adm./admin.; nao usa mais location.origin do administrador.
 - Validacao: 76 testes nativos passaram; novos testes HTTP verificam autorizacao, isolamento, e-mail unico, login com nova senha, rejeicao da antiga, revogacao e preservacao do parceiro/assinatura. node --check public/admin.js passou. Sem nova dependencia ou migracao; verificacao visual em navegador nao executada nesta alteracao.
 - Arquivos: public/admin.html, public/admin.js, src/admin-accounts.mjs, src/server.mjs, test/admin-support.test.mjs e docs/CODEX_STATUS.md.
+
+
+## Resposta inteligente somente por clique - 2026-10-20 / candidato 0.15.4
+- A sincronizacao do contexto regenerava a resposta quando o painel anterior permanecia em reply. Abrir, trocar ou atualizar a conversa agora apenas sincroniza o contato/historico.
+- O clique explicito em Resposta inteligente transmite uma solicitacao de geracao consumida uma unica vez. Gerar outra sugestao continua manual. Resultado atrasado de outra conversa e descartado, sem inserir rascunho no chat atual.
+- Sem alteracao no envio de mensagens, bots, agentes, IA da call, backend ou textos/idiomas existentes. O Inbox React de app/mobile ja usa onClick para a resposta inteligente.
+- Validacao: 11 testes passaram, incluindo fonte e pacotes minificados Chrome/Edge/Firefox: nenhuma geracao ao abrir/sincronizar/trocar; uma por clique; contexto do contato atual; descarte de resposta atrasada. Testes de contexto real do Inbox e eventos internos Android preservados. Sem gasto de IA pessoal ou teste em conversa pessoal.
+- Arquivos: extension/content.js, extension/surface-inbox.js, extension/manifest.json; content.js, surface-inbox.js e manifest.json gerados em build/extensions/{chrome,edge,firefox}; test/smart-reply-trigger.test.mjs; docs/CODEX_STATUS.md.
+- Candidato 0.15.4 preparado para publicacao pelo administrador. Nao altera o ZIP publicado nem a baseline mobile, e nao substitui os envios 0.15.3 em analise nas lojas.
