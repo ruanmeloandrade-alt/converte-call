@@ -29,7 +29,7 @@ async function start(o,capturePromise=null){
   const audioTracks=tracks.filter(t=>t.kind==='audio');if(audioTracks.length){a.audioN=-100000;a.audioRecorder=new MediaRecorder(new MediaStream(audioTracks),{mimeType:'audio/webm;codecs=opus',audioBitsPerSecond:32000});a.audioRecorder.ondataavailable=e=>{if(e.data.size){const chunk={id:a.meta.id,n:a.audioN++,blob:e.data,role:'transcription'};a.queue=a.queue.then(()=>tx('chunks','readwrite',s=>s.put(chunk))).catch(error=>{a.writeError=error;});}};a.audioRecorder.start(4000);}
   a.recorder.onerror=e=>{a.writeError=e.error||Error('Falha na gravação.');stop(false).catch(()=>{});};
   if(display)display.getVideoTracks()[0].onended=()=>{if(active===a&&!a.stopping)stop(true).catch(()=>{});};
-  a.recorder.start(4000);startLiveAI(a,o.system&&display?.getAudioTracks().length?display.getAudioTracks():tracks.filter(t=>t.kind==='audio'),o.system&&display?.getAudioTracks().length?'shared-audio':'mixed');return state();
+  a.recorder.start(4000);if(o.liveAI&&!audioTracks.length){a.meta.livePhase='no-audio';a.meta.liveError='A call está sem áudio para a IA. Ative o microfone ou compartilhe o áudio da aba.';await put(a.meta);}else startLiveAI(a,audioTracks,mic&&display?.getAudioTracks().length?'mixed':display?.getAudioTracks().length?'shared-audio':'microphone');return state();
  }catch(e){closeInputs(a);if(active===a)active=null;if(e.name==='NotAllowedError'&&phase==='screen')throw Error('Captura cancelada ou compartilhamento não autorizado. Escolha a fonte e confirme Compartilhar.');throw Error(friendly(e));}finally{starting=false;}
 }
 async function stop(auto=false){

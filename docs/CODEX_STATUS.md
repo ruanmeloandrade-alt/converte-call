@@ -791,3 +791,15 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Contexto e caixa de mensagem sao conferidos antes/depois da IA. Troca de conversa descarta o resultado; rascunho existente ou digitado durante a geracao e preservado.
 - 26 testes passaram: fonte e distribuicoes minificadas Chrome/Edge/Firefox, permissao/origem/frame, geracao unica, rascunho sem painel/envio, preservacao de texto, descarte de resultado atrasado, contexto do Inbox e autoridade de publicacao. Teste de navegador existente atualizado, mas nao executado; nao foi usado Chrome para codificacao/testes, conforme instrucao do proprietario.
 - Arquivos adicionais: extension/services.js, services.js gerado nas 3 distribuicoes, test/native-smart-reply.test.mjs e test/native-controls.browser.mjs. extension/content.js foi ajustado para o fluxo direto.
+
+
+## Copiloto da call: 9 segundos e recuperacao de sugestoes - 2026-10-20 / candidato 0.15.5
+- Captura para a IA em trechos de 9 segundos, sem encerramento precoce por pausa curta. Preserva descarte de silencio/cliques e a fila limitada ao trecho mais recente.
+- Removido descarte automatico de sugestao que ultrapassava 10 segundos de transcricao/analise. Resultados continuam bloqueados depois de parar/pausar/trocar a call ou alterar o bloco do workflow.
+- A sugestao usa contexto local dos trechos processados e aparece antes de aguardar a gravacao do historico. Erro de historico nao impede uma sugestao valida; fica visivel no HUD. Historico continua real e os commits sao aguardados antes de encerrar o processamento do trecho.
+- IA recebe a mistura de microfone e audio compartilhado usada na gravacao, evitando ignorar um lado da conversa. Captura sem audio mostra motivo no HUD. Nao modifica permissoes, chaves ou provedores.
+- Evidencia citada pela IA tolera variacoes de caixa, espacos e pontuacao, mantendo verificacao contra palavras presentes na transcricao. Audio misturado nao exige identificacao de locutor para ajudar; segue sem workflow e sem inventar condicoes comerciais.
+- Registros HTTP recentes do servico mostraram transcricao/geracao respondendo 200, sem ler conversas ou expor chaves. Isso nao equivale a validar a call pessoal do proprietario.
+- Validacao: 108 testes nativos passaram, incluindo fonte e pacotes Chrome/Edge/Firefox. Regressoes cobrem resposta apos 24 s, historico lento/falhando, duas fontes de audio, ausencia de audio, 9 s de captura, evidencia normalizada, sem workflow, descarte apos parada e controles da resposta inteligente preservados. Sem Chrome para testes, chamada pessoal, aparelho fisico ou nova chamada paga ao provedor nesta validacao.
+- Arquivos: extension/{ai-media.js,recording-analysis.js,offscreen.js,recorder.html,surface-controls.js,surface.js,manifest.json}; respectivos arquivos gerados em build/extensions/{chrome,edge,firefox}; test/live-advice.test.mjs, test/live-advice-recovery.test.mjs e docs/CODEX_STATUS.md.
+- Pacotes 0.15.5 preparados e aceitos pelo validador de ZIP do administrador. Publicacao da extensao continua exclusiva do administrador; baseline mobile e envios 0.15.3 em analise nas lojas permanecem preservados.

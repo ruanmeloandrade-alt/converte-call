@@ -10,16 +10,16 @@ test('live call assistance produces and saves contextual advice with no workflow
   assert.equal(a.meta.livePhase,'listening');assert.match(a.meta.liveAdvice.suggestion,/prioridade/);assert.equal(a.meta.liveAdvice.nextNode,withWorkflow?'node':null);assert.equal(latest.suggestions.length,1);assert.match(requests[0].input,/cliente precisa/);assert.match(requests[0].instructions,/Sem workflow/);if(withWorkflow)assert.equal(a.meta.fieldExtractionError,'Campo indisponível');
  }
 });
-test('speech endings close after a short pause, cap capture at 5 seconds and ignore clicks/silence',()=>{
+test('call audio uses 9-second intervals and ignores short clicks and silence',()=>{
  const context=vm.createContext({});vm.runInContext(readFileSync(new URL('../extension/recording-analysis.js',import.meta.url),'utf8'),context);const policy=context.CCRecordingAnalysis;
- assert.equal(policy.liveTiming.maxMs,5000);
+ assert.equal(policy.liveTiming.maxMs,9000);assert.equal(policy.liveTiming.minMs,9000);
  const voice=Array(1024).fill(0.06),silence=Array(1024).fill(0),window=policy.speechWindow(0);
  for(let time=80;time<=800;time+=80)assert.equal(policy.sampleSpeech(window,voice,time),false);
- for(let time=880;time<1280;time+=80)assert.equal(policy.sampleSpeech(window,silence,time),false);
- assert.equal(policy.sampleSpeech(window,silence,1280),true);assert.equal(window.voiceMs,800);
- const click=policy.speechWindow(0);policy.sampleSpeech(click,voice,80);assert.equal(policy.sampleSpeech(click,silence,1000),false);assert(click.voiceMs<policy.liveTiming.minVoiceMs);
- const continuous=policy.speechWindow(0);for(let time=80;time<5000;time+=80)assert.equal(policy.sampleSpeech(continuous,voice,time),false);assert.equal(policy.sampleSpeech(continuous,voice,5000),true);
- const quiet=policy.speechWindow(0);policy.sampleSpeech(quiet,silence,5000);assert.equal(quiet.hasSpeech,false);
+ assert.equal(policy.sampleSpeech(window,silence,1280),false,'a short phrase does not shorten the requested interval');
+ assert.equal(policy.sampleSpeech(window,silence,9000),true);
+ const click=policy.speechWindow(0);policy.sampleSpeech(click,voice,80);policy.sampleSpeech(click,silence,9000);assert(click.voiceMs<policy.liveTiming.minVoiceMs);
+ const continuous=policy.speechWindow(0);for(let time=80;time<9000;time+=80)assert.equal(policy.sampleSpeech(continuous,voice,time),false);assert.equal(policy.sampleSpeech(continuous,voice,9000),true);
+ const quiet=policy.speechWindow(0);policy.sampleSpeech(quiet,silence,9000);assert.equal(quiet.hasSpeech,false);
 });
 test('only short direct speech grounded in the latest words becomes visible advice',()=>{
  const context=vm.createContext({});vm.runInContext(readFileSync(new URL('../extension/recording-analysis.js',import.meta.url),'utf8'),context);const policy=context.CCRecordingAnalysis,latest='Está caro, só consigo investir no mês que vem';

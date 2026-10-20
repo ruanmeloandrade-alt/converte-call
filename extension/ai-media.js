@@ -12,16 +12,19 @@ function parseCallJSON(raw){return JSON.parse(raw.replace(/^\s*\x60\x60\x60(?:js
 const extractionInstructions='Inclua fieldUpdates como lista de {fieldId,value,evidence,confidence} exclusivamente para os campos permitidos neste bloco. confidence entre 0 e 1. newFields como lista de {label,type,value,evidence} para informações úteis que ainda não têm campo, sem criar nada. Tipos: text,textarea,number,money,date,phone,email. evidence deve ser citação literal da conversa (pelo menos 5 caracteres); não invente dados. Não extraia idade a partir de suposição. Datas YYYY-MM-DD apenas quando inequívocas. Valores numéricos como número JSON. Use listas vazias quando faltarem evidências.';
 function startLiveAI(a,tracks,speakerHint='mixed'){
  if(!a.meta.liveAI||!tracks.length)return;
- const timing=CCRecordingAnalysis.liveTiming,live={recorder:null,timer:null,monitor:null,stopped:false,queued:null,running:false,sequence:0,source:null,analyser:null,context:null,ownContext:false};a.live=live;
+ const timing=CCRecordingAnalysis.liveTiming,live={recorder:null,timer:null,monitor:null,stopped:false,queued:null,running:false,sequence:0,transcript:'',source:null,analyser:null,context:null,ownContext:false};a.live=live;
  try{live.context=a.audio||new AudioContext();live.ownContext=!a.audio;live.source=live.context.createMediaStreamSource(new MediaStream(tracks));live.analyser=live.context.createAnalyser();live.analyser.fftSize=1024;live.source.connect(live.analyser);live.samples=new Float32Array(live.analyser.fftSize);}catch{live.analyser=null;}
  const isCurrent=()=>!live.stopped&&active===a&&!a.pauseAt;
  const queue=segment=>{live.queued=segment;if(live.running)return;live.running=true;aiPipeline=aiPipeline.then(async()=>{while(live.queued&&!live.stopped){const next=live.queued;live.queued=null;await process(next);}}).finally(()=>{live.running=false;}).catch(()=>{});};
  async function process(segment){
+  let historyWrite=Promise.resolve();
   try{
    if(!isCurrent())return;a.meta.livePhase='transcribing';await put(a.meta);
    const text=(await transcribeBlob(segment.blob)).trim();if(!text){a.meta.livePhase='listening';await put(a.meta);return;}
    // Persist recognized words even when a newer phrase is waiting; never accumulate an advice backlog.
-   let transcript='';await persistAnalysis(a.meta.id,row=>{row.leadId=a.meta.lead;row.workflowSnapshot=a.meta.workflow;row.transcript+=(row.transcript?'\n':'')+text;row.segments.push({at:segment.endMs,startMs:segment.startMs,endMs:segment.endMs,text,speakerHint});transcript=row.transcript;});
+   live.transcript+=(live.transcript?'\n':'')+text;const transcript=live.transcript;
+   historyWrite=persistAnalysis(a.meta.id,row=>{row.leadId=a.meta.lead;row.workflowSnapshot=a.meta.workflow;row.transcript+=(row.transcript?'\n':'')+text;row.segments||=[];row.segments.push({at:segment.endMs,startMs:segment.startMs,endMs:segment.endMs,text,speakerHint});}).then(()=>{a.meta.liveHistoryError='';}).catch(error=>{a.meta.liveHistoryError=error.message;});
+   a.meta.liveHeard=text.slice(-180);
    if(!isCurrent())return;
    const {data}=await aiSettings(),nodes=Array.isArray(a.meta.workflow)?a.meta.workflow:[],requestNode=a.meta.workflowNode,policy=nodes.find(n=>n.id===requestNode);
    const purpose=a.meta.contentType==='auto'?(a.meta.workflowPurpose||'call'):(a.meta.contentType||'call');
@@ -29,20 +32,22 @@ function startLiveAI(a,tracks,speakerHint='mixed'){
    const raw=await textResponse(JSON.stringify({latestUtterance:text,speakerHint,recentConversation:transcript.slice(-4000),previousSuggestion:a.meta.liveAdvice?.suggestion||'',currentNode:requestNode,workflow:nodes.filter(n=>n.id===requestNode||(policy?.edges||[]).some(e=>e.to===n.id)),brain:callBrainContext(data),allowedFields:policy?.captureEnabled?(data.customFields||[]).filter(f=>(policy.captureFields||[]).includes(f.id)):[],existingFields:policy?.captureEnabled?(data.customFields||[]).map(f=>({id:f.id,label:f.label,type:f.type})):[]}),CCRecordingAnalysis.liveInstructions(purpose)+(policy?.captureEnabled?' '+extractionInstructions:''));
    let parsed;try{parsed=parseCallJSON(raw);}catch{throw Error('O modelo não retornou uma sugestão estruturada.');}
    if(!isCurrent()||a.meta.workflowNode!==requestNode)return;
-   if(elapsed()-segment.endMs>10000){a.meta.livePhase='listening';a.meta.liveError='Seu provedor está demorando. Aguardando uma resposta sobre um trecho mais recente.';await put(a.meta);return;}
    const suggestion=CCRecordingAnalysis.liveAdvice(parsed,text),current=nodes.find(n=>n.id===requestNode);
    a.meta.livePhase='listening';a.meta.liveError='';
-   if(!suggestion||suggestion.suggestion===a.meta.liveAdvice?.suggestion){await put(a.meta);return;}
+   if(!suggestion){a.meta.livePhase='waiting-context';if(parsed.ready===true)a.meta.liveError='A IA retornou uma fala sem evidência válida neste trecho. Tentando novamente no próximo trecho.';await put(a.meta);return;}
+   if(suggestion.suggestion===a.meta.liveAdvice?.suggestion){await put(a.meta);return;}
    if(!current)suggestion.nextNode=null;else if(suggestion.nextNode!==current.id&&!(current.edges||[]).some(e=>e.to===suggestion.nextNode))suggestion.nextNode=current.id;
    suggestion.at=new Date().toISOString();suggestion.sourceEndMs=segment.endMs;suggestion.sequence=segment.sequence;
    a.meta.liveAdvice=suggestion;a.meta.events.push({type:'ai-suggestion',timeMs:segment.endMs,text:suggestion.suggestion,nodeId:requestNode});
    // Display first; optional field extraction and history writes must not hold up the HUD.
    await put(a.meta);
+   await historyWrite;
    await persistAnalysis(a.meta.id,row=>{row.suggestions||=[];row.suggestions.push({...suggestion,timeMs:segment.endMs,nodeId:requestNode});});
    if(policy?.captureEnabled&&a.meta.lead&&isCurrent())try{await syncCallFields(a.meta.id,requestNode,parsed);}catch(error){a.meta.fieldExtractionError=error.message;}
    if(a.meta.workflowAdvance==='ai'&&suggestion.nextNode&&suggestion.nextNode!==current?.id&&isCurrent()&&a.meta.workflowNode===requestNode){a.meta.workflowNode=suggestion.nextNode;a.meta.events.push({type:'branch',timeMs:segment.endMs,text:'Avanço da IA: '+(nodes.find(n=>n.id===suggestion.nextNode)?.name||''),nodeId:suggestion.nextNode});const action=await chrome.runtime.sendMessage({channel:'cc',type:'call-node-action',meta:a.meta,nodeId:suggestion.nextNode,entryKey:a.meta.events.length});if(!action?.ok)a.meta.events.push({type:'action-error',timeMs:segment.endMs,text:action?.error||'Falha na ação opcional.'});}
    if(isCurrent())await put(a.meta);
   }catch(error){if(isCurrent()){a.meta.liveError=error.message;a.meta.livePhase='listening';await put(a.meta);}}
+  finally{await historyWrite;if(isCurrent())await put(a.meta);}
  }
  function next(){
   if(live.stopped||active!==a)return;if(a.pauseAt){live.timer=setTimeout(next,200);return;}
