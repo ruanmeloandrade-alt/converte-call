@@ -12,7 +12,7 @@ import {PartnerBanking} from './partner-banking.mjs';
 import {inboxMedia,verifyInboxMedia} from './inbox-data.mjs';
 import {inboxContext,inboxReply} from './inbox-context.mjs';
 import {PartnerManualBanking} from './partner-manual-bank.mjs';
-import {createManagedAccount} from './admin-accounts.mjs';
+import {createManagedAccount,supportAccount,publicRegistrationUrl} from './admin-accounts.mjs';
 import {installReleases,latestRelease,uploadRelease} from './release-uploads.mjs';
 import {installPixelEvents,pixelRules,pixelEventState,savePixelRule,removePixelRule,pixelEditorLink,editorSave} from './pixel-events.mjs';
 import {AccountWeb} from './account-web.mjs';
@@ -145,7 +145,9 @@ export function createApp({dir=process.env.DATA_DIR||'data',master=process.env.E
   if(req.method==='GET'&&path==='/v1/admin/payments'){const rows=store.all("SELECT p.*,u.email FROM billing_payments p LEFT JOIN team_members m ON m.workspace_id=p.workspace_id AND m.role='owner' LEFT JOIN users u ON u.id=m.user_id ORDER BY p.created_at DESC LIMIT 300"),totals=store.all('SELECT currency,sum(amount) AS amount,count(*) AS count FROM billing_payments GROUP BY currency');return send(res,200,{payments:rows,totals});}
   if(req.method==='POST'&&path==='/v1/admin/accounts')return send(res,201,await createManagedAccount(store,user,await body(req,3000),billing.publicUrl));
   if(path==='/v1/admin/withdrawals'&&req.method==='GET')return send(res,200,partnerPayouts.list(user));const payout=path.match(/^\/v1\/admin\/withdrawals\/([a-f0-9-]{36})(?:\/(paid|cancel))?$/);if(payout&&req.method==='GET')return send(res,200,partnerPayouts.detail(user,payout[1]));if(payout&&req.method==='POST'){const b=await body(req,2000);return send(res,200,payout[2]==='paid'?await partnerPayouts.confirm(user,payout[1],b):payout[2]==='cancel'?partnerPayouts.cancel(user,payout[1],b):(()=>{throw error(400,'Ação inválida.');})());}
-  if(req.method==='GET'&&path==='/v1/admin/accounts')return send(res,200,{accounts:adminAccounts(store,user).map(a=>({...a,profile:accountProfile(store,a.id)}))});
+  if(req.method==='GET'&&path==='/v1/admin/accounts')return send(res,200,{registrationUrl:publicRegistrationUrl(billing.publicUrl),accounts:adminAccounts(store,user).map(a=>({...a,profile:accountProfile(store,a.id)}))});
+  const accountSupport=path.match(/^\/v1\/admin\/accounts\/([a-f0-9-]{36})\/support$/);
+  if(req.method==='PATCH'&&accountSupport){limit('admin-support:'+user.id,30);return send(res,200,await supportAccount(store,user,accountSupport[1],await body(req,2000)));}
   const teamSeats=path.match(/^\/v1\/admin\/accounts\/([a-f0-9-]{36})\/team$/);
   if(teamSeats&&req.method==='PATCH')return send(res,200,setTeamSeats(store,teamSeats[1],(await body(req,1000)).seats));
   if(req.method==='GET'&&path==='/v1/admin/academy')return send(res,200,{lessons:lessons(store,user,true,url.searchParams.get('audience')==='partner'?'partner':'customer')});
