@@ -15,7 +15,18 @@ globalThis.CCServices=(()=>{
  async function googleToken(kind,interactive=false){if(!chrome.runtime.getManifest().oauth2?.client_id)throw Error('Conexão Google aguarda o cadastro OAuth do Converte Call.');const r=await chrome.identity.getAuthToken({interactive,scopes:scopes[kind],enableGranularPermissions:true});if(!r.token)throw Error('A autorização Google não foi concluída.');return r.token;}
  async function googleReq(kind,url,options={}){if(kind==='calendar')return CCPortal.request('/v1/google/calendar/events',{method:options.method||'GET',body:options.body?JSON.parse(options.body):undefined});if(kind==='gmail'&&options.method==='POST')return CCPortal.request('/v1/google/gmail/send',{method:'POST',body:{...JSON.parse(options.body||'{}'),confirm:true}});throw Error('Operação Google não suportada.');}
 
+ async function resolveInboxContext(context){
+   const result=await CCPortal.request('/v1/whatsapp/context',{method:'POST',body:{...context,ensure:true}}),d=await load();let lead=d.leads.find(l=>l.id===result.lead.id);if(lead)Object.assign(lead,result.lead);else d.leads.push(result.lead);d.bindings['phone:'+String(result.lead.phone).replace(/\D/g,'')]=result.lead.id;if(context?.name)d.bindings['title:'+context.name]=result.lead.id;d.leadAutomation||={};d.leadAutomation[result.lead.id]=result.automation;await store(d);return result;
+ }
  async function handle(m,sender){
+  if(m.type==='native-smart-reply'){
+   if(!sender.url?.startsWith('https://web.whatsapp.com/')||sender.frameId!==0||!sender.tab?.id)return {ok:false,error:'Abra o WhatsApp Web para gerar a resposta.'};
+   const identity=await CCPortal.request('/v1/account/license');
+   if(identity.membership?.role!=='owner')return {ok:false,error:'Use o Inbox autorizado para seu usuário.'};
+   const resolved=await resolveInboxContext(m.context);
+   return {ok:true,...await CCPortal.request('/v1/whatsapp/reply',{method:'POST',body:{leadId:resolved.lead.id}})};
+  }
+
   if(!/^(ai-|google-|gmail-|wa-|project-|integration-|agent-|call-node-|call-fields-|call-analysis-|workspace-|dashboard-|slim-|brain-|pixel-)/.test(m.type||''))return;
   if(!trusted(sender))return {ok:false,error:'Abra o controle seguro da extensão para esta ação.'};
   if(m.type==='workspace-read'){const workspace=await globalThis.CCCloudSync?.sync();if(!workspace)throw Error('Não foi possível atualizar seus dados. Confira sua conexão e tente novamente.');return {ok:true,workspace};}
@@ -68,7 +79,7 @@ globalThis.CCServices=(()=>{
    run.status=['stopped','idle'].includes(r.status)?r.status:'stopping';run.updatedAt=CCCore.now();CCCore.log(d,'automation-stop',l.id,'Parada '+(run.status==='stopping'?'solicitada':'confirmada')+': '+m.kind);await store(d);return {ok:true,status:run.status};
   }
   if(m.type==='wa-context'){
-   const result=await CCPortal.request('/v1/whatsapp/context',{method:'POST',body:{...m.context,ensure:true}}),d=await load();let lead=d.leads.find(l=>l.id===result.lead.id);if(lead)Object.assign(lead,result.lead);else d.leads.push(result.lead);d.bindings['phone:'+String(result.lead.phone).replace(/\D/g,'')]=result.lead.id;if(m.context?.name)d.bindings['title:'+m.context.name]=result.lead.id;d.leadAutomation||={};d.leadAutomation[result.lead.id]=result.automation;await store(d);return {ok:true,...result};
+   return {ok:true,...await resolveInboxContext(m.context)};
   }
   if(m.type==='ai-inbox-reply')return {ok:true,...await CCPortal.request('/v1/whatsapp/reply',{method:'POST',body:{leadId:m.leadId,snapshot:m.snapshot,agentId:m.agentId}})};
   if(m.type==='ai-key'){const value=String(m.key||'').trim();if(value&&!/^sk-[A-Za-z0-9_-]{15,}$/.test(value))throw Error('Confira a API key da OpenAI.');if(value){await CCCredentials.set('ccOpenAIKey',value);const cloudSynced=await CCPortal.syncKey().catch(()=>false);return {ok:true,cloudSynced};}await CCPortal.request('/v1/ai/credentials',{method:'DELETE'}).catch(error=>{if(error.status!==401&&!/Entre na sua conta/.test(error.message))throw error;});await CCCredentials.remove('ccOpenAIKey');return {ok:true};}

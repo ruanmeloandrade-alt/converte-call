@@ -783,3 +783,11 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Validacao: 11 testes passaram, incluindo fonte e pacotes minificados Chrome/Edge/Firefox: nenhuma geracao ao abrir/sincronizar/trocar; uma por clique; contexto do contato atual; descarte de resposta atrasada. Testes de contexto real do Inbox e eventos internos Android preservados. Sem gasto de IA pessoal ou teste em conversa pessoal.
 - Arquivos: extension/content.js, extension/surface-inbox.js, extension/manifest.json; content.js, surface-inbox.js e manifest.json gerados em build/extensions/{chrome,edge,firefox}; test/smart-reply-trigger.test.mjs; docs/CODEX_STATUS.md.
 - Candidato 0.15.4 preparado para publicacao pelo administrador. Nao altera o ZIP publicado nem a baseline mobile, e nao substitui os envios 0.15.3 em analise nas lojas.
+
+
+### WhatsApp Web sem painel de resposta - 2026-10-20 / candidato 0.15.4
+- Clique no botao nativo Resposta inteligente gera diretamente o rascunho na caixa do WhatsApp, sem criar iframe/painel. Se uma ficha anterior estiver aberta, ela e recolhida. Indicador no proprio botao bloqueia cliques concorrentes. Nao envia mensagem.
+- A resolucao do contato e a geracao reutilizam os endpoints existentes. A nova mensagem interna native-smart-reply aceita somente o frame principal do WhatsApp Web e conta titular autorizada; os demais servicos continuam restritos aos controles da extensao. Nenhuma chave ou credencial e exposta ao site.
+- Contexto e caixa de mensagem sao conferidos antes/depois da IA. Troca de conversa descarta o resultado; rascunho existente ou digitado durante a geracao e preservado.
+- 26 testes passaram: fonte e distribuicoes minificadas Chrome/Edge/Firefox, permissao/origem/frame, geracao unica, rascunho sem painel/envio, preservacao de texto, descarte de resultado atrasado, contexto do Inbox e autoridade de publicacao. Teste de navegador existente atualizado, mas nao executado; nao foi usado Chrome para codificacao/testes, conforme instrucao do proprietario.
+- Arquivos adicionais: extension/services.js, services.js gerado nas 3 distribuicoes, test/native-smart-reply.test.mjs e test/native-controls.browser.mjs. extension/content.js foi ajustado para o fluxo direto.
