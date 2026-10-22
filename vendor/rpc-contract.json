@@ -54,7 +54,8 @@
     "normalizeEvolutionDeliveryStatus",
     "isEvolutionConnectionClosedMessage",
     "getLeadSales",
-    "saveLeadSale"
+    "saveLeadSale",
+    "saveLeadCustomFields"
   ],
   "@/lib/products.functions": [
     "listProductCatalogs",

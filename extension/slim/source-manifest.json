@@ -7,6 +7,11 @@
       "platformAdapted": false
     },
     {
+      "path": "routes\\fluxo-trabalho.tsx",
+      "sha256": "2e1dedbc85da353d9ad87a9cfa70074aa5666353646bd2a5bf6323e8e9c7fb9e",
+      "platformAdapted": true
+    },
+    {
       "path": "routes\\crm.publicos.tsx",
       "sha256": "9eb2d0528be55a778c8b7cdf5c894f7fd84d78fbab212eca1b3fc93728996eb7",
       "platformAdapted": true
@@ -17,23 +22,13 @@
       "platformAdapted": true
     },
     {
-      "path": "legacy\\crm.funis-de-venda.legacy.tsx",
-      "sha256": "30211b0fa02c63c6fb6b9073773916a99e33bd87f71d86810d3ecac72f8747e0",
-      "platformAdapted": true
-    },
-    {
-      "path": "legacy\\crm.produtos.legacy.tsx",
-      "sha256": "b83a8b6291a5f6a82f5a451dd874e32c6347ebdcc21f5d7c4546d2a8d2f3aa85",
-      "platformAdapted": true
-    },
-    {
-      "path": "routes\\fluxo-trabalho.tsx",
-      "sha256": "2e1dedbc85da353d9ad87a9cfa70074aa5666353646bd2a5bf6323e8e9c7fb9e",
-      "platformAdapted": true
-    },
-    {
       "path": "components\\automations\\ConversationAgentsPanel.tsx",
       "sha256": "baa7c67c6d824e1bc252bbfe97d700615bda493ee5ebcf6b231031068944eb6c",
+      "platformAdapted": true
+    },
+    {
+      "path": "legacy\\crm.funis-de-venda.legacy.tsx",
+      "sha256": "30211b0fa02c63c6fb6b9073773916a99e33bd87f71d86810d3ecac72f8747e0",
       "platformAdapted": true
     },
     {
@@ -42,8 +37,8 @@
       "platformAdapted": true
     },
     {
-      "path": "routes\\pedidos.tsx",
-      "sha256": "400b1e62e883de9a3a356981c738f7c89de8549660526fc6ef0af265724bea36",
+      "path": "components\\inbox\\LeadProfilePanel.tsx",
+      "sha256": "421e742ec5857671a779e14b4d073449c73c2c06610c29c97461ae5571345168",
       "platformAdapted": true
     },
     {
@@ -52,8 +47,13 @@
       "platformAdapted": true
     },
     {
-      "path": "components\\inbox\\LeadProfilePanel.tsx",
-      "sha256": "0411d5e2c8a03e554942d370c68857590075067d076fe1a2165a7d6b12973586",
+      "path": "legacy\\crm.produtos.legacy.tsx",
+      "sha256": "b83a8b6291a5f6a82f5a451dd874e32c6347ebdcc21f5d7c4546d2a8d2f3aa85",
+      "platformAdapted": true
+    },
+    {
+      "path": "routes\\pedidos.tsx",
+      "sha256": "400b1e62e883de9a3a356981c738f7c89de8549660526fc6ef0af265724bea36",
       "platformAdapted": true
     },
     {
@@ -67,33 +67,8 @@
       "platformAdapted": true
     },
     {
-      "path": "components\\ui\\button.tsx",
-      "sha256": "885861d5e25352279fc6fb7e7cb4c3fa7e5ab09e145f81d22280aa051d776162",
-      "platformAdapted": false
-    },
-    {
-      "path": "components\\ui\\input.tsx",
-      "sha256": "4ee1c239851691038ddef07a1cac8f3d348a35ff5816ecc296d20c9803b1c3de",
-      "platformAdapted": false
-    },
-    {
-      "path": "lib\\crm-mock.ts",
-      "sha256": "81c08e2ff63720c2546ba8d280b29813bd2e39054f3df7f7a31f1841e97747b8",
-      "platformAdapted": false
-    },
-    {
-      "path": "lib\\utils.ts",
-      "sha256": "c0adf27efbfa148d5abcf99e860f8e3e6c8fc77a1f99e023c08ef4f12e6ece29",
-      "platformAdapted": false
-    },
-    {
-      "path": "components\\ui\\dialog.tsx",
-      "sha256": "8ff751b1d801e7f37e48a966f46f0bfd44a94a857c710a947488a1583bd79ddb",
-      "platformAdapted": false
-    },
-    {
-      "path": "components\\ui\\textarea.tsx",
-      "sha256": "5af8d497b7b1c4f77399bf5b9f1861230d9950d0c2c5fe1bdbf8b3bdb6eab1e0",
+      "path": "components\\automations\\AgentTypeDialog.tsx",
+      "sha256": "cb7a0f63ab8cc5c27b8eebdf710e85f4302c026b6150e1ba28a895db95a9ac26",
       "platformAdapted": false
     },
     {
@@ -109,6 +84,11 @@
     {
       "path": "components\\automations\\AgentLinksEditor.tsx",
       "sha256": "4311df68e9baef3dedcbaaf96f2cfc9cbfd2729d00c6fb383509fce51662e3ad",
+      "platformAdapted": false
+    },
+    {
+      "path": "components\\automations\\AgentActionsEditor.tsx",
+      "sha256": "855e5d5cf53fb89d90ff036d9d9259e502baff0a5141f8484862a69f5f9175da",
       "platformAdapted": false
     },
     {
@@ -147,23 +127,48 @@
       "platformAdapted": false
     },
     {
-      "path": "components\\automations\\AgentActionsEditor.tsx",
-      "sha256": "855e5d5cf53fb89d90ff036d9d9259e502baff0a5141f8484862a69f5f9175da",
+      "path": "components\\ui\\input.tsx",
+      "sha256": "4ee1c239851691038ddef07a1cac8f3d348a35ff5816ecc296d20c9803b1c3de",
       "platformAdapted": false
     },
     {
-      "path": "components\\automations\\AgentTypeDialog.tsx",
-      "sha256": "cb7a0f63ab8cc5c27b8eebdf710e85f4302c026b6150e1ba28a895db95a9ac26",
+      "path": "components\\ui\\button.tsx",
+      "sha256": "885861d5e25352279fc6fb7e7cb4c3fa7e5ab09e145f81d22280aa051d776162",
       "platformAdapted": false
     },
     {
-      "path": "lib\\dashboard-drilldown.ts",
-      "sha256": "6b5cbe54207777f2b91a11d7f5eadbd1a6dc50dfe8aad97bcbc5fb1f24c97994",
+      "path": "components\\ui\\textarea.tsx",
+      "sha256": "5af8d497b7b1c4f77399bf5b9f1861230d9950d0c2c5fe1bdbf8b3bdb6eab1e0",
       "platformAdapted": false
     },
     {
-      "path": "lib\\dashboard-v4-widget-preferences.ts",
-      "sha256": "910187265558409daad93ce64d85533c006071194959ce11e11fcaa0c6e385f2",
+      "path": "components\\ui\\dialog.tsx",
+      "sha256": "8ff751b1d801e7f37e48a966f46f0bfd44a94a857c710a947488a1583bd79ddb",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\crm-mock.ts",
+      "sha256": "81c08e2ff63720c2546ba8d280b29813bd2e39054f3df7f7a31f1841e97747b8",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\utils.ts",
+      "sha256": "c0adf27efbfa148d5abcf99e860f8e3e6c8fc77a1f99e023c08ef4f12e6ece29",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\product-categories.ts",
+      "sha256": "e53fe9641f032f88b4b077d30eada7a9d66708445290203b9c00eac8f5f9e1ce",
+      "platformAdapted": false
+    },
+    {
+      "path": "components\\crm\\Lead360Section.tsx",
+      "sha256": "134141d41cbbc3405e498b031109357a2340e57dc65d1f4910aaaa6d7566e984",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\catalog-import.ts",
+      "sha256": "92d98bd4683986d69bbdd273d1d45cf3a46e9469f11e3a87dbf05e9be9abbf83",
       "platformAdapted": false
     },
     {
@@ -172,8 +177,43 @@
       "platformAdapted": false
     },
     {
-      "path": "components\\crm\\Lead360Section.tsx",
-      "sha256": "134141d41cbbc3405e498b031109357a2340e57dc65d1f4910aaaa6d7566e984",
+      "path": "components\\inbox\\LeadSalesPanel.tsx",
+      "sha256": "e83854bfecbc379df2bcf6fb7b6639e239f3946d21679dd99674b22cd77cacb7",
+      "platformAdapted": false
+    },
+    {
+      "path": "components\\workflow\\EmployeeOfMonthView.tsx",
+      "sha256": "7e9fefb4914446f97e6c4266bea1c8eb1ead77ba53befbe9125e4663881dd9e0",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\dashboard-v4-widget-preferences.ts",
+      "sha256": "910187265558409daad93ce64d85533c006071194959ce11e11fcaa0c6e385f2",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\dashboard-drilldown.ts",
+      "sha256": "6b5cbe54207777f2b91a11d7f5eadbd1a6dc50dfe8aad97bcbc5fb1f24c97994",
+      "platformAdapted": false
+    },
+    {
+      "path": "components\\automations\\ObjectiveCanvas.tsx",
+      "sha256": "2b5aa89f1cf1cb5120d1528437fd5fabf53595681021b9e99eac60352af3133e",
+      "platformAdapted": true
+    },
+    {
+      "path": "components\\automations\\ObjectiveBlockEditors.tsx",
+      "sha256": "1ac50a9f42c8d85368553badfd942861a078b4f89d9d3d99d348f6b4c7c5d8b8",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\inbox-mock.ts",
+      "sha256": "6aaa14c34a5d9cf39b05dd9626dea1bc4ce97fb697edb2ec22dd5223a06d642e",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\inbox-cache.ts",
+      "sha256": "0dba9fc8ec5487882198e54dfbaade8737f1afc18f88aca9101ccca1b8f62600",
       "platformAdapted": false
     },
     {
@@ -192,53 +232,18 @@
       "platformAdapted": false
     },
     {
-      "path": "components\\ui\\accordion.tsx",
-      "sha256": "0de02bb71ec1739e64a2fc2af0848458f204490719bad8e51c3fbe2bcb31d3a8",
-      "platformAdapted": false
-    },
-    {
       "path": "components\\ui\\select.tsx",
       "sha256": "27b85948433560e1d1792037dafac2fa4d0dc38e72977464271ceae1bac60a1d",
       "platformAdapted": false
     },
     {
-      "path": "components\\workflow\\EmployeeOfMonthView.tsx",
-      "sha256": "7e9fefb4914446f97e6c4266bea1c8eb1ead77ba53befbe9125e4663881dd9e0",
+      "path": "components\\ui\\accordion.tsx",
+      "sha256": "0de02bb71ec1739e64a2fc2af0848458f204490719bad8e51c3fbe2bcb31d3a8",
       "platformAdapted": false
-    },
-    {
-      "path": "components\\automations\\ObjectiveBlockEditors.tsx",
-      "sha256": "1ac50a9f42c8d85368553badfd942861a078b4f89d9d3d99d348f6b4c7c5d8b8",
-      "platformAdapted": false
-    },
-    {
-      "path": "components\\automations\\ObjectiveCanvas.tsx",
-      "sha256": "2b5aa89f1cf1cb5120d1528437fd5fabf53595681021b9e99eac60352af3133e",
-      "platformAdapted": true
     },
     {
       "path": "hooks\\use-permissions.ts",
       "sha256": "b8e874945d32822dbb29088714f45b165f10bc4fb077e445107acb3c52ffeda9",
-      "platformAdapted": false
-    },
-    {
-      "path": "lib\\product-categories.ts",
-      "sha256": "e53fe9641f032f88b4b077d30eada7a9d66708445290203b9c00eac8f5f9e1ce",
-      "platformAdapted": false
-    },
-    {
-      "path": "lib\\catalog-import.ts",
-      "sha256": "92d98bd4683986d69bbdd273d1d45cf3a46e9469f11e3a87dbf05e9be9abbf83",
-      "platformAdapted": false
-    },
-    {
-      "path": "lib\\inbox-cache.ts",
-      "sha256": "0dba9fc8ec5487882198e54dfbaade8737f1afc18f88aca9101ccca1b8f62600",
-      "platformAdapted": false
-    },
-    {
-      "path": "lib\\inbox-mock.ts",
-      "sha256": "6aaa14c34a5d9cf39b05dd9626dea1bc4ce97fb697edb2ec22dd5223a06d642e",
       "platformAdapted": false
     },
     {
@@ -282,11 +287,6 @@
       "platformAdapted": false
     },
     {
-      "path": "components\\automations\\SalesbotBuilder.tsx",
-      "sha256": "98d9e2035478ea0227506d1b81083be7ae4792c7f24a78b3a91b7ba7774a58a8",
-      "platformAdapted": true
-    },
-    {
       "path": "components\\automations\\SalesbotTemplatePicker.tsx",
       "sha256": "2708a69293b11e4b3feff135e0a9dd48b19f5e36b1f2a9b2e3ea381c654f9574",
       "platformAdapted": false
@@ -294,6 +294,11 @@
     {
       "path": "components\\automations\\CentralDeGrupos.tsx",
       "sha256": "e007da23d01c282662caa9d5ada39308d1cc7286a708d63e1ee3d0054a9613f0",
+      "platformAdapted": true
+    },
+    {
+      "path": "components\\automations\\SalesbotBuilder.tsx",
+      "sha256": "cc4aca6f0b90a00a62377f8e2cb02a489457e2e659a5c745d2bc0330191f667a",
       "platformAdapted": true
     },
     {
@@ -307,8 +312,8 @@
       "platformAdapted": false
     },
     {
-      "path": "components\\crm\\MessageTemplateEditor.tsx",
-      "sha256": "9d45448e1fb2715020910017e19f061fa444a7cbdde1c3fdc0009dc962d2457c",
+      "path": "components\\ui\\checkbox.tsx",
+      "sha256": "d2c880d1a7de1633a5eb6f4d09977f203d737de24fe3d7e8ba959b851fd18145",
       "platformAdapted": false
     },
     {
@@ -317,23 +322,28 @@
       "platformAdapted": false
     },
     {
-      "path": "components\\ui\\checkbox.tsx",
-      "sha256": "d2c880d1a7de1633a5eb6f4d09977f203d737de24fe3d7e8ba959b851fd18145",
-      "platformAdapted": false
-    },
-    {
       "path": "components\\crm\\StageTriggerConfigPopover.tsx",
       "sha256": "caa9a537290a63e58b37bcd26748b239cdd4b7afe226dc3b47617d720ddce1ca",
       "platformAdapted": false
     },
     {
-      "path": "lib\\salesbot-field-targets.ts",
-      "sha256": "8601df70b88bae2870f8be7bc6d6816f65c97f1c146cdfb4c29cdb17e30f039e",
+      "path": "components\\crm\\MessageTemplateEditor.tsx",
+      "sha256": "9d45448e1fb2715020910017e19f061fa444a7cbdde1c3fdc0009dc962d2457c",
+      "platformAdapted": false
+    },
+    {
+      "path": "components\\ui\\dropdown-menu.tsx",
+      "sha256": "9aca83be58992cdf5c996afaa9af8cac82366e0b5b7f71f4866dce49b5a0c434",
       "platformAdapted": false
     },
     {
       "path": "lib\\salesbot-block-tutorials.ts",
       "sha256": "40a7ab5e83da0bd34cb60c909096edbfbd85d63002a2c5500b6ace9b310f362a",
+      "platformAdapted": false
+    },
+    {
+      "path": "lib\\salesbot-field-targets.ts",
+      "sha256": "8601df70b88bae2870f8be7bc6d6816f65c97f1c146cdfb4c29cdb17e30f039e",
       "platformAdapted": false
     },
     {
@@ -352,39 +362,29 @@
       "platformAdapted": false
     },
     {
-      "path": "components\\ui\\dropdown-menu.tsx",
-      "sha256": "9aca83be58992cdf5c996afaa9af8cac82366e0b5b7f71f4866dce49b5a0c434",
-      "platformAdapted": false
-    },
-    {
       "path": "lib\\text-vars.ts",
       "sha256": "4402ace26f439e75345726f052334948bac3d95c9f2026e60de41c899e821048",
-      "platformAdapted": false
-    },
-    {
-      "path": "components\\inbox\\LeadSalesPanel.tsx",
-      "sha256": "e83854bfecbc379df2bcf6fb7b6639e239f3946d21679dd99674b22cd77cacb7",
       "platformAdapted": false
     }
   ],
   "platformAdaptations": [
     "routes\\fluxo-trabalho.tsx",
     "routes\\crm.publicos.tsx",
-    "legacy\\crm.funis-de-venda.legacy.tsx",
     "legacy\\crm.automacoes.legacy.tsx",
     "components\\automations\\ConversationAgentsPanel.tsx",
+    "legacy\\crm.funis-de-venda.legacy.tsx",
+    "routes\\crm.estoque.tsx",
+    "components\\inbox\\LeadProfilePanel.tsx",
+    "routes\\crm.empresas.tsx",
     "legacy\\crm.produtos.legacy.tsx",
     "routes\\pedidos.tsx",
-    "routes\\crm.estoque.tsx",
-    "routes\\crm.empresas.tsx",
-    "components\\inbox\\LeadProfilePanel.tsx",
     "components\\inbox\\InboxPage.legacy.tsx",
     "components\\dashboard\\DashboardV4ConfigurableBoard.tsx",
     "components\\automations\\ObjectiveTree.tsx",
     "components\\automations\\AgentTestChat.tsx",
     "components\\automations\\ObjectiveCanvas.tsx",
     "lib\\salesbot-types.ts",
-    "components\\automations\\SalesbotBuilder.tsx",
-    "components\\automations\\CentralDeGrupos.tsx"
+    "components\\automations\\CentralDeGrupos.tsx",
+    "components\\automations\\SalesbotBuilder.tsx"
   ]
 }

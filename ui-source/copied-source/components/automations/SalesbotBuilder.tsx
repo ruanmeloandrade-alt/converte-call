@@ -4685,18 +4685,21 @@ function CreateCustomFieldDialog({
 }) {
   const [name, setName] = useState("");
   const [type, setType] = useState("text");
+  const [options, setOptions] = useState("");
   const createFn = useServerFn(createLeadCustomField);
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
-    if (!name.trim()) return;
+    if (loading || !name.trim()) return;
+    if (["select","multiselect"].includes(type) && !options.trim()) return toast.error("Adicione as opções do campo.");
     setLoading(true);
     try {
-      const res = await createFn({ data: { name, fieldType: type } });
+      const res = await createFn({ data: { name: name.trim(), fieldType: type, options: options.split("\n").map(v => v.trim()).filter(Boolean) } });
       onCreated(res.field);
       onOpenChange(false);
       setName("");
       setType("text");
+      setOptions("");
       toast.success("Campo personalizado criado.");
     } catch (err: any) {
       toast.error(err.message || "Erro ao criar campo.");
@@ -4736,7 +4739,16 @@ function CreateCustomFieldDialog({
               <option value="phone">Telefone</option>
               <option value="date">Data</option>
               <option value="url">Link / URL</option>
+              <option value="select">Selecionar (1 opção)</option>
+              <option value="multiselect">Selecionar múltiplos</option>
+              <option value="datetime">Data e hora</option>
+              <option value="birthday">Data de nascimento</option>
+              <option value="cpf">CPF</option>
+              <option value="address">Endereço</option>
+              <option value="file">Arquivo</option>
+              <option value="product">Produto</option>
             </select>
+            {["select","multiselect"].includes(type) && <label className="block text-xs mt-2">Opções (uma por linha)<textarea value={options} onChange={e => setOptions(e.target.value)} className="mt-1 w-full bg-slate-950 border border-slate-800 rounded p-2" rows={4}/></label>}
           </div>
         </div>
         <DialogFooter>

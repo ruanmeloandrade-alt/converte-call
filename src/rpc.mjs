@@ -5,6 +5,16 @@ import {workflowRPC} from './workflow-adapter.mjs';
 import { Core } from "./database.mjs";
 import { uploadAsset, signedAsset } from "./assets.mjs";
 const id = () => crypto.randomUUID();
+const displayFieldValue = (field, entry) => {
+  let value = entry?.value ?? entry ?? '';
+  if (value && typeof value === 'object' && !Array.isArray(value)) value = value.display ?? value.raw ?? '';
+  if (Array.isArray(value)) return value.join(field.type === 'multiselect' ? '|' : ', ');
+  if (field.type === 'multiselect' && typeof value === 'string' && !value.includes('|')) {
+    const selected = (field.options || []).filter(option => value.split(',').map(v => v.trim()).includes(option));
+    if (selected.length) return selected.join('|');
+  }
+  return String(value ?? '');
+};
 const field = (f) => ({ id: f.id, name: f.label, fieldType: f.type, options: f.options || [] });
 function leadRow(d, l) {
   const funnel = d.funnels.find((f) => f.id === l.funnelId), stage = funnel?.stages.find((s) => s.name === l.stage || s.id === l.stageId);
@@ -210,13 +220,37 @@ async function rpc(store, ws, module, name, arg = {}) {
     }
     case "getLeadDetail": {
       const l = findLead(d, p), f = d.funnels.find((f2) => f2.id === l.funnelId), s = f?.stages.find((s2) => s2.name === l.stage);
-      result = { lead: { ...leadRow(d, l), stageId: s?.id, pipelineId: f?.id, stageName: l.stage, pipelineName: f?.name, sourceId: l.crmSourceId || d.crmSources[0]?.id, sourceProvider: "mkton", sourceDisplayName: l.source, keepFiles: !!l.keepFiles, customFields: d.customFields.filter((f2) => l.custom?.[f2.id]).map((f2) => ({ id: f2.id, name: f2.label, type: f2.type, displayValue: Array.isArray(l.custom[f2.id].value) ? l.custom[f2.id].value.join(", ") : String(l.custom[f2.id].value ?? "") })) }, activities: d.localActivity.filter((a) => a.entityId === l.id).map((a) => ({ ...a, occurredAt: a.at })) };
+      result = { lead: { ...leadRow(d, l), stageId: s?.id, pipelineId: f?.id, stageName: l.stage, pipelineName: f?.name, sourceId: l.crmSourceId || d.crmSources[0]?.id, sourceProvider: "mkton", sourceDisplayName: l.source, keepFiles: !!l.keepFiles, customFields: d.customFields.filter((f2) => l.custom?.[f2.id]).map((f2) => ({ id: f2.id, name: f2.label, type: f2.type, displayValue: displayFieldValue(f2,l.custom[f2.id]) })) }, activities: d.localActivity.filter((a) => a.entityId === l.id).map((a) => ({ ...a, occurredAt: a.at })) };
+      break;
+    }
+    case "saveLeadCustomFields": {
+      const patch = p.fields;
+      if (!Array.isArray(patch) || !Array.isArray(p.removedIds)) throw Error("Lista de campos inválida.");
+      const next = structuredClone(d.customFields).filter(f => !p.removedIds.includes(f.id));
+      for (const item of patch) {
+        const label = String(item.name || '').trim(), type = item.fieldType;
+        if (!label || !['text','textarea','phone','email','date','datetime','birthday','cpf','address','url','money','file','product','select','multiselect','number','time','checkbox'].includes(type)) throw Error('Nome ou tipo de campo inválido.');
+        const options = [...new Set((item.options || []).map(v => String(v).trim()).filter(Boolean))];
+        if (['select','multiselect'].includes(type) && !options.length) throw Error('Adicione as opções do campo.');
+        let row = next.find(f => f.id === item.id);
+        if (item.id && !row) throw Error('Campo removido. Reabra as configurações.');
+        if (next.some(f => f.id !== row?.id && String(f.label).trim().toLocaleLowerCase() === label.toLocaleLowerCase())) throw Error('Já existe um campo com esse nome.');
+        if (row) Object.assign(row,{label,type,options});
+        else next.push({id:id(),label,type,options});
+      }
+      d.customFields = next;
+      for (const lead of d.leads) for (const key of p.removedIds) if (lead.custom) delete lead.custom[key];
+      result = {ok:true,fields:next.map(field)};
+      changed = true;
       break;
     }
     case "listLeadCustomFields":
       result = { fields: d.customFields.map(field) };
       break;
     case "createLeadCustomField": {
+      p.name = String(p.name || '').trim();
+      if (!p.name) throw Error('Informe o nome do campo.');
+      if (['select','multiselect'].includes(p.fieldType) && (!Array.isArray(p.options) || !p.options.some(v => String(v).trim()))) throw Error('Adicione as opções do campo.');
       if (d.customFields.some((f2) => f2.label.toLowerCase() === p.name.toLowerCase())) throw Error("J\xE1 existe um campo com esse nome.");
       const f = { id: id(), label: p.name, type: p.fieldType, options: p.options || [] };
       d.customFields.push(f);
@@ -242,8 +276,9 @@ async function rpc(store, ws, module, name, arg = {}) {
     case "setLeadCustomFieldValue": {
       const l = findLead(d, p);
       l.custom ||= {};
+      if (!d.customFields.some(f => f.id === p.fieldId)) throw Error("Campo não encontrado.");
       l.custom[p.fieldId] = { value: p.value, source: "Voc\xEA", updatedAt: Date.now() };
-      result = { ok: true };
+      result = { ok: true, value: p.value, changed: true };
       changed = true;
       break;
     }
