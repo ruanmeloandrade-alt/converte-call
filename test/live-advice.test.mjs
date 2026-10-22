@@ -10,15 +10,15 @@ test('live call assistance produces and saves contextual advice with no workflow
   assert.equal(a.meta.livePhase,'listening');assert.match(a.meta.liveAdvice.suggestion,/prioridade/);assert.equal(a.meta.liveAdvice.nextNode,withWorkflow?'node':null);assert.equal(latest.suggestions.length,1);assert.match(requests[0].input,/cliente precisa/);assert.match(requests[0].instructions,/Sem workflow/);if(withWorkflow)assert.equal(a.meta.fieldExtractionError,'Campo indisponível');
  }
 });
-test('call audio uses 9-second intervals and ignores short clicks and silence',()=>{
+test('call audio ends complete phrases after silence with a 10-second maximum',()=>{
  const context=vm.createContext({});vm.runInContext(readFileSync(new URL('../extension/recording-analysis.js',import.meta.url),'utf8'),context);const policy=context.CCRecordingAnalysis;
- assert.equal(policy.liveTiming.maxMs,9000);assert.equal(policy.liveTiming.minMs,9000);
+ assert.equal(policy.liveTiming.maxMs,10000);assert.equal(policy.liveTiming.minMs,3000);
  const voice=Array(1024).fill(0.06),silence=Array(1024).fill(0),window=policy.speechWindow(0);
  for(let time=80;time<=800;time+=80)assert.equal(policy.sampleSpeech(window,voice,time),false);
  assert.equal(policy.sampleSpeech(window,silence,1280),false,'a short phrase does not shorten the requested interval');
- assert.equal(policy.sampleSpeech(window,silence,9000),true);
+ assert.equal(policy.sampleSpeech(window,silence,3000),true);
  const click=policy.speechWindow(0);policy.sampleSpeech(click,voice,80);policy.sampleSpeech(click,silence,9000);assert(click.voiceMs<policy.liveTiming.minVoiceMs);
- const continuous=policy.speechWindow(0);for(let time=80;time<9000;time+=80)assert.equal(policy.sampleSpeech(continuous,voice,time),false);assert.equal(policy.sampleSpeech(continuous,voice,9000),true);
+ const continuous=policy.speechWindow(0);for(let time=80;time<10000;time+=80)assert.equal(policy.sampleSpeech(continuous,voice,time),false);assert.equal(policy.sampleSpeech(continuous,voice,10000),true);
  const quiet=policy.speechWindow(0);policy.sampleSpeech(quiet,silence,9000);assert.equal(quiet.hasSpeech,false);
 });
 test('only short direct speech grounded in the latest words becomes visible advice',()=>{
@@ -28,7 +28,7 @@ test('only short direct speech grounded in the latest words becomes visible advi
  const prompt=policy.liveInstructions('call');assert.match(prompt,/latestUtterance/);assert.match(prompt,/ready:false/);assert.match(prompt,/primeira pessoa/);assert.match(prompt,/Não repita previousSuggestion/);
  assert.match(policy.liveInstructions('lesson'),/videoaula/);
 });
-test('slow providers keep only the newest waiting audio segment and never publish after stop',async()=>{
+test('slow providers preserve every waiting audio segment and never publish after stop',async()=>{
  for(const stopDuringRequest of [false,true]){
   const requests=[],texts=[];let latest={id:'call',transcript:'',segments:[]},release;const gate=new Promise(r=>release=r);let clock=0,number=0;
   class Recorder{constructor(){this.state='inactive';this.mimeType='audio/webm';}start(){this.state='recording';}stop(){this.state='inactive';this.ondataavailable?.({data:new Blob(['Trecho '+(++number)+' do cliente'])});this.onstop?.();}}
@@ -39,6 +39,6 @@ test('slow providers keep only the newest waiting audio segment and never publis
   clock=2000;vm.runInContext('active.live.recorder.stop()',context);clock=4000;vm.runInContext('active.live.recorder.stop()',context);
   if(stopDuringRequest)vm.runInContext('stopLiveAI(active);active=null;',context);
   release();await vm.runInContext('aiPipeline',context);
-  if(stopDuringRequest){assert.equal(a.meta.liveAdvice,undefined);assert.equal(requests.length,0);}else{assert.equal(texts.length,2);assert.match(texts[0],/Trecho 1/);assert.match(texts[1],/Trecho 3/);assert.match(a.meta.liveAdvice.clientQuote,/Trecho 3/);assert(requests.every(r=>r.recentConversation.length<=4000));assert.equal(requests[0].speakerHint,'mixed');}
+  if(stopDuringRequest){assert.equal(a.meta.liveAdvice,undefined);assert.equal(requests.length,0);}else{assert.equal(texts.length,3);assert.match(texts[0],/Trecho 1/);assert.match(texts[1],/Trecho 2/);assert.match(texts[2],/Trecho 3/);assert.match(a.meta.liveAdvice.clientQuote,/Trecho 3/);assert(requests.every(r=>r.recentConversation.length<=12000));assert.equal(requests[0].speakerHint,'mixed');}
  }
 });

@@ -13,23 +13,42 @@ async function recorderContext(){return (await chrome.runtime.getContexts({docum
 async function media(message){const context=await recorderContext();if(context)return chrome.runtime.sendMessage({...message,target:'media-engine',owner:'window'});await engine();return chrome.runtime.sendMessage({...message,target:'media-engine',owner:'offscreen'});}
 async function openRecorder(sender){const context=await recorderContext();if(context){if(context.tabId>=0){const tab=await chrome.tabs.get(context.tabId);await chrome.windows.update(tab.windowId,{focused:true,state:'normal'});}return {ok:true};}const off=(await chrome.runtime.getContexts({contextTypes:['OFFSCREEN_DOCUMENT']}))[0];if(off){const r=await chrome.runtime.sendMessage({target:'media-engine',owner:'offscreen',type:'status'});if(r?.recording)throw Error('Finalize a gravação ativa antes de abrir outra.');await chrome.offscreen.closeDocument();}if(sender.tab?.id)await chrome.storage.session.set({ccRecorderHostTab:sender.tab.id});await chrome.windows.create({type:'popup',url:chrome.runtime.getURL('recorder.html'),width:550,height:780,focused:true});return {ok:true};}
 
+// Placement is independent of the open module. Hidden means no injected controls anywhere.
+async function surfacePlacement(tabId){
+ const saved=(await chrome.storage.session.get('ccSurfacePlacement')).ccSurfacePlacement;
+ if(saved)return saved;
+ const follow=(await chrome.storage.local.get('ccSurfaceFollow')).ccSurfaceFollow===true;
+ const placement={follow,tabId,hidden:false};await chrome.storage.session.set({ccSurfacePlacement:placement});return placement;
+}
+async function anchorSurface(tab){const placement=await surfacePlacement(tab.id);placement.tabId=tab.id;placement.hidden=false;await chrome.storage.session.set({ccSurfacePlacement:placement});queueSurfaceFollow(tab.id,tab.windowId);}
+async function suspendSurfaces(except){for(const tab of await chrome.tabs.query({}))if(tab.id!==except)await chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'surface-suspend'}).catch(()=>{});}
 const downloads=new Map();
 chrome.downloads.onChanged.addListener(delta=>{if(['complete','interrupted'].includes(delta.state?.current)&&downloads.has(delta.id)){const token=downloads.get(delta.id);downloads.delete(delta.id);media({type:'release-url',token}).catch(()=>{});}});
 async function notify(){for(const tab of await chrome.tabs.query({})){if(tab.id)chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'state-changed'}).catch(()=>{});}}
 async function downloadRecording(id){const result=await media({type:'media-url',id});if(!result.ok)throw Error(result.error);try{const downloadId=await chrome.downloads.download({url:result.url,filename:'Converte Call/'+result.filename,saveAs:false});downloads.set(downloadId,result.token);return {ok:true,downloadId};}catch(e){await media({type:'release-url',token:result.token});throw e;}}
 async function handle(m,sender){
  if(m.type==='open-floating')return openFloating(m.kind);
- if(m.type==='floating-action'&&sender.url?.startsWith(chrome.runtime.getURL('floating.html'))){const tab=await normalHost();if(!tab)throw Error('Abra uma janela normal do navegador.');if(m.action==='record')return openRecorder({tab});if(m.action==='inbox'){const access=await handle({type:'open-inbox'},sender);if(!access.employee)return access;m.action='employee-inbox';}if(!['home','pipeline','orders','tracking','calls','employee-inbox'].includes(m.action))throw Error('Módulo inválido.');await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:'crm',view:m.action}});await chrome.windows.update(tab.windowId,{focused:true});await chrome.tabs.update(tab.id,{active:true});queueSurfaceFollow(tab.id,tab.windowId);return {ok:true};}
- if(m.type==='surface-location'&&sender.tab){const active=(await chrome.tabs.query({active:true,windowId:sender.tab.windowId}))[0];if(active?.id!==sender.tab.id||!(await chrome.windows.get(sender.tab.windowId)).focused)return {ok:false};await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:['crm','surface','dock','inbox'].includes(m.mode)?m.mode:'dock',view:String(m.view||'home').slice(0,80)}});return {ok:true};}
- if(m.type==='surface-ready'&&sender.tab){const sourceWindow=await chrome.windows.get(sender.tab.windowId);if(!sender.tab.active||!sourceWindow.focused||sourceWindow.type!=='normal')return {ok:true,suspended:true};let state=(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState;if(!state){const active=(await chrome.tabs.query({active:true,windowId:sender.tab.windowId}))[0];if(active?.id!==sender.tab.id)return {ok:true,suspended:true};state={enabled:true,mode:/^https:\/\/(meet\.google\.com|[^/]*\.zoom\.us)\//.test(sender.tab.url||'')?'surface':'dock',view:'hud'};await chrome.storage.session.set({ccSurfaceState:state});}queueSurfaceFollow(sender.tab.id,sender.tab.windowId);return {ok:true};}
+ if(m.type==='floating-action'&&sender.url?.startsWith(chrome.runtime.getURL('floating.html'))){const tab=await normalHost();if(!tab)throw Error('Abra uma janela normal do navegador.');if(m.action==='record')return openRecorder({tab});if(m.action==='inbox'){const access=await handle({type:'open-inbox'},sender);if(!access.employee)return access;m.action='employee-inbox';}if(!['home','pipeline','orders','tracking','calls','employee-inbox'].includes(m.action))throw Error('Módulo inválido.');await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:'crm',view:m.action}});await chrome.windows.update(tab.windowId,{focused:true});await chrome.tabs.update(tab.id,{active:true});await anchorSurface(tab);return {ok:true};}
+ if(m.type==='surface-placement'&&sender.tab){
+  const placement=await surfacePlacement(sender.tab.id);
+  if(placement.hidden||(!placement.follow&&placement.tabId!==sender.tab.id))return {ok:false};
+  placement.tabId=sender.tab.id;
+  if(typeof m.follow==='boolean'){placement.follow=m.follow;await chrome.storage.local.set({ccSurfaceFollow:m.follow});}
+  if(m.hidden===true){placement.hidden=true;placement.follow=false;await chrome.storage.local.set({ccSurfaceFollow:false});}
+  await chrome.storage.session.set({ccSurfacePlacement:placement});
+  if(placement.hidden)await suspendSurfaces();else queueSurfaceFollow(sender.tab.id,sender.tab.windowId);
+  return {ok:true,placement};
+ }
+ if(m.type==='surface-location'&&sender.tab){const placement=await surfacePlacement(sender.tab.id);if(placement.hidden||(!placement.follow&&placement.tabId!==sender.tab.id))return {ok:false};const active=(await chrome.tabs.query({active:true,windowId:sender.tab.windowId}))[0];if(active?.id!==sender.tab.id||!(await chrome.windows.get(sender.tab.windowId)).focused)return {ok:false};await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:['crm','surface','dock','inbox'].includes(m.mode)?m.mode:'dock',view:String(m.view||'home').slice(0,80)}});return {ok:true};}
+ if(m.type==='surface-ready'&&sender.tab){const placement=await surfacePlacement(sender.tab.id);if(placement.hidden||(!placement.follow&&placement.tabId!==sender.tab.id))return {ok:true,suspended:true};const sourceWindow=await chrome.windows.get(sender.tab.windowId);if(!sender.tab.active||!sourceWindow.focused||sourceWindow.type!=='normal')return {ok:true,suspended:true};let state=(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState;if(!state){const active=(await chrome.tabs.query({active:true,windowId:sender.tab.windowId}))[0];if(active?.id!==sender.tab.id)return {ok:true,suspended:true};state={enabled:true,mode:/^https:\/\/(meet\.google\.com|[^/]*\.zoom\.us)\//.test(sender.tab.url||'')?'surface':'dock',view:'hud'};await chrome.storage.session.set({ccSurfaceState:state});}queueSurfaceFollow(sender.tab.id,sender.tab.windowId);return {ok:true};}
  if(m.type==='open-recorder')return openRecorder(sender);
  if(m.type==='open-academy-lesson'){
   const content=await CCPortal.request('/v1/academy'),lesson=content.lessons?.find(item=>item.id===m.id);
   if(!lesson||!/^[-\w]{11}$/.test(lesson.videoId||''))throw Error('Aula não disponível para sua conta.');
   await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:'lesson',view:'academy',lesson:{id:lesson.id,title:String(lesson.title||'Sua aula').slice(0,160),videoId:lesson.videoId}}});
-  await chrome.tabs.create({url:'https://www.youtube.com/watch?v='+lesson.videoId,active:true});return {ok:true};
+  const lessonTab=await chrome.tabs.create({url:'https://www.youtube.com/watch?v='+lesson.videoId,active:true});await anchorSurface(lessonTab);return {ok:true};
  }
- if(m.type==='capture-engine-started'){const recordingContext=await recorderContext();if(recordingContext?.tabId>=0){const recordingTab=await chrome.tabs.get(recordingContext.tabId);await chrome.windows.update(recordingTab.windowId,{state:'minimized'});}const host=(await chrome.storage.session.get('ccRecorderHostTab')).ccRecorderHostTab;if(host){await chrome.tabs.update(host,{active:true}).catch(()=>{});await chrome.tabs.sendMessage(host,{channel:'cc',type:'open',view:'hud'}).catch(()=>{});}await notify();return {ok:true};}
+ if(m.type==='capture-engine-started'){const recordingContext=await recorderContext();if(recordingContext?.tabId>=0){const recordingTab=await chrome.tabs.get(recordingContext.tabId);await chrome.windows.update(recordingTab.windowId,{state:'minimized'});}const host=(await chrome.storage.session.get('ccRecorderHostTab')).ccRecorderHostTab;if(m.detachedHUD){const placement=await surfacePlacement(host);placement.hidden=true;placement.follow=false;await chrome.storage.session.set({ccSurfacePlacement:placement});await chrome.storage.local.set({ccSurfaceFollow:false});await suspendSurfaces();await openFloating('hud');}else if(host){await chrome.tabs.update(host,{active:true}).catch(()=>{});await chrome.tabs.sendMessage(host,{channel:'cc',type:'open',view:'hud'}).catch(()=>{});}await notify();return {ok:true};}
  const portal=await CCPortal.handle(m,sender);if(portal!==undefined)return portal;
  const service=await CCServices.handle(m,sender);if(service!==undefined)return service;
  if(m.type==='native-inbox-access'){if(!sender.url?.startsWith('https://web.whatsapp.com/'))throw Error('Abra o WhatsApp Web.');const identity=await CCPortal.request('/v1/account/license');return {ok:true,owner:identity.membership?.role==='owner'};}
@@ -37,7 +56,7 @@ async function handle(m,sender){
   const identity=await CCPortal.request('/v1/account/license');if(identity.membership?.role==='member'){if(!identity.membership.permissions.includes('inbox'))throw Error('Seu usuário não tem acesso ao Inbox.');return {ok:true,employee:true};}
   await chrome.storage.session.set({ccSurfaceState:{enabled:true,mode:'inbox',view:'employee-inbox'}});
   const tabs=await chrome.tabs.query({url:'https://web.whatsapp.com/*'});const tab=tabs[0]||await chrome.tabs.create({url:'https://web.whatsapp.com/'});
-  await chrome.tabs.update(tab.id,{active:true});if(tab.windowId)await chrome.windows.update(tab.windowId,{focused:true});return {ok:true};
+  await anchorSurface(tab);await chrome.tabs.update(tab.id,{active:true});if(tab.windowId)await chrome.windows.update(tab.windowId,{focused:true});return {ok:true};
  }
  if(m.type==='capture-prepare')return media({type:'status'});
  if(m.type==='capture-start'){
@@ -69,7 +88,7 @@ chrome.runtime.onMessage.addListener((m,sender,reply)=>{
 });
 chrome.action.onClicked.addListener(async tab=>{
  if(!tab.id)return;
- try{await chrome.scripting.executeScript({target:{tabId:tab.id},files:['content.js']});await chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'surface-toggle'});await chrome.action.setBadgeText({tabId:tab.id,text:''});}
+ try{const placement=await surfacePlacement(tab.id);placement.hidden=false;placement.tabId=tab.id;await chrome.storage.session.set({ccSurfacePlacement:placement});await suspendSurfaces(tab.id);await chrome.scripting.executeScript({target:{tabId:tab.id},files:['content.js']});await chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'surface-toggle',follow:placement.follow});await chrome.action.setBadgeText({tabId:tab.id,text:''});}
  catch{await chrome.action.setBadgeBackgroundColor({tabId:tab.id,color:'#CA4962'});await chrome.action.setBadgeText({tabId:tab.id,text:'!'});await chrome.action.setTitle({tabId:tab.id,title:'Abra o WhatsApp Web, Meet ou outro site comum para usar os controles.'});}
 });
 
@@ -77,19 +96,19 @@ let surfaceSwitch=Promise.resolve();
 function queueSurfaceFollow(tabId,windowId){surfaceSwitch=surfaceSwitch.catch(()=>{}).then(()=>followActiveTab(tabId,windowId));}
 async function followActiveTab(tabId,windowId){
  let state=(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState;
- if(!state?.enabled)return;
+ const placement=await surfacePlacement(tabId);if(!state?.enabled||placement.hidden||(!placement.follow&&placement.tabId!==tabId))return;
  const win=await chrome.windows.get(windowId);if(win.type!=='normal'||!win.focused)return;
  const active=(await chrome.tabs.query({active:true,windowId}))[0];if(active?.id!==tabId)return;
  const tab=await chrome.tabs.get(tabId);
- for(const other of await chrome.tabs.query({}))if(other.id!==tabId)await chrome.tabs.sendMessage(other.id,{channel:'cc',type:'surface-suspend'}).catch(()=>{});
+ await suspendSurfaces(tabId);
  // Chrome blocks injection into internal pages, its store and other extensions.
  if(!/^https?:/.test(tab.url||''))return;
  try{await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-ping'});}catch{try{await chrome.scripting.executeScript({target:{tabId},files:['content.js']});}catch{return;}}
  const latest=(await chrome.tabs.query({active:true,windowId}))[0];if(latest?.id!==tabId||!(await chrome.windows.get(windowId)).focused)return;
  state=(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState;
- const target=new URL(tab.url);if(['checkout.stripe.com','billing.stripe.com'].includes(target.hostname)||(['convertecall.pro','pay.convertecall.pro'].includes(target.hostname)&&/^\/(checkout|account\/assinatura)/.test(target.pathname)))state={...state,mode:'dock'};
+ const latestPlacement=await surfacePlacement(tabId);if(latestPlacement.hidden||(!latestPlacement.follow&&latestPlacement.tabId!==tabId))return;const target=new URL(tab.url);if(['checkout.stripe.com','billing.stripe.com'].includes(target.hostname)||(['convertecall.pro','pay.convertecall.pro'].includes(target.hostname)&&/^\/(checkout|account\/assinatura)/.test(target.pathname)))state={...state,mode:'dock'};
  const floating=await chrome.storage.session.get(['ccFloating:hud','ccFloating:dock']);if(floating['ccFloating:hud']&&state.mode==='surface'&&state.view==='hud')state={...state,mode:'dock'};
- await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-restore',state,detachedDock:!!floating['ccFloating:dock']}).catch(()=>{});
+ await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-restore',state,follow:latestPlacement.follow,detachedDock:!!floating['ccFloating:dock']}).catch(()=>{});
 }
 chrome.tabs.onActivated.addListener(({tabId,windowId})=>queueSurfaceFollow(tabId,windowId));
 chrome.tabs.onUpdated.addListener((tabId,change,tab)=>{if(change.status==='complete'&&tab.active)queueSurfaceFollow(tabId,tab.windowId);});

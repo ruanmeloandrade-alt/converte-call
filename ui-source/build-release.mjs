@@ -6,7 +6,7 @@ const root=resolve('../extension'),out=resolve('../build/extensions'),sha=b=>cre
 const jsonAllowed=new Set(['manifest.json','slim/mobile-runtime.json','slim/rpc-contract.json']);
 const allowed=name=>['.js','.css','.html','.png'].includes(extname(name))||jsonAllowed.has(name);
 const inputs=new Map();
-function walk(dir,prefix=''){for(const e of readdirSync(dir,{withFileTypes:true})){const name=prefix+e.name;if(e.isDirectory())walk(join(dir,e.name),name+'/');else if(allowed(name))inputs.set(name,readFileSync(join(dir,e.name)));}}walk(root);
+function walk(dir,prefix=''){for(const e of readdirSync(dir,{withFileTypes:true})){const name=prefix+e.name;if(e.isDirectory())walk(join(dir,e.name),name+'/');else if(allowed(name)){const bytes=readFileSync(join(dir,e.name));inputs.set(name,name.endsWith('.png')?bytes:Buffer.from(bytes.toString().replace(/\r\n/g,'\n')));}}}walk(root);
 for(const target of ['chrome','edge','firefox']){
  const files=new Map(inputs),manifest=JSON.parse(files.get('manifest.json'));
  manifest.content_scripts.forEach(s=>s.js.unshift('browser-compat.js'));
