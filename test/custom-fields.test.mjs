@@ -13,8 +13,14 @@ test('custom fields persist atomically through authenticated RPC, keep blank def
  const botId=crypto.randomUUID();app.store.mutate(owner.workspaceId,d=>d.bots.push({id:botId,startBlockId:'field',blocks:[{id:'field',kind:'acao',acaoTipo:'definir-campo',campoId:selected.id,campoValor:'A',campoOrigem:'manual'}]}));
  const adapter=new SalesbotStore(app.store,app.evolution,owner.workspaceId);await adapter.run(()=>Runtime.startSalesbotRun(adapter,{workspaceId:owner.workspaceId,leadId:lead,salesbotId:botId}));
  assert.equal((await rpc('getLeadDetail',{leadId:lead})).body.lead.customFields.find(f=>f.id===selected.id).displayValue,'A');
+ const manual=(await rpc('createLeadCustomField',{name:'Origem manual',fieldType:'text'})).body.field;
+ await rpc('setLeadCustomFieldValue',{leadId:lead,fieldId:manual.id,value:'Perfil preenchido'});
+ const copyBot=crypto.randomUUID();app.store.mutate(owner.workspaceId,d=>d.bots.push({id:copyBot,startBlockId:'copy',blocks:[{id:'copy',kind:'acao',acaoTipo:'definir-campo',campoId:selected.id,campoOrigem:'copiar',campoOrigemRef:manual.id}]}));
+ await adapter.run(()=>Runtime.startSalesbotRun(adapter,{workspaceId:owner.workspaceId,leadId:lead,salesbotId:copyBot}));
+ assert.equal((await rpc('getLeadDetail',{leadId:lead})).body.lead.customFields.find(f=>f.id===selected.id).displayValue,'Perfil preenchido');
+ const currentFields=(await rpc('listLeadCustomFields')).body.fields;
  const savedBefore=structuredClone(app.store.get(owner.workspaceId).leads.find(l=>l.id===lead).custom[selected.id]);
- const invalid=await rpc('saveLeadCustomFields',{removedIds:[selected.id],fields:[{name:'Primeiro válido',fieldType:'text'},{name:'Inválido',fieldType:'select',options:[]}]});assert.notEqual(invalid.status,200);assert.deepEqual((await rpc('listLeadCustomFields')).body.fields,fields);assert.deepEqual(app.store.get(owner.workspaceId).leads.find(l=>l.id===lead).custom[selected.id],savedBefore);
+ const invalid=await rpc('saveLeadCustomFields',{removedIds:[selected.id],fields:[{name:'Primeiro válido',fieldType:'text'},{name:'Inválido',fieldType:'select',options:[]}]});assert.notEqual(invalid.status,200);assert.deepEqual((await rpc('listLeadCustomFields')).body.fields,currentFields);assert.deepEqual(app.store.get(owner.workspaceId).leads.find(l=>l.id===lead).custom[selected.id],savedBefore);
  const other=(await call('/v1/auth/register',{registrationMode:'quick',name:'Outra',whatsapp:'5522991234567',email:'other@fields.test',password:'Fields-other-password'})).body;
  assert.equal((await rpc('listLeadCustomFields',{},other.accessToken)).body.fields.some(f=>f.id===selected.id),false);
  await rpc('saveLeadCustomFields',{removedIds:[selected.id],fields:[]});assert.equal(app.store.get(owner.workspaceId).leads.find(l=>l.id===lead).custom[selected.id],undefined);
