@@ -28,10 +28,10 @@ async function restorePortalAccount(force=false){
  if(force!==true&&portalIdentity&&Date.now()-portalAccountCheckedAt<30000)return;
  const epoch=portalAccountEpoch;let timer;
  portalAccountPending=(async()=>{try{
-  if(!portalIdentity){portalAccountStatus='loading';portalAccountError='';if(data)render();}
-  const identity=await Promise.race([service('portal-account'),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('A consulta da conta demorou. Sua sessão foi preservada. Tente novamente.')),15000);})]);
+  if(!portalIdentity){const cached=await chrome.storage.local.get(['ccAccountView','ccAccountVerifiedAt']);if(epoch===portalAccountEpoch&&cached.ccAccountView?.userId&&Date.now()-(cached.ccAccountVerifiedAt||0)<300000){portalIdentity=cached.ccAccountView;portalAccountStatus='connected';}else portalAccountStatus='loading';portalAccountError='';if(data)render();}
+  const identity=await Promise.race([service('portal-account',{force:force===true}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('A consulta da conta demorou. Sua sessão foi preservada. Tente novamente.')),15000);})]);
   if(epoch===portalAccountEpoch){portalIdentity=identity;portalAccountStatus='connected';portalAccountError='';portalAccountCheckedAt=Date.now();}
- }catch(error){if(epoch===portalAccountEpoch){portalAccountError=error.message;if(error.status===401){portalAccountStatus='disconnected';portalIdentity=null;}else portalAccountStatus=portalIdentity?'connected':'error';}}
+ }catch(error){if(epoch===portalAccountEpoch){portalAccountError=error.message;if(error.status===401||error.status===403){portalAccountStatus='disconnected';portalIdentity=null;}else portalAccountStatus=portalIdentity?'connected':'error';}}
  finally{clearTimeout(timer);if(data&&(!portalIdentity||!document.querySelector('.modal,dialog[open]')&&!document.activeElement?.matches('input,textarea,select')))render();}
  })().finally(()=>portalAccountPending=null);return portalAccountPending;
 }
