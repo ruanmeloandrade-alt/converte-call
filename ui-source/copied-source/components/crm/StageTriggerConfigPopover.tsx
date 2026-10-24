@@ -12,6 +12,7 @@ import {
  DropdownMenu,
  DropdownMenuContent,
  DropdownMenuItem,
+ DropdownMenuCheckboxItem,
  DropdownMenuLabel,
  DropdownMenuSeparator,
  DropdownMenuTrigger,
@@ -33,7 +34,7 @@ import type {
  TriggerSpec,
 } from "@/lib/crm-mock";
 import { normalizeTrigger } from "@/lib/crm-mock";
-import { listConnectedLeadSources } from "@/lib/crm.functions";
+import { listConnectedLeadSources, listWorkspaceUsers } from "@/lib/crm.functions";
 import { listLeadCustomFields } from "@/lib/leads.functions";
 
 const ACTIVE_OPTIONS: { value: ActiveMode; label: string }[] = [
@@ -90,10 +91,7 @@ function labelForField(field: ConditionField, customName?: string): string {
  }
 }
 
-/**
- * Seletor baseado em DropdownMenu. O Radix Select dentro de um Popover
- * perde o clique nos itens, então usamos menu (que funciona aninhado).
- */
+/** Seletor nativo: não abre um portal fora do editor de gatilho. */
 function PickerSelect({
  prefix,
  value,
@@ -107,34 +105,13 @@ function PickerSelect({
  onChange: (value: string) => void;
  className?: string;
 }) {
- const current = options.find((o) => o.value === value);
  return (
-  <DropdownMenu modal={false}>
-   <DropdownMenuTrigger asChild>
-    <button
-     type="button"
-     className={cn(
-      "w-full h-8 flex items-center gap-1 rounded border border-border bg-background px-2 text-xs text-left hover:border-primary/40",
-      className,
-     )}
-    >
-     {prefix && <span className="text-muted-foreground shrink-0">{prefix}</span>}
-     <span className="truncate flex-1">{current?.label ?? "Selecionar"}</span>
-     <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0" />
-    </button>
-   </DropdownMenuTrigger>
-   <DropdownMenuContent align="start" className="w-[320px] max-w-[92vw] z-[100]">
-    {options.map((o) => (
-     <DropdownMenuItem
-      key={o.value}
-      onSelect={() => onChange(o.value)}
-      className={cn("text-xs cursor-pointer", o.value === value && "bg-primary/10 text-primary")}
-     >
-      {o.label}
-     </DropdownMenuItem>
-    ))}
-   </DropdownMenuContent>
-  </DropdownMenu>
+  <select aria-label={prefix || "Selecionar opção"} value={value}
+   className={cn("w-full h-8 min-w-0 rounded border border-border bg-background px-2 text-xs text-foreground",className)}
+   onClick={e=>e.stopPropagation()} onChange={e=>onChange(e.target.value)}>
+   {!options.some(o=>o.value===value) && <option value="">Selecionar</option>}
+   {options.map(o=><option key={o.value} value={o.value}>{prefix ? `${prefix} ${o.label}` : o.label}</option>)}
+  </select>
  );
 }
 
@@ -174,6 +151,8 @@ export function StageTriggerConfigPopover({
 
  const listSources = useServerFn(listConnectedLeadSources);
  const listCustomFields = useServerFn(listLeadCustomFields);
+ const loadUsers = useServerFn(listWorkspaceUsers);
+ const usersQ = useQuery({queryKey:["stage-trigger-users",action.id],queryFn:()=>loadUsers({}),enabled:open,staleTime:0,gcTime:0});
  const sourcesQ = useQuery({
   queryKey: ["connected-lead-sources"],
   queryFn: () => listSources({}),
@@ -261,6 +240,11 @@ export function StageTriggerConfigPopover({
 
  function validatedDraft(): ExecutionConfig {
   let trigger = normalizeSupportedTrigger(draft.trigger);
+  if (!Number.isFinite(Number(draft.delayMinutes ?? 0)) || Number(draft.delayMinutes ?? 0) < 0) throw new Error("Informe um tempo válido.");
+  if (trigger.kind === "created-or-moved" && draft.delayUnit && Number(draft.delayMinutes ?? 0) <= 0) throw new Error("Informe um tempo maior que zero para aguardar na etapa.");
+  if (trigger.kind === "daily" && !/^([01]\d|2[0-3]):[0-5]\d$/.test(trigger.time)) throw new Error("Escolha o horário da execução diária.");
+  if (trigger.kind === "exact-datetime" && (!trigger.at || !Number.isFinite(new Date(trigger.at).getTime()) || new Date(trigger.at).getTime() <= Date.now())) throw new Error("Escolha uma data e hora futuras.");
+  if (draft.active === "custom" && !(draft.activeWindows?.length ? draft.activeWindows : draft.activeWindow ? [draft.activeWindow] : []).some(w=>w.days.length && /^([01]\d|2[0-3]):[0-5]\d$/.test(w.from) && /^([01]\d|2[0-3]):[0-5]\d$/.test(w.to) && w.from!==w.to)) throw new Error("Configure os dias e horários do período personalizado.");
 
   if (trigger.kind === "field-updated") {
    if (trigger.fieldId || trigger.fieldName) {
@@ -399,18 +383,15 @@ export function StageTriggerConfigPopover({
          </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[300px] z-[100]">
           {sources.map((s) => (
-           <DropdownMenuItem
+           <DropdownMenuCheckboxItem
             key={s.id}
-            onSelect={(e) => { e.preventDefault(); toggleSource(s.id); }}
+            checked={selectedSourceIds.has(s.id)}
+            onCheckedChange={() => toggleSource(s.id)}
+            onSelect={(e) => { e.preventDefault(); }}
             className="text-xs"
            >
-            <Checkbox
-             checked={selectedSourceIds.has(s.id)}
-             className="mr-2"
-             onCheckedChange={() => toggleSource(s.id)}
-            />
             {s.label}
-           </DropdownMenuItem>
+           </DropdownMenuCheckboxItem>
           ))}
          </DropdownMenuContent>
         </DropdownMenu>
@@ -443,13 +424,15 @@ export function StageTriggerConfigPopover({
          />
         )}
 
-        <Input
+        {c.field === "assignee" ? <PickerSelect value={c.value} className="flex-1"
+         options={(usersQ.data?.users ?? []).map(u=>({value:u.id,label:u.name}))}
+         onChange={value=>updateCondition(i,{value})} /> : <Input
          value={c.value}
          onChange={(e) => updateCondition(i, { value: e.target.value })}
          className="h-7 text-[11px] flex-1"
          placeholder={c.field === "no-tag" ? "(qualquer)" : "valor"}
          type={c.field === "value" ? "number" : "text"}
-        />
+        />}
         <button
          onClick={() => removeCondition(i)}
          className="text-muted-foreground hover:text-destructive"
@@ -520,7 +503,8 @@ export function StageTriggerConfigPopover({
        delayMinutes={draft.delayMinutes ?? 0}
        customFields={customFields.map((f) => ({ id: f.id, name: f.name, fieldType: f.fieldType }))}
        onTriggerChange={(spec) => update("trigger", spec)}
-       onDelayChange={(minutes) => update("delayMinutes", minutes)}
+       delayUnit={draft.delayUnit}
+       onDelayChange={(minutes, unit, clearUnit) => setDraft(prev=>({...prev,delayMinutes:minutes,...(clearUnit?{delayUnit:undefined}:unit?{delayUnit:unit}:{})}))}
       />
       <p className="text-[10px] text-muted-foreground leading-tight">
        A mensagem será enviada aos contatos que se comunicaram com você nos aplicativos de mensagens que você integrou.
@@ -795,28 +779,31 @@ function toMinutes(amount: number, unit: "minutes" | "hours" | "days"): number {
 function ExecutionTiming({
  spec,
  delayMinutes,
+ delayUnit,
  customFields,
  onTriggerChange,
  onDelayChange,
 }: {
  spec: TriggerSpec;
  delayMinutes: number;
+ delayUnit?: "minutes" | "hours" | "days";
  customFields: Array<{ id: string; name: string; fieldType?: string }>;
  onTriggerChange: (spec: TriggerSpec) => void;
- onDelayChange: (minutes: number) => void;
+ onDelayChange: (minutes: number, unit?: "minutes" | "hours" | "days", clearUnit?: boolean) => void;
 }) {
- const delay = splitDelay(delayMinutes);
- const hasDelay = Math.max(0, Number(delayMinutes || 0)) > 0;
+ const unit = delayUnit ?? splitDelay(delayMinutes).unit;
+ const delay = {unit, amount: Math.max(0,Number(delayMinutes)||0) / toMinutes(1,unit)};
+ const hasDelay = Math.max(0, Number(delayMinutes || 0)) > 0 || !!delayUnit;
  const current: TimingValue =
   spec.kind === "created-or-moved" && hasDelay ? "dwell" : (spec.kind as TimingValue);
 
  function selectTiming(value: TimingValue) {
   if (value === "dwell") {
    onTriggerChange({ kind: "created-or-moved" });
-   onDelayChange(toMinutes(delay.amount || 30, delay.unit));
+   onDelayChange(toMinutes(delay.amount || 30, delay.unit),delay.unit);
    return;
   }
-  onDelayChange(0);
+  onDelayChange(0,undefined,true);
   if (value === "tag-added") { onTriggerChange({ kind: "tag-added", tags: [] }); return; }
   if (value === "field-updated") { onTriggerChange({ kind: "field-updated", entity: "lead" }); return; }
   if (value === "hours-before-field") {
@@ -887,8 +874,8 @@ function ExecutionTiming({
       <Input
        type="number"
        min={1}
-       value={delay.amount || 1}
-       onChange={(e) => onDelayChange(toMinutes(Number(e.target.value), delay.unit))}
+       value={delay.amount || ""}
+       onChange={(e) => onDelayChange(toMinutes(Number(e.target.value), delay.unit),delay.unit)}
        className="h-8 text-xs w-20"
       />
       <PickerSelect
@@ -899,7 +886,7 @@ function ExecutionTiming({
         { value: "hours", label: "horas" },
         { value: "days", label: "dias" },
        ]}
-       onChange={(unit) => onDelayChange(toMinutes(delay.amount || 1, unit as "minutes" | "hours" | "days"))}
+       onChange={(unit) => onDelayChange(toMinutes(delay.amount || 1, unit as "minutes" | "hours" | "days"), unit as "minutes" | "hours" | "days")}
       />
      </div>
      <p className="text-[10px] text-muted-foreground leading-tight">

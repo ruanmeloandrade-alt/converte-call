@@ -1,3 +1,5 @@
+import {SalesbotStore} from './salesbot-store.mjs';
+import * as StageRuntime from './salesbot-runtime.original.mjs';
 import {objectivePixelOptions} from './pixel-leads.mjs';
 import {leadSales} from './lead-sales.mjs';
 import {normalizeProduct, prepareOrder, applyOrderStock} from './product-policy.mjs';
@@ -43,6 +45,8 @@ async function rpc(store, ws, module, name, arg = {}) {
   const p = arg?.data ?? arg ?? {};
   const d = store.get(ws), baseline = structuredClone(d);
   let result, changed = false;
+  const createdLeadIds=[];
+  const workspaceUsers=()=>store.all('SELECT u.id,u.email,p.profile FROM users u JOIN team_members m ON m.user_id=u.id LEFT JOIN account_profiles p ON p.user_id=u.id WHERE m.workspace_id=? AND m.active=1',ws).map(u=>{const profile=u.profile?store.vault.open(u.profile):{};return {id:u.id,email:u.email,name:[profile.firstName,profile.lastName].filter(Boolean).join(' ')||u.email};});
   const now = () => (/* @__PURE__ */ new Date()).toISOString();
   if(module==='@/lib/workflow.functions'){const response=workflowRPC(d,name,p,Core);if(response.changed)store.put(ws,d);return response.result;}
   switch (name) {
@@ -58,10 +62,10 @@ async function rpc(store, ws, module, name, arg = {}) {
       result = { isAdmin: false, isSuperAdmin: false, roles: [] };
       break;
     case "listWorkspaceUsers":
-      result = { users: store.all("SELECT id,email FROM users WHERE workspace_id=?", ws) };
+      result = { users: workspaceUsers() };
       break;
     case "listInternalMessageTargets":
-      result = { users: store.all("SELECT id,email FROM users WHERE workspace_id=?", ws), departments: [], admins: [] };
+      result = { users: workspaceUsers(), departments: [], admins: [] };
       break;
     case "listWorkspaceChannels":
       result = {whatsapp:d.connections?.whatsapp?.status==="connected"?[{id:d.connections.whatsapp.sessionId||"account-whatsapp",label:d.connections.whatsapp.phone||"WhatsApp conectado",status:"connected"}]:[],instagram:[],facebook:[],email:[]};
@@ -180,6 +184,7 @@ async function rpc(store, ws, module, name, arg = {}) {
         delete l.order;
         d.leads.push(l);
         Core.log(d, "lead-created", l.id, "Cliente criado: " + l.name);
+        createdLeadIds.push(l.id);
       }
       if (p.order) {
         const selectedProduct = d.products.find(x => x.id === p.order.productId);
@@ -212,6 +217,8 @@ async function rpc(store, ws, module, name, arg = {}) {
     case "duplicateLead": {
       const l = structuredClone(findLead(d, p));
       l.id = id();
+      l.createdAt = now();
+      createdLeadIds.push(l.id);
       l.name = p.name || l.name + " (c\xF3pia)";
       d.leads.push(l);
       result = { leadId: l.id };
@@ -318,16 +325,39 @@ async function rpc(store, ws, module, name, arg = {}) {
       result = { automations: row?.automations || {} };
       break;
     }
-    case "saveStageAutomations":
-      upsert(d.slimStageAutomations, { id: p.pipelineId, automations: p.automations || p.actions || {} });
-      changed = true;
-      result = { ok: true, count: Object.values(p.automations || p.actions || {}).reduce((n, a) => n + (a?.length || 0), 0) };
-      break;
+    case "saveStageAutomations": {
+      const funnel=d.funnels.find(f=>f.id===p.pipelineId);if(!funnel)throw Error('Funil fora desta conta.');
+      const automations=p.automations||p.actions||{};
+      if(!automations||typeof automations!=='object'||Array.isArray(automations))throw Error('Gatilhos inválidos.');
+      for(const [stage,actions] of Object.entries(automations)){
+       if(!funnel.stages.some(s=>s.id===stage)||!Array.isArray(actions)||actions.some(a=>!a?.id))throw Error('Etapa ou gatilho inválido.');
+       if(actions.some(a=>a.stageIds?.some(id=>!funnel.stages.some(s=>s.id===id))))throw Error('Destino fora deste funil.');
+      }
+      upsert(d.slimStageAutomations,{id:p.pipelineId,automations});store.put(ws,d);changed=false;
+      const adapter=new SalesbotStore(store,null,ws);let backfilled=0;const seen=new Set();
+      await adapter.run(async()=>{for(const [stage,actions]of Object.entries(automations))for(const action of actions){
+       if(seen.has(action.id)||action.enabled===false||!action.execution?.applyToExisting)continue;seen.add(action.id);
+       const receipt=await StageRuntime.backfillAutomationAction(adapter,{workspaceId:ws,pipelineId:p.pipelineId,action,stageIds:action.stageIds?.length?action.stageIds:[stage],requestId:p.applyRequestId});backfilled+=receipt.queued;
+      }
+      await StageRuntime.scheduleStageTimerActions(adapter,true,{workspaceId:ws,pipelineId:p.pipelineId});});
+      const latest=store.get(ws),saved=latest.slimStageAutomations.find(r=>r.id===p.pipelineId);
+      // Clear only the command whose definition we just confirmed, never newer edits.
+      for(const actions of Object.values(saved?.automations||{}))for(const action of actions){
+       const expected=Object.values(automations).flat().find(a=>a.id===action.id);
+       if(expected&&JSON.stringify(action)===JSON.stringify(expected)&&action.execution)action.execution.applyToExisting=false;
+      }
+      store.put(ws,latest);
+      result={ok:true,count:Object.values(automations).reduce((n,a)=>n+a.length,0),backfilled};break;
+    }
+    case "backfillAutomationAction": {
+      const adapter=new SalesbotStore(store,null,ws),row=d.slimStageAutomations.find(r=>r.id===p.pipelineId);
+      const action=Object.values(row?.automations||{}).flat().find(a=>a.id===p.action?.id);
+      if(!action)throw Error('Gatilho não salvo neste funil.');
+      const stages=action.stageIds?.length?action.stageIds:Object.entries(row.automations).filter(([,actions])=>actions.some(a=>a.id===action.id)).map(([stage])=>stage);
+      result=await adapter.run(()=>StageRuntime.backfillAutomationAction(adapter,{workspaceId:ws,pipelineId:p.pipelineId,action,stageIds:stages,requestId:p.requestId}));break;
+    }
     case "triggerStageAutomations":
-    case "backfillAutomationAction":
-      store.enqueue(ws, "stage", { leadId: p.leadId, trigger: "manual" });
-      result = { ok: true, queued: true };
-      break;
+      findLead(d,p);store.enqueue(ws,"crm-trigger",{leadId:p.leadId,event:"manual",eventId:p.requestId||id()});result={ok:true,queued:true};break;
     case "listProductCatalogs":
       result = d.catalogs.map((c) => ({ ...c, products: d.products.filter((p2) => p2.catalogId === c.id) }));
       break;
@@ -502,9 +532,11 @@ async function rpc(store, ws, module, name, arg = {}) {
     case "listWorkflowPipelinesLite":
       result = { pipelines: d.projects.map((p2) => ({ id: p2.id, name: p2.name, stages: p2.columns })) };
       break;
-    case "listConnectedLeadSources":
-      result = { sources: d.crmSources };
+    case "listConnectedLeadSources": {
+      const instance=store.one("SELECT instance_name,phone FROM instances WHERE workspace_id=? AND status='connected'",ws);
+      result={sources:[...d.crmSources.map(s=>({...s,label:s.label||s.display_name||s.name||s.provider})),...(instance?[{id:instance.instance_name,label:instance.phone?`WhatsApp ${instance.phone}`:'WhatsApp conectado',provider:'whatsapp'}]:[])]};
       break;
+    }
     case "listForms":
       result = d.forms;
       break;
@@ -538,7 +570,10 @@ async function rpc(store, ws, module, name, arg = {}) {
     default:
       throw Error("Esta a\xE7\xE3o do Slim requer o servidor conectado: " + name + ".");
   }
-  if (changed) store.put(ws, d);
+  if (changed) {
+   const persist=()=>{store.put(ws,d);for(const leadId of createdLeadIds)store.enqueue(ws,"crm-trigger",{leadId,event:"created",eventId:"lead-created:"+leadId},{id:"lead-created:"+leadId});};
+   if(createdLeadIds.length)store.transaction(persist);else persist();
+  }
   return result;
 }
 export {

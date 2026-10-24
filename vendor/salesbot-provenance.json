@@ -11,7 +11,7 @@
   "files": [
     {
       "file": "lib/stage-automation-engine.server.ts",
-      "sha256": "3987430be039fc5fb62894b61fa4f28a3f67224e51fcac62ff134ebe759104a0"
+      "sha256": "b2766f3143d4a6dba4ea38d85bccc5208e3a97b487198d45c5667005001f3a9c"
     },
     {
       "file": "lib/salesbot-runtime.server.ts",
@@ -19,91 +19,95 @@
     },
     {
       "file": "lib/forms.functions.ts",
-      "sha256": "8cb7dd3013e39f69f505b50552c6a4f14a822103010a943ef598ed41df1c29c4"
+      "sha256": "6767658117d253346f37c5b3b21a3d15d5472ac2998671ed6b3feaccbd2c3dc6"
     },
     {
       "file": "lib/crm-mock.ts",
-      "sha256": "81c08e2ff63720c2546ba8d280b29813bd2e39054f3df7f7a31f1841e97747b8"
+      "sha256": "ec09260f3084001af65d9009da7c8e90490a92faa1f3a8d65c332dee2d378ee6"
     },
     {
       "file": "lib/salesbot-group-actions.server.ts",
-      "sha256": "b7fd8ebfee1005ac489c7033cb87d26c723360306699e7008e86c6e507dc8b1a"
+      "sha256": "e7ac5f834227f1a294dbc8520ccc33fcfba1e233459783e8a2e2492a4b60c0f3"
     },
     {
       "file": "lib/execution-context.ts",
-      "sha256": "aee778bbd4339348159d7d805c91fbe05e23e2a2b1f76306e612ef7e8b82cffa"
+      "sha256": "a28834003faa46d435bac0376f956d319e39b2fdf86a319ad10d12c63fe514d8"
     },
     {
       "file": "lib/salesbot-ai-claim.server.ts",
-      "sha256": "83cc02662a618ca25a953644c60cf7ea6eef1a12dea8543563e9e9a4f51cffcb"
+      "sha256": "7d61e8877a1c39a4ca0c230af1b59b140b1bc012561d17c75d875b5e58ab2853"
     },
     {
       "file": "lib/salesbot-run-guards.server.ts",
-      "sha256": "cf702f7654723efd6ba5ae5d18969bd72b78b915ce0408a054c0e2ab3e8ce044"
+      "sha256": "4d1a5c742031d25359db6c0cf2ac75519f7a9b2b8359fcd6242b7b344794260f"
     },
     {
       "file": "lib/ai-agent-x1-guards.server.ts",
-      "sha256": "b0217f2fb1c680d0d9128ccb0eaea922e1438276a8e9019b69bfd9503c0dab44"
+      "sha256": "096aab7fe618d9f1659cb4971dfa51924208784101a2090d8941a320f33705c5"
     },
     {
       "file": "lib/whatsapp-identity.ts",
-      "sha256": "9ee365f4b4c5d97bf5bf74f665c4ccfb21ff7419ffa4cdf978f22d3dc72f6865"
+      "sha256": "e677e1ac23c060f70a50876a93ad392373b7b097e60c87f75dfbe2acea41a354"
     },
     {
       "file": "lib/agent-action-rules.ts",
-      "sha256": "e12a9512b9e6f4ed00a929887887e9af8d12c71e7cafc867fbb78eea9aaa1d6a"
+      "sha256": "87911565bd24e4c654b234efa0437d9d8fdea46164f3724afe0f372c54764b8b"
     },
     {
       "file": "lib/whatsapp-session-routing.server.ts",
-      "sha256": "2d0c9fae7837cd2caf4260293681d9e7bff87b892003b20eaa28acac9aacc45f"
+      "sha256": "a9f2e70bcf55b839bee103f3e666770f666dd57831ea5962491421233e4e42a6"
     },
     {
       "file": "lib/crm-event-dispatch.server.ts",
-      "sha256": "adad864009cee8599bbce5137143944b36481c3dcb01b06bf0fa52aa6cc11f11"
+      "sha256": "50bde299c329fceb6c2358631d41b0aaa6b77fd329fb4989cdc98b203e384c3c"
     },
     {
       "file": "lib/agent-trigger-eval.ts",
-      "sha256": "c01b0450a3da6f48ad4f0264ef51966a508e026ad7a7601577e841cdff322f20"
+      "sha256": "5da7571ef3fa2747c430bc8228c934c1edd325815471ac2d342ccca8dc8f8bea"
     },
     {
       "file": "lib/agent-conditional-rules.ts",
-      "sha256": "70d4713c30d25d6a391ffa281e4661b0164d6eaeada856f0e852dd7f3a994c1f"
+      "sha256": "4b7834f81e4787c83d52d98d9d7f796db28ae53e3f3509e7c3ebce2e465ccb09"
     },
     {
       "file": "lib/workflow-task-create.server.ts",
-      "sha256": "9d92fdb57fd6e5eed05039889608534fe0d69623f64db80d1adef34d62f6e782"
+      "sha256": "b13885596c4e0a11af2a3ac3b78da902a21bcf9402315e87a1e2eabd487568ef"
     },
     {
       "file": "lib/agent-knowledge.server.ts",
-      "sha256": "d84ecdd04d057a26e08555587257e9e5de5eea8a090f9ed24ed2d13790fec195"
+      "sha256": "4a894894353d4d553e561a4cd3382148c4954fb5678548c8378fda060661d858"
     },
     {
       "file": "lib/audio-transcription.server.ts",
-      "sha256": "6ae2e3bee898f5420204c2bfe86bfea871e64df34da0ab325936738a9bff2936"
+      "sha256": "69a2b91f7c5ae9603002ae6985d96a1ea615cd0846b40f600da1e09e29dd53f9"
     },
     {
       "file": "lib/salesbot-external-automation.server.ts",
-      "sha256": "6e369cca19c5af21db485de8cdbe9f3ac9603d7c20afbcf42b453ea28b7a4b64"
+      "sha256": "6f02fb240158f4bfef92d15062bdc6e68d45f39350d8516f8f7f27c48744232a"
     },
     {
       "file": "lib/agent-sentiment-reaction.ts",
-      "sha256": "03afe0c079c3f1a079d475ebe28c3042d8bd5fa0ac5aca314c2bb47c356433c6"
+      "sha256": "96d661bfa381fbd36ea86f3da324d18f7f84f82a7c7978439d623e609fec0a03"
     },
     {
       "file": "lib/evolution-groups.server.ts",
-      "sha256": "24779e1e267904ac208354a97a75c395820bbc2488ab4b629df2a56437c17e58"
+      "sha256": "e8ca2e5926124257f1743aacd52794916fe0d1efd6e0d62811767af892306808"
     },
     {
       "file": "lib/agent-system-data.server.ts",
-      "sha256": "c1c4055fdbee5560b3ba06901b8c26d2d9d1c0d1463625ce327053c30713c2de"
+      "sha256": "a05d5a24ddfc0e36d425c548ef062a8823aefc37e50fb0d5f85cdab4d268903a"
     },
     {
       "file": "lib/salesbot-webhook.server.ts",
-      "sha256": "92b53a7ee8f6765e9323cd6e87336f613e51e65f0cbef8946939fcb26aa8195b"
+      "sha256": "5ab7f0861d69874b660f610e71c482fd78009c8a9ca1ca51deaf11343a390598"
     },
     {
       "file": "lib/external-automations-events.ts",
-      "sha256": "8f2e3698d01dc7aec78cb2f2330a2f9a455334b6734e4a68b026b311609f9322"
+      "sha256": "ff223a168001ffebaf7d22b034d4a41a9d2bda7588f0b232e22916f697665d25"
+    },
+    {
+      "file": "lib/stage-execution.core.ts",
+      "sha256": "208754584d75a02de4e839be94ead67845fae2902e726e42afea4985df90d591"
     }
   ]
 }

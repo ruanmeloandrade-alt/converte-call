@@ -18,7 +18,7 @@ class Query{
  constructor(adapter,table){Object.assign(this,{adapter,table,filters:[],orders:[],operation:'select',payload:null,cap:Infinity,offset:0,one:false,required:false});}
  select(_columns,options={}){this.head=!!options.head;return this;}
  insert(payload){this.operation='insert';this.payload=payload;return this;}
- upsert(payload,options={}){this.operation='upsert';this.payload=payload;this.conflict=options.onConflict?.split(',');return this;}
+ upsert(payload,options={}){this.operation='upsert';this.payload=payload;this.conflict=options.onConflict?.split(',');this.ignoreDuplicates=!!options.ignoreDuplicates;return this;}
  update(payload){this.operation='update';this.payload=payload;return this;}
  delete(){this.operation='delete';return this;}
  eq(k,v){this.filters.push(predicate(k,'eq',v));return this;}neq(k,v){this.filters.push(predicate(k,'neq',v));return this;}
@@ -34,7 +34,17 @@ class Query{
  then(resolve,reject){return Promise.resolve().then(()=>this.execute()).then(resolve,reject);}
  execute(){return this.adapter.store.transaction(()=>{let rows=this.adapter.rows(this.table).filter(row=>this.filters.every(filter=>filter(row)));for(const {key,ascending}of this.orders.toReversed())rows.sort((a,b)=>String(get(a,key)||'').localeCompare(String(get(b,key)||''),undefined,{numeric:true})*(ascending?1:-1));const count=rows.length;rows=rows.slice(this.offset,this.offset+this.cap);
   if(this.operation==='insert'&&this.payload?.dedupe_key&&this.adapter.rows(this.table).some(r=>r.dedupe_key===this.payload.dedupe_key))return {data:null,error:{code:'23505',message:'Evento já registrado.'},count:0};
-  if(this.operation==='insert'||this.operation==='upsert'){rows=(Array.isArray(this.payload)?this.payload:[this.payload]).map(input=>{if(input.workspace_id&&input.workspace_id!==this.adapter.ws)throw Error('Workspace de execução divergente.');let previous;if(this.operation==='upsert')previous=this.adapter.rows(this.table).find(row=>(this.conflict||['id']).every(key=>input[key]!==undefined&&row[key]===input[key]));const row={...previous,...input,id:previous?.id||input.id||randomUUID(),workspace_id:this.adapter.ws,created_at:previous?.created_at||input.created_at||at()};this.adapter.write(this.table,row);return row;});}
+  if(this.operation==='insert'||this.operation==='upsert'){
+   const keys=this.conflict||['id'],key=input=>JSON.stringify(keys.map(k=>input[k]));
+   const existing=new Map(this.operation==='upsert'?this.adapter.rows(this.table).map(row=>[key(row),row]):[]);
+   rows=(Array.isArray(this.payload)?this.payload:[this.payload]).flatMap(input=>{
+    if(input.workspace_id&&input.workspace_id!==this.adapter.ws)throw Error('Workspace de execução divergente.');
+    const previous=keys.every(k=>input[k]!==undefined)?existing.get(key(input)):undefined;
+    if(previous&&this.ignoreDuplicates)return [];
+    const row={...previous,...input,id:previous?.id||input.id||randomUUID(),workspace_id:this.adapter.ws,created_at:previous?.created_at||input.created_at||at()};
+    this.adapter.write(this.table,row);existing.set(key(row),row);return [row];
+   });
+  }
   else if(this.operation==='update'){rows=rows.map(row=>{if(this.payload.workspace_id&&this.payload.workspace_id!==this.adapter.ws)throw Error('Workspace de atualização divergente.');const next={...row,...this.payload,workspace_id:this.adapter.ws};this.adapter.write(this.table,next);return next;});}
   else if(this.operation==='delete'){for(const row of rows)this.adapter.remove(this.table,row);}
   if(this.required&&rows.length!==1)return {data:null,error:{message:'Registro da automação não encontrado.'},count};return {data:this.head?null:this.one?rows[0]||null:rows,error:null,count};});}
@@ -45,13 +55,13 @@ export class SalesbotStore{
  mutate(change){const save=()=>{const data=this.store.get(this.ws);change(data);this.store.put(this.ws,data,{automationEvents:false});};return this.store.db.isTransaction?save():this.store.transaction(save);}
  from(table){return new Query(this,table);}
  rows(table){const d=this.store.get(this.ws),ws=this.ws,wrap=row=>({...row,workspace_id:ws});
-  if(table==='leads')return d.leads.filter(l=>!this.leadId||l.id===this.leadId).map(l=>{const f=d.funnels.find(f=>f.id===l.funnelId),s=f?.stages.find(s=>s.name===l.stage);return {...l,...Object.fromEntries(Object.entries(fields).map(([key,field])=>[key,l[field]??null])),id:l.id,status:!l.status||l.status==='open'?'active':l.status,phone:/^[1-9]\d{9,14}$/.test(l.phone||'')?'+'+l.phone:l.phone,workspace_id:ws,stage_id:s?.id||null,pipeline_id:f?.id||null,tags:l.tags||[],phone_normalized:l.phone,custom_data:l.customData||{},crm_sources:null};});
+  if(table==='leads')return d.leads.filter(l=>!this.leadId||l.id===this.leadId).map(l=>{const f=d.funnels.find(f=>f.id===l.funnelId),s=f?.stages.find(s=>s.name===l.stage);return {...l,...Object.fromEntries(Object.entries(fields).map(([key,field])=>[key,l[field]??null])),id:l.id,status:!l.status||l.status==='open'?'active':l.status,phone:/^[1-9]\d{9,14}$/.test(l.phone||'')?'+'+l.phone:l.phone,workspace_id:ws,stage_id:s?.id||null,pipeline_id:f?.id||null,tags:l.tags||[],phone_normalized:l.phone,custom_data:{...l,...l.customData,...(l.source==='WhatsApp'&&!l.customData?.whatsapp_session_id?{whatsapp_session_id:this.evolution?.instance(ws)?.instance_name}: {})},crm_source_id:l.crmSourceId||null,workspaces:{business_hours:d.businessHours||null},crm_sources:null};});
   if(table==='salesbots')return d.bots.map(b=>wrap({...b,local_id:b.id,name:b.nome||b.name,scope:b.escopo||'individual',is_active:b.isActive!==false,settings:{maxInteracoes:b.maxInteracoes},gatilhos:b.gatilhos||[]}));
   if(table==='salesbot_blocks')return d.bots.flatMap(bot=>{const ids=new Map((bot.blocks||[]).map(b=>[b.id,blockId(ws,bot.id,b.id)]));const branches=value=>Array.isArray(value)?value.map(branches):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,/(nextBlockId|targetBlockId)$/i.test(k)&&typeof v==='string'?ids.get(v)||v:branches(v)])):value;return (bot.blocks||[]).map(b=>{const config=branches({...b,isStartBlock:bot.startBlockId===b.id});return wrap({id:ids.get(b.id),local_id:b.id,salesbot_id:bot.id,type:b.kind||b.type,config,next_block_id:ids.get(b.nextBlockId)||null});});});
   if(table==='pipelines')return d.funnels.map(f=>wrap({...f,name:f.name,is_active:true}));
   if(table==='pipeline_stages')return d.funnels.flatMap(f=>f.stages.map((s,i)=>wrap({...s,pipeline_id:f.id,position:i,is_active:true})));
   if(table==='conversation_ai_agents'){const provider=String(d.providers.ai||'openai'),saved=this.store.secret(ws,provider==='openai'?'openai':'ai:'+provider),defaultModel=saved?.model||AI_DEFAULTS[provider]?.model;return d.agents.map(a=>{const requested=String(a.model||'').replace(/^openai\//,'');const model=provider!=='openai'||!requested||/^gpt-5\.[345](?:[-.]|$)/.test(requested)?defaultModel:requested;return wrap({...a,system_prompt:a.system_prompt||a.instructions,model:'openai/'+model,metadata:a.metadata||{objective_tree:a.objectiveTree,settings:{mode:a.mode||'prompt'}}});});}
-  if(table==='crm_stage_automations')return (d.slimStageAutomations||[]).flatMap(f=>Object.entries(f.automations||{}).flatMap(([stage,actions])=>(Array.isArray(actions)?actions:[]).map((action,i)=>wrap({id:action.id,pipeline_id:f.id,stage_id:stage,action,position:i,enabled:action.enabled!==false}))));
+  if(table==='crm_stage_automations')return (d.slimStageAutomations||[]).flatMap(f=>Object.entries(f.automations||{}).flatMap(([stage,actions])=>(Array.isArray(actions)?actions:[]).map((action,i)=>wrap({id:action.id,pipeline_id:f.id,stage_id:stage,action_id:action.id,action,position:i,enabled:action.enabled!==false}))));
   if(table==='whatsapp_web_sessions'){const row=this.evolution.instance(ws);return row?[wrap({id:row.instance_name,provider:'evolution',status:row.status==='connected'?'conectado':row.status,instance_name:row.instance_name,last_connected_at:row.updated_at})]:[];}
   if(table==='workspaces')return [{id:ws,business_hours:d.businessHours||null,owner_id:this.store.one('SELECT user_id FROM team_members WHERE workspace_id=? AND role=?',ws,'owner')?.user_id}];
   if(table==='workspace_members')return this.store.all('SELECT user_id,role,active FROM team_members WHERE workspace_id=?',ws).map(m=>wrap({...m,id:m.user_id,status:m.active?'active':'inactive'}));

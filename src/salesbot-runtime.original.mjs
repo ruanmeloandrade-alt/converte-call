@@ -1017,9 +1017,3454 @@ var init_forms_functions = __esm({
   }
 });
 
+// ../node_modules/date-fns/locale/en-US/_lib/formatDistance.js
+var formatDistanceLocale, formatDistance;
+var init_formatDistance = __esm({
+  "../node_modules/date-fns/locale/en-US/_lib/formatDistance.js"() {
+    formatDistanceLocale = {
+      lessThanXSeconds: {
+        one: "less than a second",
+        other: "less than {{count}} seconds"
+      },
+      xSeconds: {
+        one: "1 second",
+        other: "{{count}} seconds"
+      },
+      halfAMinute: "half a minute",
+      lessThanXMinutes: {
+        one: "less than a minute",
+        other: "less than {{count}} minutes"
+      },
+      xMinutes: {
+        one: "1 minute",
+        other: "{{count}} minutes"
+      },
+      aboutXHours: {
+        one: "about 1 hour",
+        other: "about {{count}} hours"
+      },
+      xHours: {
+        one: "1 hour",
+        other: "{{count}} hours"
+      },
+      xDays: {
+        one: "1 day",
+        other: "{{count}} days"
+      },
+      aboutXWeeks: {
+        one: "about 1 week",
+        other: "about {{count}} weeks"
+      },
+      xWeeks: {
+        one: "1 week",
+        other: "{{count}} weeks"
+      },
+      aboutXMonths: {
+        one: "about 1 month",
+        other: "about {{count}} months"
+      },
+      xMonths: {
+        one: "1 month",
+        other: "{{count}} months"
+      },
+      aboutXYears: {
+        one: "about 1 year",
+        other: "about {{count}} years"
+      },
+      xYears: {
+        one: "1 year",
+        other: "{{count}} years"
+      },
+      overXYears: {
+        one: "over 1 year",
+        other: "over {{count}} years"
+      },
+      almostXYears: {
+        one: "almost 1 year",
+        other: "almost {{count}} years"
+      }
+    };
+    formatDistance = (token, count, options) => {
+      let result;
+      const tokenValue = formatDistanceLocale[token];
+      if (typeof tokenValue === "string") {
+        result = tokenValue;
+      } else if (count === 1) {
+        result = tokenValue.one;
+      } else {
+        result = tokenValue.other.replace("{{count}}", count.toString());
+      }
+      if (options?.addSuffix) {
+        if (options.comparison && options.comparison > 0) {
+          return "in " + result;
+        } else {
+          return result + " ago";
+        }
+      }
+      return result;
+    };
+  }
+});
+
+// ../node_modules/date-fns/locale/_lib/buildFormatLongFn.js
+function buildFormatLongFn(args) {
+  return (options = {}) => {
+    const width = options.width ? String(options.width) : args.defaultWidth;
+    const format3 = args.formats[width] || args.formats[args.defaultWidth];
+    return format3;
+  };
+}
+var init_buildFormatLongFn = __esm({
+  "../node_modules/date-fns/locale/_lib/buildFormatLongFn.js"() {
+  }
+});
+
+// ../node_modules/date-fns/locale/en-US/_lib/formatLong.js
+var dateFormats, timeFormats, dateTimeFormats, formatLong;
+var init_formatLong = __esm({
+  "../node_modules/date-fns/locale/en-US/_lib/formatLong.js"() {
+    init_buildFormatLongFn();
+    dateFormats = {
+      full: "EEEE, MMMM do, y",
+      long: "MMMM do, y",
+      medium: "MMM d, y",
+      short: "MM/dd/yyyy"
+    };
+    timeFormats = {
+      full: "h:mm:ss a zzzz",
+      long: "h:mm:ss a z",
+      medium: "h:mm:ss a",
+      short: "h:mm a"
+    };
+    dateTimeFormats = {
+      full: "{{date}} 'at' {{time}}",
+      long: "{{date}} 'at' {{time}}",
+      medium: "{{date}}, {{time}}",
+      short: "{{date}}, {{time}}"
+    };
+    formatLong = {
+      date: buildFormatLongFn({
+        formats: dateFormats,
+        defaultWidth: "full"
+      }),
+      time: buildFormatLongFn({
+        formats: timeFormats,
+        defaultWidth: "full"
+      }),
+      dateTime: buildFormatLongFn({
+        formats: dateTimeFormats,
+        defaultWidth: "full"
+      })
+    };
+  }
+});
+
+// ../node_modules/date-fns/locale/en-US/_lib/formatRelative.js
+var formatRelativeLocale, formatRelative;
+var init_formatRelative = __esm({
+  "../node_modules/date-fns/locale/en-US/_lib/formatRelative.js"() {
+    formatRelativeLocale = {
+      lastWeek: "'last' eeee 'at' p",
+      yesterday: "'yesterday at' p",
+      today: "'today at' p",
+      tomorrow: "'tomorrow at' p",
+      nextWeek: "eeee 'at' p",
+      other: "P"
+    };
+    formatRelative = (token, _date, _baseDate, _options) => formatRelativeLocale[token];
+  }
+});
+
+// ../node_modules/date-fns/locale/_lib/buildLocalizeFn.js
+function buildLocalizeFn(args) {
+  return (value, options) => {
+    const context = options?.context ? String(options.context) : "standalone";
+    let valuesArray;
+    if (context === "formatting" && args.formattingValues) {
+      const defaultWidth = args.defaultFormattingWidth || args.defaultWidth;
+      const width = options?.width ? String(options.width) : defaultWidth;
+      valuesArray = args.formattingValues[width] || args.formattingValues[defaultWidth];
+    } else {
+      const defaultWidth = args.defaultWidth;
+      const width = options?.width ? String(options.width) : args.defaultWidth;
+      valuesArray = args.values[width] || args.values[defaultWidth];
+    }
+    const index = args.argumentCallback ? args.argumentCallback(value) : value;
+    return valuesArray[index];
+  };
+}
+var init_buildLocalizeFn = __esm({
+  "../node_modules/date-fns/locale/_lib/buildLocalizeFn.js"() {
+  }
+});
+
+// ../node_modules/date-fns/locale/en-US/_lib/localize.js
+var eraValues, quarterValues, monthValues, dayValues, dayPeriodValues, formattingDayPeriodValues, ordinalNumber, localize;
+var init_localize = __esm({
+  "../node_modules/date-fns/locale/en-US/_lib/localize.js"() {
+    init_buildLocalizeFn();
+    eraValues = {
+      narrow: ["B", "A"],
+      abbreviated: ["BC", "AD"],
+      wide: ["Before Christ", "Anno Domini"]
+    };
+    quarterValues = {
+      narrow: ["1", "2", "3", "4"],
+      abbreviated: ["Q1", "Q2", "Q3", "Q4"],
+      wide: ["1st quarter", "2nd quarter", "3rd quarter", "4th quarter"]
+    };
+    monthValues = {
+      narrow: ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
+      abbreviated: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ],
+      wide: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+      ]
+    };
+    dayValues = {
+      narrow: ["S", "M", "T", "W", "T", "F", "S"],
+      short: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+      abbreviated: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      wide: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+      ]
+    };
+    dayPeriodValues = {
+      narrow: {
+        am: "a",
+        pm: "p",
+        midnight: "mi",
+        noon: "n",
+        morning: "morning",
+        afternoon: "afternoon",
+        evening: "evening",
+        night: "night"
+      },
+      abbreviated: {
+        am: "AM",
+        pm: "PM",
+        midnight: "midnight",
+        noon: "noon",
+        morning: "morning",
+        afternoon: "afternoon",
+        evening: "evening",
+        night: "night"
+      },
+      wide: {
+        am: "a.m.",
+        pm: "p.m.",
+        midnight: "midnight",
+        noon: "noon",
+        morning: "morning",
+        afternoon: "afternoon",
+        evening: "evening",
+        night: "night"
+      }
+    };
+    formattingDayPeriodValues = {
+      narrow: {
+        am: "a",
+        pm: "p",
+        midnight: "mi",
+        noon: "n",
+        morning: "in the morning",
+        afternoon: "in the afternoon",
+        evening: "in the evening",
+        night: "at night"
+      },
+      abbreviated: {
+        am: "AM",
+        pm: "PM",
+        midnight: "midnight",
+        noon: "noon",
+        morning: "in the morning",
+        afternoon: "in the afternoon",
+        evening: "in the evening",
+        night: "at night"
+      },
+      wide: {
+        am: "a.m.",
+        pm: "p.m.",
+        midnight: "midnight",
+        noon: "noon",
+        morning: "in the morning",
+        afternoon: "in the afternoon",
+        evening: "in the evening",
+        night: "at night"
+      }
+    };
+    ordinalNumber = (dirtyNumber, _options) => {
+      const number = Number(dirtyNumber);
+      const rem100 = number % 100;
+      if (rem100 > 20 || rem100 < 10) {
+        switch (rem100 % 10) {
+          case 1:
+            return number + "st";
+          case 2:
+            return number + "nd";
+          case 3:
+            return number + "rd";
+        }
+      }
+      return number + "th";
+    };
+    localize = {
+      ordinalNumber,
+      era: buildLocalizeFn({
+        values: eraValues,
+        defaultWidth: "wide"
+      }),
+      quarter: buildLocalizeFn({
+        values: quarterValues,
+        defaultWidth: "wide",
+        argumentCallback: (quarter) => quarter - 1
+      }),
+      month: buildLocalizeFn({
+        values: monthValues,
+        defaultWidth: "wide"
+      }),
+      day: buildLocalizeFn({
+        values: dayValues,
+        defaultWidth: "wide"
+      }),
+      dayPeriod: buildLocalizeFn({
+        values: dayPeriodValues,
+        defaultWidth: "wide",
+        formattingValues: formattingDayPeriodValues,
+        defaultFormattingWidth: "wide"
+      })
+    };
+  }
+});
+
+// ../node_modules/date-fns/locale/_lib/buildMatchFn.js
+function buildMatchFn(args) {
+  return (string, options = {}) => {
+    const width = options.width;
+    const matchPattern = width && args.matchPatterns[width] || args.matchPatterns[args.defaultMatchWidth];
+    const matchResult = string.match(matchPattern);
+    if (!matchResult) {
+      return null;
+    }
+    const matchedString = matchResult[0];
+    const parsePatterns = width && args.parsePatterns[width] || args.parsePatterns[args.defaultParseWidth];
+    const key = Array.isArray(parsePatterns) ? findIndex(parsePatterns, (pattern) => pattern.test(matchedString)) : (
+      // [TODO] -- I challenge you to fix the type
+      findKey(parsePatterns, (pattern) => pattern.test(matchedString))
+    );
+    let value;
+    value = args.valueCallback ? args.valueCallback(key) : key;
+    value = options.valueCallback ? (
+      // [TODO] -- I challenge you to fix the type
+      options.valueCallback(value)
+    ) : value;
+    const rest = string.slice(matchedString.length);
+    return { value, rest };
+  };
+}
+function findKey(object, predicate) {
+  for (const key in object) {
+    if (Object.prototype.hasOwnProperty.call(object, key) && predicate(object[key])) {
+      return key;
+    }
+  }
+  return void 0;
+}
+function findIndex(array, predicate) {
+  for (let key = 0; key < array.length; key++) {
+    if (predicate(array[key])) {
+      return key;
+    }
+  }
+  return void 0;
+}
+var init_buildMatchFn = __esm({
+  "../node_modules/date-fns/locale/_lib/buildMatchFn.js"() {
+  }
+});
+
+// ../node_modules/date-fns/locale/_lib/buildMatchPatternFn.js
+function buildMatchPatternFn(args) {
+  return (string, options = {}) => {
+    const matchResult = string.match(args.matchPattern);
+    if (!matchResult) return null;
+    const matchedString = matchResult[0];
+    const parseResult = string.match(args.parsePattern);
+    if (!parseResult) return null;
+    let value = args.valueCallback ? args.valueCallback(parseResult[0]) : parseResult[0];
+    value = options.valueCallback ? options.valueCallback(value) : value;
+    const rest = string.slice(matchedString.length);
+    return { value, rest };
+  };
+}
+var init_buildMatchPatternFn = __esm({
+  "../node_modules/date-fns/locale/_lib/buildMatchPatternFn.js"() {
+  }
+});
+
+// ../node_modules/date-fns/locale/en-US/_lib/match.js
+var matchOrdinalNumberPattern, parseOrdinalNumberPattern, matchEraPatterns, parseEraPatterns, matchQuarterPatterns, parseQuarterPatterns, matchMonthPatterns, parseMonthPatterns, matchDayPatterns, parseDayPatterns, matchDayPeriodPatterns, parseDayPeriodPatterns, match;
+var init_match = __esm({
+  "../node_modules/date-fns/locale/en-US/_lib/match.js"() {
+    init_buildMatchFn();
+    init_buildMatchPatternFn();
+    matchOrdinalNumberPattern = /^(\d+)(th|st|nd|rd)?/i;
+    parseOrdinalNumberPattern = /\d+/i;
+    matchEraPatterns = {
+      narrow: /^(b|a)/i,
+      abbreviated: /^(b\.?\s?c\.?|b\.?\s?c\.?\s?e\.?|a\.?\s?d\.?|c\.?\s?e\.?)/i,
+      wide: /^(before christ|before common era|anno domini|common era)/i
+    };
+    parseEraPatterns = {
+      any: [/^b/i, /^(a|c)/i]
+    };
+    matchQuarterPatterns = {
+      narrow: /^[1234]/i,
+      abbreviated: /^q[1234]/i,
+      wide: /^[1234](th|st|nd|rd)? quarter/i
+    };
+    parseQuarterPatterns = {
+      any: [/1/i, /2/i, /3/i, /4/i]
+    };
+    matchMonthPatterns = {
+      narrow: /^[jfmasond]/i,
+      abbreviated: /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i,
+      wide: /^(january|february|march|april|may|june|july|august|september|october|november|december)/i
+    };
+    parseMonthPatterns = {
+      narrow: [
+        /^j/i,
+        /^f/i,
+        /^m/i,
+        /^a/i,
+        /^m/i,
+        /^j/i,
+        /^j/i,
+        /^a/i,
+        /^s/i,
+        /^o/i,
+        /^n/i,
+        /^d/i
+      ],
+      any: [
+        /^ja/i,
+        /^f/i,
+        /^mar/i,
+        /^ap/i,
+        /^may/i,
+        /^jun/i,
+        /^jul/i,
+        /^au/i,
+        /^s/i,
+        /^o/i,
+        /^n/i,
+        /^d/i
+      ]
+    };
+    matchDayPatterns = {
+      narrow: /^[smtwf]/i,
+      short: /^(su|mo|tu|we|th|fr|sa)/i,
+      abbreviated: /^(sun|mon|tue|wed|thu|fri|sat)/i,
+      wide: /^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/i
+    };
+    parseDayPatterns = {
+      narrow: [/^s/i, /^m/i, /^t/i, /^w/i, /^t/i, /^f/i, /^s/i],
+      any: [/^su/i, /^m/i, /^tu/i, /^w/i, /^th/i, /^f/i, /^sa/i]
+    };
+    matchDayPeriodPatterns = {
+      narrow: /^(a|p|mi|n|(in the|at) (morning|afternoon|evening|night))/i,
+      any: /^([ap]\.?\s?m\.?|midnight|noon|(in the|at) (morning|afternoon|evening|night))/i
+    };
+    parseDayPeriodPatterns = {
+      any: {
+        am: /^a/i,
+        pm: /^p/i,
+        midnight: /^mi/i,
+        noon: /^no/i,
+        morning: /morning/i,
+        afternoon: /afternoon/i,
+        evening: /evening/i,
+        night: /night/i
+      }
+    };
+    match = {
+      ordinalNumber: buildMatchPatternFn({
+        matchPattern: matchOrdinalNumberPattern,
+        parsePattern: parseOrdinalNumberPattern,
+        valueCallback: (value) => parseInt(value, 10)
+      }),
+      era: buildMatchFn({
+        matchPatterns: matchEraPatterns,
+        defaultMatchWidth: "wide",
+        parsePatterns: parseEraPatterns,
+        defaultParseWidth: "any"
+      }),
+      quarter: buildMatchFn({
+        matchPatterns: matchQuarterPatterns,
+        defaultMatchWidth: "wide",
+        parsePatterns: parseQuarterPatterns,
+        defaultParseWidth: "any",
+        valueCallback: (index) => index + 1
+      }),
+      month: buildMatchFn({
+        matchPatterns: matchMonthPatterns,
+        defaultMatchWidth: "wide",
+        parsePatterns: parseMonthPatterns,
+        defaultParseWidth: "any"
+      }),
+      day: buildMatchFn({
+        matchPatterns: matchDayPatterns,
+        defaultMatchWidth: "wide",
+        parsePatterns: parseDayPatterns,
+        defaultParseWidth: "any"
+      }),
+      dayPeriod: buildMatchFn({
+        matchPatterns: matchDayPeriodPatterns,
+        defaultMatchWidth: "any",
+        parsePatterns: parseDayPeriodPatterns,
+        defaultParseWidth: "any"
+      })
+    };
+  }
+});
+
+// ../node_modules/date-fns/locale/en-US.js
+var enUS;
+var init_en_US = __esm({
+  "../node_modules/date-fns/locale/en-US.js"() {
+    init_formatDistance();
+    init_formatLong();
+    init_formatRelative();
+    init_localize();
+    init_match();
+    enUS = {
+      code: "en-US",
+      formatDistance,
+      formatLong,
+      formatRelative,
+      localize,
+      match,
+      options: {
+        weekStartsOn: 0,
+        firstWeekContainsDate: 1
+      }
+    };
+  }
+});
+
+// ../node_modules/date-fns/_lib/defaultLocale.js
+var init_defaultLocale = __esm({
+  "../node_modules/date-fns/_lib/defaultLocale.js"() {
+    init_en_US();
+  }
+});
+
+// ../node_modules/date-fns/_lib/defaultOptions.js
+function getDefaultOptions() {
+  return defaultOptions;
+}
+var defaultOptions;
+var init_defaultOptions = __esm({
+  "../node_modules/date-fns/_lib/defaultOptions.js"() {
+    defaultOptions = {};
+  }
+});
+
+// ../node_modules/date-fns/constants.js
+var daysInYear, maxTime, minTime, millisecondsInWeek, millisecondsInDay, secondsInHour, secondsInDay, secondsInWeek, secondsInYear, secondsInMonth, secondsInQuarter, constructFromSymbol;
+var init_constants = __esm({
+  "../node_modules/date-fns/constants.js"() {
+    daysInYear = 365.2425;
+    maxTime = Math.pow(10, 8) * 24 * 60 * 60 * 1e3;
+    minTime = -maxTime;
+    millisecondsInWeek = 6048e5;
+    millisecondsInDay = 864e5;
+    secondsInHour = 3600;
+    secondsInDay = secondsInHour * 24;
+    secondsInWeek = secondsInDay * 7;
+    secondsInYear = secondsInDay * daysInYear;
+    secondsInMonth = secondsInYear / 12;
+    secondsInQuarter = secondsInMonth * 3;
+    constructFromSymbol = Symbol.for("constructDateFrom");
+  }
+});
+
+// ../node_modules/date-fns/constructFrom.js
+function constructFrom(date, value) {
+  if (typeof date === "function") return date(value);
+  if (date && typeof date === "object" && constructFromSymbol in date)
+    return date[constructFromSymbol](value);
+  if (date instanceof Date) return new date.constructor(value);
+  return new Date(value);
+}
+var init_constructFrom = __esm({
+  "../node_modules/date-fns/constructFrom.js"() {
+    init_constants();
+  }
+});
+
+// ../node_modules/date-fns/toDate.js
+function toDate(argument, context) {
+  return constructFrom(context || argument, argument);
+}
+var init_toDate = __esm({
+  "../node_modules/date-fns/toDate.js"() {
+    init_constructFrom();
+  }
+});
+
+// ../node_modules/date-fns/_lib/getTimezoneOffsetInMilliseconds.js
+function getTimezoneOffsetInMilliseconds(date) {
+  const _date = toDate(date);
+  const utcDate = new Date(
+    Date.UTC(
+      _date.getFullYear(),
+      _date.getMonth(),
+      _date.getDate(),
+      _date.getHours(),
+      _date.getMinutes(),
+      _date.getSeconds(),
+      _date.getMilliseconds()
+    )
+  );
+  utcDate.setUTCFullYear(_date.getFullYear());
+  return +date - +utcDate;
+}
+var init_getTimezoneOffsetInMilliseconds = __esm({
+  "../node_modules/date-fns/_lib/getTimezoneOffsetInMilliseconds.js"() {
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/_lib/normalizeDates.js
+function normalizeDates(context, ...dates) {
+  const normalize = constructFrom.bind(
+    null,
+    context || dates.find((date) => typeof date === "object")
+  );
+  return dates.map(normalize);
+}
+var init_normalizeDates = __esm({
+  "../node_modules/date-fns/_lib/normalizeDates.js"() {
+    init_constructFrom();
+  }
+});
+
+// ../node_modules/date-fns/startOfDay.js
+function startOfDay(date, options) {
+  const _date = toDate(date, options?.in);
+  _date.setHours(0, 0, 0, 0);
+  return _date;
+}
+var init_startOfDay = __esm({
+  "../node_modules/date-fns/startOfDay.js"() {
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/differenceInCalendarDays.js
+function differenceInCalendarDays(laterDate, earlierDate, options) {
+  const [laterDate_, earlierDate_] = normalizeDates(
+    options?.in,
+    laterDate,
+    earlierDate
+  );
+  const laterStartOfDay = startOfDay(laterDate_);
+  const earlierStartOfDay = startOfDay(earlierDate_);
+  const laterTimestamp = +laterStartOfDay - getTimezoneOffsetInMilliseconds(laterStartOfDay);
+  const earlierTimestamp = +earlierStartOfDay - getTimezoneOffsetInMilliseconds(earlierStartOfDay);
+  return Math.round((laterTimestamp - earlierTimestamp) / millisecondsInDay);
+}
+var init_differenceInCalendarDays = __esm({
+  "../node_modules/date-fns/differenceInCalendarDays.js"() {
+    init_getTimezoneOffsetInMilliseconds();
+    init_normalizeDates();
+    init_constants();
+    init_startOfDay();
+  }
+});
+
+// ../node_modules/date-fns/startOfYear.js
+function startOfYear(date, options) {
+  const date_ = toDate(date, options?.in);
+  date_.setFullYear(date_.getFullYear(), 0, 1);
+  date_.setHours(0, 0, 0, 0);
+  return date_;
+}
+var init_startOfYear = __esm({
+  "../node_modules/date-fns/startOfYear.js"() {
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/getDayOfYear.js
+function getDayOfYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = differenceInCalendarDays(_date, startOfYear(_date));
+  const dayOfYear = diff + 1;
+  return dayOfYear;
+}
+var init_getDayOfYear = __esm({
+  "../node_modules/date-fns/getDayOfYear.js"() {
+    init_differenceInCalendarDays();
+    init_startOfYear();
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/startOfWeek.js
+function startOfWeek(date, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const weekStartsOn = options?.weekStartsOn ?? options?.locale?.options?.weekStartsOn ?? defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
+  const _date = toDate(date, options?.in);
+  const day = _date.getDay();
+  const diff = (day < weekStartsOn ? 7 : 0) + day - weekStartsOn;
+  _date.setDate(_date.getDate() - diff);
+  _date.setHours(0, 0, 0, 0);
+  return _date;
+}
+var init_startOfWeek = __esm({
+  "../node_modules/date-fns/startOfWeek.js"() {
+    init_defaultOptions();
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/startOfISOWeek.js
+function startOfISOWeek(date, options) {
+  return startOfWeek(date, { ...options, weekStartsOn: 1 });
+}
+var init_startOfISOWeek = __esm({
+  "../node_modules/date-fns/startOfISOWeek.js"() {
+    init_startOfWeek();
+  }
+});
+
+// ../node_modules/date-fns/getISOWeekYear.js
+function getISOWeekYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const year = _date.getFullYear();
+  const fourthOfJanuaryOfNextYear = constructFrom(_date, 0);
+  fourthOfJanuaryOfNextYear.setFullYear(year + 1, 0, 4);
+  fourthOfJanuaryOfNextYear.setHours(0, 0, 0, 0);
+  const startOfNextYear = startOfISOWeek(fourthOfJanuaryOfNextYear);
+  const fourthOfJanuaryOfThisYear = constructFrom(_date, 0);
+  fourthOfJanuaryOfThisYear.setFullYear(year, 0, 4);
+  fourthOfJanuaryOfThisYear.setHours(0, 0, 0, 0);
+  const startOfThisYear = startOfISOWeek(fourthOfJanuaryOfThisYear);
+  if (_date.getTime() >= startOfNextYear.getTime()) {
+    return year + 1;
+  } else if (_date.getTime() >= startOfThisYear.getTime()) {
+    return year;
+  } else {
+    return year - 1;
+  }
+}
+var init_getISOWeekYear = __esm({
+  "../node_modules/date-fns/getISOWeekYear.js"() {
+    init_constructFrom();
+    init_startOfISOWeek();
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/startOfISOWeekYear.js
+function startOfISOWeekYear(date, options) {
+  const year = getISOWeekYear(date, options);
+  const fourthOfJanuary = constructFrom(options?.in || date, 0);
+  fourthOfJanuary.setFullYear(year, 0, 4);
+  fourthOfJanuary.setHours(0, 0, 0, 0);
+  return startOfISOWeek(fourthOfJanuary);
+}
+var init_startOfISOWeekYear = __esm({
+  "../node_modules/date-fns/startOfISOWeekYear.js"() {
+    init_constructFrom();
+    init_getISOWeekYear();
+    init_startOfISOWeek();
+  }
+});
+
+// ../node_modules/date-fns/getISOWeek.js
+function getISOWeek(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = +startOfISOWeek(_date) - +startOfISOWeekYear(_date);
+  return Math.round(diff / millisecondsInWeek) + 1;
+}
+var init_getISOWeek = __esm({
+  "../node_modules/date-fns/getISOWeek.js"() {
+    init_constants();
+    init_startOfISOWeek();
+    init_startOfISOWeekYear();
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/getWeekYear.js
+function getWeekYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const year = _date.getFullYear();
+  const defaultOptions2 = getDefaultOptions();
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const firstWeekOfNextYear = constructFrom(options?.in || date, 0);
+  firstWeekOfNextYear.setFullYear(year + 1, 0, firstWeekContainsDate);
+  firstWeekOfNextYear.setHours(0, 0, 0, 0);
+  const startOfNextYear = startOfWeek(firstWeekOfNextYear, options);
+  const firstWeekOfThisYear = constructFrom(options?.in || date, 0);
+  firstWeekOfThisYear.setFullYear(year, 0, firstWeekContainsDate);
+  firstWeekOfThisYear.setHours(0, 0, 0, 0);
+  const startOfThisYear = startOfWeek(firstWeekOfThisYear, options);
+  if (+_date >= +startOfNextYear) {
+    return year + 1;
+  } else if (+_date >= +startOfThisYear) {
+    return year;
+  } else {
+    return year - 1;
+  }
+}
+var init_getWeekYear = __esm({
+  "../node_modules/date-fns/getWeekYear.js"() {
+    init_defaultOptions();
+    init_constructFrom();
+    init_startOfWeek();
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/startOfWeekYear.js
+function startOfWeekYear(date, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const year = getWeekYear(date, options);
+  const firstWeek = constructFrom(options?.in || date, 0);
+  firstWeek.setFullYear(year, 0, firstWeekContainsDate);
+  firstWeek.setHours(0, 0, 0, 0);
+  const _date = startOfWeek(firstWeek, options);
+  return _date;
+}
+var init_startOfWeekYear = __esm({
+  "../node_modules/date-fns/startOfWeekYear.js"() {
+    init_defaultOptions();
+    init_constructFrom();
+    init_getWeekYear();
+    init_startOfWeek();
+  }
+});
+
+// ../node_modules/date-fns/getWeek.js
+function getWeek(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = +startOfWeek(_date, options) - +startOfWeekYear(_date, options);
+  return Math.round(diff / millisecondsInWeek) + 1;
+}
+var init_getWeek = __esm({
+  "../node_modules/date-fns/getWeek.js"() {
+    init_constants();
+    init_startOfWeek();
+    init_startOfWeekYear();
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/_lib/addLeadingZeros.js
+function addLeadingZeros(number, targetLength) {
+  const sign = number < 0 ? "-" : "";
+  const output = Math.abs(number).toString().padStart(targetLength, "0");
+  return sign + output;
+}
+var init_addLeadingZeros = __esm({
+  "../node_modules/date-fns/_lib/addLeadingZeros.js"() {
+  }
+});
+
+// ../node_modules/date-fns/_lib/format/lightFormatters.js
+var lightFormatters;
+var init_lightFormatters = __esm({
+  "../node_modules/date-fns/_lib/format/lightFormatters.js"() {
+    init_addLeadingZeros();
+    lightFormatters = {
+      // Year
+      y(date, token) {
+        const signedYear = date.getFullYear();
+        const year = signedYear > 0 ? signedYear : 1 - signedYear;
+        return addLeadingZeros(token === "yy" ? year % 100 : year, token.length);
+      },
+      // Month
+      M(date, token) {
+        const month = date.getMonth();
+        return token === "M" ? String(month + 1) : addLeadingZeros(month + 1, 2);
+      },
+      // Day of the month
+      d(date, token) {
+        return addLeadingZeros(date.getDate(), token.length);
+      },
+      // AM or PM
+      a(date, token) {
+        const dayPeriodEnumValue = date.getHours() / 12 >= 1 ? "pm" : "am";
+        switch (token) {
+          case "a":
+          case "aa":
+            return dayPeriodEnumValue.toUpperCase();
+          case "aaa":
+            return dayPeriodEnumValue;
+          case "aaaaa":
+            return dayPeriodEnumValue[0];
+          case "aaaa":
+          default:
+            return dayPeriodEnumValue === "am" ? "a.m." : "p.m.";
+        }
+      },
+      // Hour [1-12]
+      h(date, token) {
+        return addLeadingZeros(date.getHours() % 12 || 12, token.length);
+      },
+      // Hour [0-23]
+      H(date, token) {
+        return addLeadingZeros(date.getHours(), token.length);
+      },
+      // Minute
+      m(date, token) {
+        return addLeadingZeros(date.getMinutes(), token.length);
+      },
+      // Second
+      s(date, token) {
+        return addLeadingZeros(date.getSeconds(), token.length);
+      },
+      // Fraction of second
+      S(date, token) {
+        const numberOfDigits = token.length;
+        const milliseconds = date.getMilliseconds();
+        const fractionalSeconds = Math.trunc(
+          milliseconds * Math.pow(10, numberOfDigits - 3)
+        );
+        return addLeadingZeros(fractionalSeconds, token.length);
+      }
+    };
+  }
+});
+
+// ../node_modules/date-fns/_lib/format/formatters.js
+function formatTimezoneShort(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = Math.trunc(absOffset / 60);
+  const minutes = absOffset % 60;
+  if (minutes === 0) {
+    return sign + String(hours);
+  }
+  return sign + String(hours) + delimiter + addLeadingZeros(minutes, 2);
+}
+function formatTimezoneWithOptionalMinutes(offset, delimiter) {
+  if (offset % 60 === 0) {
+    const sign = offset > 0 ? "-" : "+";
+    return sign + addLeadingZeros(Math.abs(offset) / 60, 2);
+  }
+  return formatTimezone(offset, delimiter);
+}
+function formatTimezone(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = addLeadingZeros(Math.trunc(absOffset / 60), 2);
+  const minutes = addLeadingZeros(absOffset % 60, 2);
+  return sign + hours + delimiter + minutes;
+}
+var dayPeriodEnum, formatters;
+var init_formatters = __esm({
+  "../node_modules/date-fns/_lib/format/formatters.js"() {
+    init_getDayOfYear();
+    init_getISOWeek();
+    init_getISOWeekYear();
+    init_getWeek();
+    init_getWeekYear();
+    init_addLeadingZeros();
+    init_lightFormatters();
+    dayPeriodEnum = {
+      am: "am",
+      pm: "pm",
+      midnight: "midnight",
+      noon: "noon",
+      morning: "morning",
+      afternoon: "afternoon",
+      evening: "evening",
+      night: "night"
+    };
+    formatters = {
+      // Era
+      G: function(date, token, localize2) {
+        const era = date.getFullYear() > 0 ? 1 : 0;
+        switch (token) {
+          // AD, BC
+          case "G":
+          case "GG":
+          case "GGG":
+            return localize2.era(era, { width: "abbreviated" });
+          // A, B
+          case "GGGGG":
+            return localize2.era(era, { width: "narrow" });
+          // Anno Domini, Before Christ
+          case "GGGG":
+          default:
+            return localize2.era(era, { width: "wide" });
+        }
+      },
+      // Year
+      y: function(date, token, localize2) {
+        if (token === "yo") {
+          const signedYear = date.getFullYear();
+          const year = signedYear > 0 ? signedYear : 1 - signedYear;
+          return localize2.ordinalNumber(year, { unit: "year" });
+        }
+        return lightFormatters.y(date, token);
+      },
+      // Local week-numbering year
+      Y: function(date, token, localize2, options) {
+        const signedWeekYear = getWeekYear(date, options);
+        const weekYear = signedWeekYear > 0 ? signedWeekYear : 1 - signedWeekYear;
+        if (token === "YY") {
+          const twoDigitYear = weekYear % 100;
+          return addLeadingZeros(twoDigitYear, 2);
+        }
+        if (token === "Yo") {
+          return localize2.ordinalNumber(weekYear, { unit: "year" });
+        }
+        return addLeadingZeros(weekYear, token.length);
+      },
+      // ISO week-numbering year
+      R: function(date, token) {
+        const isoWeekYear = getISOWeekYear(date);
+        return addLeadingZeros(isoWeekYear, token.length);
+      },
+      // Extended year. This is a single number designating the year of this calendar system.
+      // The main difference between `y` and `u` localizers are B.C. years:
+      // | Year | `y` | `u` |
+      // |------|-----|-----|
+      // | AC 1 |   1 |   1 |
+      // | BC 1 |   1 |   0 |
+      // | BC 2 |   2 |  -1 |
+      // Also `yy` always returns the last two digits of a year,
+      // while `uu` pads single digit years to 2 characters and returns other years unchanged.
+      u: function(date, token) {
+        const year = date.getFullYear();
+        return addLeadingZeros(year, token.length);
+      },
+      // Quarter
+      Q: function(date, token, localize2) {
+        const quarter = Math.ceil((date.getMonth() + 1) / 3);
+        switch (token) {
+          // 1, 2, 3, 4
+          case "Q":
+            return String(quarter);
+          // 01, 02, 03, 04
+          case "QQ":
+            return addLeadingZeros(quarter, 2);
+          // 1st, 2nd, 3rd, 4th
+          case "Qo":
+            return localize2.ordinalNumber(quarter, { unit: "quarter" });
+          // Q1, Q2, Q3, Q4
+          case "QQQ":
+            return localize2.quarter(quarter, {
+              width: "abbreviated",
+              context: "formatting"
+            });
+          // 1, 2, 3, 4 (narrow quarter; could be not numerical)
+          case "QQQQQ":
+            return localize2.quarter(quarter, {
+              width: "narrow",
+              context: "formatting"
+            });
+          // 1st quarter, 2nd quarter, ...
+          case "QQQQ":
+          default:
+            return localize2.quarter(quarter, {
+              width: "wide",
+              context: "formatting"
+            });
+        }
+      },
+      // Stand-alone quarter
+      q: function(date, token, localize2) {
+        const quarter = Math.ceil((date.getMonth() + 1) / 3);
+        switch (token) {
+          // 1, 2, 3, 4
+          case "q":
+            return String(quarter);
+          // 01, 02, 03, 04
+          case "qq":
+            return addLeadingZeros(quarter, 2);
+          // 1st, 2nd, 3rd, 4th
+          case "qo":
+            return localize2.ordinalNumber(quarter, { unit: "quarter" });
+          // Q1, Q2, Q3, Q4
+          case "qqq":
+            return localize2.quarter(quarter, {
+              width: "abbreviated",
+              context: "standalone"
+            });
+          // 1, 2, 3, 4 (narrow quarter; could be not numerical)
+          case "qqqqq":
+            return localize2.quarter(quarter, {
+              width: "narrow",
+              context: "standalone"
+            });
+          // 1st quarter, 2nd quarter, ...
+          case "qqqq":
+          default:
+            return localize2.quarter(quarter, {
+              width: "wide",
+              context: "standalone"
+            });
+        }
+      },
+      // Month
+      M: function(date, token, localize2) {
+        const month = date.getMonth();
+        switch (token) {
+          case "M":
+          case "MM":
+            return lightFormatters.M(date, token);
+          // 1st, 2nd, ..., 12th
+          case "Mo":
+            return localize2.ordinalNumber(month + 1, { unit: "month" });
+          // Jan, Feb, ..., Dec
+          case "MMM":
+            return localize2.month(month, {
+              width: "abbreviated",
+              context: "formatting"
+            });
+          // J, F, ..., D
+          case "MMMMM":
+            return localize2.month(month, {
+              width: "narrow",
+              context: "formatting"
+            });
+          // January, February, ..., December
+          case "MMMM":
+          default:
+            return localize2.month(month, { width: "wide", context: "formatting" });
+        }
+      },
+      // Stand-alone month
+      L: function(date, token, localize2) {
+        const month = date.getMonth();
+        switch (token) {
+          // 1, 2, ..., 12
+          case "L":
+            return String(month + 1);
+          // 01, 02, ..., 12
+          case "LL":
+            return addLeadingZeros(month + 1, 2);
+          // 1st, 2nd, ..., 12th
+          case "Lo":
+            return localize2.ordinalNumber(month + 1, { unit: "month" });
+          // Jan, Feb, ..., Dec
+          case "LLL":
+            return localize2.month(month, {
+              width: "abbreviated",
+              context: "standalone"
+            });
+          // J, F, ..., D
+          case "LLLLL":
+            return localize2.month(month, {
+              width: "narrow",
+              context: "standalone"
+            });
+          // January, February, ..., December
+          case "LLLL":
+          default:
+            return localize2.month(month, { width: "wide", context: "standalone" });
+        }
+      },
+      // Local week of year
+      w: function(date, token, localize2, options) {
+        const week = getWeek(date, options);
+        if (token === "wo") {
+          return localize2.ordinalNumber(week, { unit: "week" });
+        }
+        return addLeadingZeros(week, token.length);
+      },
+      // ISO week of year
+      I: function(date, token, localize2) {
+        const isoWeek = getISOWeek(date);
+        if (token === "Io") {
+          return localize2.ordinalNumber(isoWeek, { unit: "week" });
+        }
+        return addLeadingZeros(isoWeek, token.length);
+      },
+      // Day of the month
+      d: function(date, token, localize2) {
+        if (token === "do") {
+          return localize2.ordinalNumber(date.getDate(), { unit: "date" });
+        }
+        return lightFormatters.d(date, token);
+      },
+      // Day of year
+      D: function(date, token, localize2) {
+        const dayOfYear = getDayOfYear(date);
+        if (token === "Do") {
+          return localize2.ordinalNumber(dayOfYear, { unit: "dayOfYear" });
+        }
+        return addLeadingZeros(dayOfYear, token.length);
+      },
+      // Day of week
+      E: function(date, token, localize2) {
+        const dayOfWeek = date.getDay();
+        switch (token) {
+          // Tue
+          case "E":
+          case "EE":
+          case "EEE":
+            return localize2.day(dayOfWeek, {
+              width: "abbreviated",
+              context: "formatting"
+            });
+          // T
+          case "EEEEE":
+            return localize2.day(dayOfWeek, {
+              width: "narrow",
+              context: "formatting"
+            });
+          // Tu
+          case "EEEEEE":
+            return localize2.day(dayOfWeek, {
+              width: "short",
+              context: "formatting"
+            });
+          // Tuesday
+          case "EEEE":
+          default:
+            return localize2.day(dayOfWeek, {
+              width: "wide",
+              context: "formatting"
+            });
+        }
+      },
+      // Local day of week
+      e: function(date, token, localize2, options) {
+        const dayOfWeek = date.getDay();
+        const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
+        switch (token) {
+          // Numerical value (Nth day of week with current locale or weekStartsOn)
+          case "e":
+            return String(localDayOfWeek);
+          // Padded numerical value
+          case "ee":
+            return addLeadingZeros(localDayOfWeek, 2);
+          // 1st, 2nd, ..., 7th
+          case "eo":
+            return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
+          case "eee":
+            return localize2.day(dayOfWeek, {
+              width: "abbreviated",
+              context: "formatting"
+            });
+          // T
+          case "eeeee":
+            return localize2.day(dayOfWeek, {
+              width: "narrow",
+              context: "formatting"
+            });
+          // Tu
+          case "eeeeee":
+            return localize2.day(dayOfWeek, {
+              width: "short",
+              context: "formatting"
+            });
+          // Tuesday
+          case "eeee":
+          default:
+            return localize2.day(dayOfWeek, {
+              width: "wide",
+              context: "formatting"
+            });
+        }
+      },
+      // Stand-alone local day of week
+      c: function(date, token, localize2, options) {
+        const dayOfWeek = date.getDay();
+        const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
+        switch (token) {
+          // Numerical value (same as in `e`)
+          case "c":
+            return String(localDayOfWeek);
+          // Padded numerical value
+          case "cc":
+            return addLeadingZeros(localDayOfWeek, token.length);
+          // 1st, 2nd, ..., 7th
+          case "co":
+            return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
+          case "ccc":
+            return localize2.day(dayOfWeek, {
+              width: "abbreviated",
+              context: "standalone"
+            });
+          // T
+          case "ccccc":
+            return localize2.day(dayOfWeek, {
+              width: "narrow",
+              context: "standalone"
+            });
+          // Tu
+          case "cccccc":
+            return localize2.day(dayOfWeek, {
+              width: "short",
+              context: "standalone"
+            });
+          // Tuesday
+          case "cccc":
+          default:
+            return localize2.day(dayOfWeek, {
+              width: "wide",
+              context: "standalone"
+            });
+        }
+      },
+      // ISO day of week
+      i: function(date, token, localize2) {
+        const dayOfWeek = date.getDay();
+        const isoDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+        switch (token) {
+          // 2
+          case "i":
+            return String(isoDayOfWeek);
+          // 02
+          case "ii":
+            return addLeadingZeros(isoDayOfWeek, token.length);
+          // 2nd
+          case "io":
+            return localize2.ordinalNumber(isoDayOfWeek, { unit: "day" });
+          // Tue
+          case "iii":
+            return localize2.day(dayOfWeek, {
+              width: "abbreviated",
+              context: "formatting"
+            });
+          // T
+          case "iiiii":
+            return localize2.day(dayOfWeek, {
+              width: "narrow",
+              context: "formatting"
+            });
+          // Tu
+          case "iiiiii":
+            return localize2.day(dayOfWeek, {
+              width: "short",
+              context: "formatting"
+            });
+          // Tuesday
+          case "iiii":
+          default:
+            return localize2.day(dayOfWeek, {
+              width: "wide",
+              context: "formatting"
+            });
+        }
+      },
+      // AM or PM
+      a: function(date, token, localize2) {
+        const hours = date.getHours();
+        const dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
+        switch (token) {
+          case "a":
+          case "aa":
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "abbreviated",
+              context: "formatting"
+            });
+          case "aaa":
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "abbreviated",
+              context: "formatting"
+            }).toLowerCase();
+          case "aaaaa":
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "narrow",
+              context: "formatting"
+            });
+          case "aaaa":
+          default:
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "wide",
+              context: "formatting"
+            });
+        }
+      },
+      // AM, PM, midnight, noon
+      b: function(date, token, localize2) {
+        const hours = date.getHours();
+        let dayPeriodEnumValue;
+        if (hours === 12) {
+          dayPeriodEnumValue = dayPeriodEnum.noon;
+        } else if (hours === 0) {
+          dayPeriodEnumValue = dayPeriodEnum.midnight;
+        } else {
+          dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
+        }
+        switch (token) {
+          case "b":
+          case "bb":
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "abbreviated",
+              context: "formatting"
+            });
+          case "bbb":
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "abbreviated",
+              context: "formatting"
+            }).toLowerCase();
+          case "bbbbb":
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "narrow",
+              context: "formatting"
+            });
+          case "bbbb":
+          default:
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "wide",
+              context: "formatting"
+            });
+        }
+      },
+      // in the morning, in the afternoon, in the evening, at night
+      B: function(date, token, localize2) {
+        const hours = date.getHours();
+        let dayPeriodEnumValue;
+        if (hours >= 17) {
+          dayPeriodEnumValue = dayPeriodEnum.evening;
+        } else if (hours >= 12) {
+          dayPeriodEnumValue = dayPeriodEnum.afternoon;
+        } else if (hours >= 4) {
+          dayPeriodEnumValue = dayPeriodEnum.morning;
+        } else {
+          dayPeriodEnumValue = dayPeriodEnum.night;
+        }
+        switch (token) {
+          case "B":
+          case "BB":
+          case "BBB":
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "abbreviated",
+              context: "formatting"
+            });
+          case "BBBBB":
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "narrow",
+              context: "formatting"
+            });
+          case "BBBB":
+          default:
+            return localize2.dayPeriod(dayPeriodEnumValue, {
+              width: "wide",
+              context: "formatting"
+            });
+        }
+      },
+      // Hour [1-12]
+      h: function(date, token, localize2) {
+        if (token === "ho") {
+          let hours = date.getHours() % 12;
+          if (hours === 0) hours = 12;
+          return localize2.ordinalNumber(hours, { unit: "hour" });
+        }
+        return lightFormatters.h(date, token);
+      },
+      // Hour [0-23]
+      H: function(date, token, localize2) {
+        if (token === "Ho") {
+          return localize2.ordinalNumber(date.getHours(), { unit: "hour" });
+        }
+        return lightFormatters.H(date, token);
+      },
+      // Hour [0-11]
+      K: function(date, token, localize2) {
+        const hours = date.getHours() % 12;
+        if (token === "Ko") {
+          return localize2.ordinalNumber(hours, { unit: "hour" });
+        }
+        return addLeadingZeros(hours, token.length);
+      },
+      // Hour [1-24]
+      k: function(date, token, localize2) {
+        let hours = date.getHours();
+        if (hours === 0) hours = 24;
+        if (token === "ko") {
+          return localize2.ordinalNumber(hours, { unit: "hour" });
+        }
+        return addLeadingZeros(hours, token.length);
+      },
+      // Minute
+      m: function(date, token, localize2) {
+        if (token === "mo") {
+          return localize2.ordinalNumber(date.getMinutes(), { unit: "minute" });
+        }
+        return lightFormatters.m(date, token);
+      },
+      // Second
+      s: function(date, token, localize2) {
+        if (token === "so") {
+          return localize2.ordinalNumber(date.getSeconds(), { unit: "second" });
+        }
+        return lightFormatters.s(date, token);
+      },
+      // Fraction of second
+      S: function(date, token) {
+        return lightFormatters.S(date, token);
+      },
+      // Timezone (ISO-8601. If offset is 0, output is always `'Z'`)
+      X: function(date, token, _localize) {
+        const timezoneOffset = date.getTimezoneOffset();
+        if (timezoneOffset === 0) {
+          return "Z";
+        }
+        switch (token) {
+          // Hours and optional minutes
+          case "X":
+            return formatTimezoneWithOptionalMinutes(timezoneOffset);
+          // Hours, minutes and optional seconds without `:` delimiter
+          // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+          // so this token always has the same output as `XX`
+          case "XXXX":
+          case "XX":
+            return formatTimezone(timezoneOffset);
+          // Hours, minutes and optional seconds with `:` delimiter
+          // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+          // so this token always has the same output as `XXX`
+          case "XXXXX":
+          case "XXX":
+          // Hours and minutes with `:` delimiter
+          default:
+            return formatTimezone(timezoneOffset, ":");
+        }
+      },
+      // Timezone (ISO-8601. If offset is 0, output is `'+00:00'` or equivalent)
+      x: function(date, token, _localize) {
+        const timezoneOffset = date.getTimezoneOffset();
+        switch (token) {
+          // Hours and optional minutes
+          case "x":
+            return formatTimezoneWithOptionalMinutes(timezoneOffset);
+          // Hours, minutes and optional seconds without `:` delimiter
+          // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+          // so this token always has the same output as `xx`
+          case "xxxx":
+          case "xx":
+            return formatTimezone(timezoneOffset);
+          // Hours, minutes and optional seconds with `:` delimiter
+          // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+          // so this token always has the same output as `xxx`
+          case "xxxxx":
+          case "xxx":
+          // Hours and minutes with `:` delimiter
+          default:
+            return formatTimezone(timezoneOffset, ":");
+        }
+      },
+      // Timezone (GMT)
+      O: function(date, token, _localize) {
+        const timezoneOffset = date.getTimezoneOffset();
+        switch (token) {
+          // Short
+          case "O":
+          case "OO":
+          case "OOO":
+            return "GMT" + formatTimezoneShort(timezoneOffset, ":");
+          // Long
+          case "OOOO":
+          default:
+            return "GMT" + formatTimezone(timezoneOffset, ":");
+        }
+      },
+      // Timezone (specific non-location)
+      z: function(date, token, _localize) {
+        const timezoneOffset = date.getTimezoneOffset();
+        switch (token) {
+          // Short
+          case "z":
+          case "zz":
+          case "zzz":
+            return "GMT" + formatTimezoneShort(timezoneOffset, ":");
+          // Long
+          case "zzzz":
+          default:
+            return "GMT" + formatTimezone(timezoneOffset, ":");
+        }
+      },
+      // Seconds timestamp
+      t: function(date, token, _localize) {
+        const timestamp = Math.trunc(+date / 1e3);
+        return addLeadingZeros(timestamp, token.length);
+      },
+      // Milliseconds timestamp
+      T: function(date, token, _localize) {
+        return addLeadingZeros(+date, token.length);
+      }
+    };
+  }
+});
+
+// ../node_modules/date-fns/_lib/format/longFormatters.js
+var dateLongFormatter, timeLongFormatter, dateTimeLongFormatter, longFormatters;
+var init_longFormatters = __esm({
+  "../node_modules/date-fns/_lib/format/longFormatters.js"() {
+    dateLongFormatter = (pattern, formatLong2) => {
+      switch (pattern) {
+        case "P":
+          return formatLong2.date({ width: "short" });
+        case "PP":
+          return formatLong2.date({ width: "medium" });
+        case "PPP":
+          return formatLong2.date({ width: "long" });
+        case "PPPP":
+        default:
+          return formatLong2.date({ width: "full" });
+      }
+    };
+    timeLongFormatter = (pattern, formatLong2) => {
+      switch (pattern) {
+        case "p":
+          return formatLong2.time({ width: "short" });
+        case "pp":
+          return formatLong2.time({ width: "medium" });
+        case "ppp":
+          return formatLong2.time({ width: "long" });
+        case "pppp":
+        default:
+          return formatLong2.time({ width: "full" });
+      }
+    };
+    dateTimeLongFormatter = (pattern, formatLong2) => {
+      const matchResult = pattern.match(/(P+)(p+)?/) || [];
+      const datePattern = matchResult[1];
+      const timePattern = matchResult[2];
+      if (!timePattern) {
+        return dateLongFormatter(pattern, formatLong2);
+      }
+      let dateTimeFormat;
+      switch (datePattern) {
+        case "P":
+          dateTimeFormat = formatLong2.dateTime({ width: "short" });
+          break;
+        case "PP":
+          dateTimeFormat = formatLong2.dateTime({ width: "medium" });
+          break;
+        case "PPP":
+          dateTimeFormat = formatLong2.dateTime({ width: "long" });
+          break;
+        case "PPPP":
+        default:
+          dateTimeFormat = formatLong2.dateTime({ width: "full" });
+          break;
+      }
+      return dateTimeFormat.replace("{{date}}", dateLongFormatter(datePattern, formatLong2)).replace("{{time}}", timeLongFormatter(timePattern, formatLong2));
+    };
+    longFormatters = {
+      p: timeLongFormatter,
+      P: dateTimeLongFormatter
+    };
+  }
+});
+
+// ../node_modules/date-fns/_lib/protectedTokens.js
+function isProtectedDayOfYearToken(token) {
+  return dayOfYearTokenRE.test(token);
+}
+function isProtectedWeekYearToken(token) {
+  return weekYearTokenRE.test(token);
+}
+function warnOrThrowProtectedError(token, format3, input) {
+  const _message = message(token, format3, input);
+  if (throwTokens.includes(token)) throw new RangeError(_message);
+}
+function message(token, format3, input) {
+  const subject = token[0] === "Y" ? "years" : "days of the month";
+  return `Use \`${token.toLowerCase()}\` instead of \`${token}\` (in \`${format3}\`) for formatting ${subject} to the input \`${input}\`; see: https://github.com/date-fns/date-fns/blob/master/docs/unicodeTokens.md`;
+}
+var dayOfYearTokenRE, weekYearTokenRE, throwTokens;
+var init_protectedTokens = __esm({
+  "../node_modules/date-fns/_lib/protectedTokens.js"() {
+    dayOfYearTokenRE = /^D+$/;
+    weekYearTokenRE = /^Y+$/;
+    throwTokens = ["D", "DD", "YY", "YYYY"];
+  }
+});
+
+// ../node_modules/date-fns/isDate.js
+function isDate(value) {
+  return value instanceof Date || typeof value === "object" && Object.prototype.toString.call(value) === "[object Date]";
+}
+var init_isDate = __esm({
+  "../node_modules/date-fns/isDate.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isValid.js
+function isValid(date) {
+  return !(!isDate(date) && typeof date !== "number" || isNaN(+toDate(date)));
+}
+var init_isValid = __esm({
+  "../node_modules/date-fns/isValid.js"() {
+    init_isDate();
+    init_toDate();
+  }
+});
+
+// ../node_modules/date-fns/format.js
+function format(date, formatStr, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const locale = options?.locale ?? defaultOptions2.locale ?? enUS;
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const weekStartsOn = options?.weekStartsOn ?? options?.locale?.options?.weekStartsOn ?? defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
+  const originalDate = toDate(date, options?.in);
+  if (!isValid(originalDate)) {
+    throw new RangeError("Invalid time value");
+  }
+  let parts = formatStr.match(longFormattingTokensRegExp).map((substring) => {
+    const firstCharacter = substring[0];
+    if (firstCharacter === "p" || firstCharacter === "P") {
+      const longFormatter = longFormatters[firstCharacter];
+      return longFormatter(substring, locale.formatLong);
+    }
+    return substring;
+  }).join("").match(formattingTokensRegExp).map((substring) => {
+    if (substring === "''") {
+      return { isToken: false, value: "'" };
+    }
+    const firstCharacter = substring[0];
+    if (firstCharacter === "'") {
+      return { isToken: false, value: cleanEscapedString(substring) };
+    }
+    if (formatters[firstCharacter]) {
+      return { isToken: true, value: substring };
+    }
+    if (firstCharacter.match(unescapedLatinCharacterRegExp)) {
+      throw new RangeError(
+        "Format string contains an unescaped latin alphabet character `" + firstCharacter + "`"
+      );
+    }
+    return { isToken: false, value: substring };
+  });
+  if (locale.localize.preprocessor) {
+    parts = locale.localize.preprocessor(originalDate, parts);
+  }
+  const formatterOptions = {
+    firstWeekContainsDate,
+    weekStartsOn,
+    locale
+  };
+  return parts.map((part) => {
+    if (!part.isToken) return part.value;
+    const token = part.value;
+    if (!options?.useAdditionalWeekYearTokens && isProtectedWeekYearToken(token) || !options?.useAdditionalDayOfYearTokens && isProtectedDayOfYearToken(token)) {
+      warnOrThrowProtectedError(token, formatStr, String(date));
+    }
+    const formatter = formatters[token[0]];
+    return formatter(originalDate, token, locale.localize, formatterOptions);
+  }).join("");
+}
+function cleanEscapedString(input) {
+  const matched = input.match(escapedStringRegExp);
+  if (!matched) {
+    return input;
+  }
+  return matched[1].replace(doubleQuoteRegExp, "'");
+}
+var formattingTokensRegExp, longFormattingTokensRegExp, escapedStringRegExp, doubleQuoteRegExp, unescapedLatinCharacterRegExp;
+var init_format = __esm({
+  "../node_modules/date-fns/format.js"() {
+    init_defaultLocale();
+    init_defaultOptions();
+    init_formatters();
+    init_longFormatters();
+    init_protectedTokens();
+    init_isValid();
+    init_toDate();
+    formattingTokensRegExp = /[yYQqMLwIdDecihHKkms]o|(\w)\1*|''|'(''|[^'])+('|$)|./g;
+    longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
+    escapedStringRegExp = /^'([^]*?)'?$/;
+    doubleQuoteRegExp = /''/g;
+    unescapedLatinCharacterRegExp = /[a-zA-Z]/;
+  }
+});
+
+// ../node_modules/date-fns/addDays.js
+var init_addDays = __esm({
+  "../node_modules/date-fns/addDays.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addMonths.js
+var init_addMonths = __esm({
+  "../node_modules/date-fns/addMonths.js"() {
+  }
+});
+
+// ../node_modules/date-fns/add.js
+var init_add = __esm({
+  "../node_modules/date-fns/add.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSaturday.js
+var init_isSaturday = __esm({
+  "../node_modules/date-fns/isSaturday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSunday.js
+var init_isSunday = __esm({
+  "../node_modules/date-fns/isSunday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isWeekend.js
+var init_isWeekend = __esm({
+  "../node_modules/date-fns/isWeekend.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addBusinessDays.js
+var init_addBusinessDays = __esm({
+  "../node_modules/date-fns/addBusinessDays.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addMilliseconds.js
+var init_addMilliseconds = __esm({
+  "../node_modules/date-fns/addMilliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addHours.js
+var init_addHours = __esm({
+  "../node_modules/date-fns/addHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setISOWeekYear.js
+var init_setISOWeekYear = __esm({
+  "../node_modules/date-fns/setISOWeekYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addISOWeekYears.js
+var init_addISOWeekYears = __esm({
+  "../node_modules/date-fns/addISOWeekYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addMinutes.js
+var init_addMinutes = __esm({
+  "../node_modules/date-fns/addMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addQuarters.js
+var init_addQuarters = __esm({
+  "../node_modules/date-fns/addQuarters.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addSeconds.js
+var init_addSeconds = __esm({
+  "../node_modules/date-fns/addSeconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addWeeks.js
+var init_addWeeks = __esm({
+  "../node_modules/date-fns/addWeeks.js"() {
+  }
+});
+
+// ../node_modules/date-fns/addYears.js
+var init_addYears = __esm({
+  "../node_modules/date-fns/addYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/areIntervalsOverlapping.js
+var init_areIntervalsOverlapping = __esm({
+  "../node_modules/date-fns/areIntervalsOverlapping.js"() {
+  }
+});
+
+// ../node_modules/date-fns/max.js
+var init_max = __esm({
+  "../node_modules/date-fns/max.js"() {
+  }
+});
+
+// ../node_modules/date-fns/min.js
+var init_min = __esm({
+  "../node_modules/date-fns/min.js"() {
+  }
+});
+
+// ../node_modules/date-fns/clamp.js
+var init_clamp = __esm({
+  "../node_modules/date-fns/clamp.js"() {
+  }
+});
+
+// ../node_modules/date-fns/closestIndexTo.js
+var init_closestIndexTo = __esm({
+  "../node_modules/date-fns/closestIndexTo.js"() {
+  }
+});
+
+// ../node_modules/date-fns/closestTo.js
+var init_closestTo = __esm({
+  "../node_modules/date-fns/closestTo.js"() {
+  }
+});
+
+// ../node_modules/date-fns/compareAsc.js
+var init_compareAsc = __esm({
+  "../node_modules/date-fns/compareAsc.js"() {
+  }
+});
+
+// ../node_modules/date-fns/compareDesc.js
+var init_compareDesc = __esm({
+  "../node_modules/date-fns/compareDesc.js"() {
+  }
+});
+
+// ../node_modules/date-fns/constructNow.js
+var init_constructNow = __esm({
+  "../node_modules/date-fns/constructNow.js"() {
+  }
+});
+
+// ../node_modules/date-fns/daysToWeeks.js
+var init_daysToWeeks = __esm({
+  "../node_modules/date-fns/daysToWeeks.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameDay.js
+var init_isSameDay = __esm({
+  "../node_modules/date-fns/isSameDay.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInBusinessDays.js
+var init_differenceInBusinessDays = __esm({
+  "../node_modules/date-fns/differenceInBusinessDays.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInCalendarISOWeekYears.js
+var init_differenceInCalendarISOWeekYears = __esm({
+  "../node_modules/date-fns/differenceInCalendarISOWeekYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInCalendarISOWeeks.js
+var init_differenceInCalendarISOWeeks = __esm({
+  "../node_modules/date-fns/differenceInCalendarISOWeeks.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInCalendarMonths.js
+var init_differenceInCalendarMonths = __esm({
+  "../node_modules/date-fns/differenceInCalendarMonths.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getQuarter.js
+var init_getQuarter = __esm({
+  "../node_modules/date-fns/getQuarter.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInCalendarQuarters.js
+var init_differenceInCalendarQuarters = __esm({
+  "../node_modules/date-fns/differenceInCalendarQuarters.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInCalendarWeeks.js
+var init_differenceInCalendarWeeks = __esm({
+  "../node_modules/date-fns/differenceInCalendarWeeks.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInCalendarYears.js
+var init_differenceInCalendarYears = __esm({
+  "../node_modules/date-fns/differenceInCalendarYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInDays.js
+var init_differenceInDays = __esm({
+  "../node_modules/date-fns/differenceInDays.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInHours.js
+var init_differenceInHours = __esm({
+  "../node_modules/date-fns/differenceInHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subISOWeekYears.js
+var init_subISOWeekYears = __esm({
+  "../node_modules/date-fns/subISOWeekYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInISOWeekYears.js
+var init_differenceInISOWeekYears = __esm({
+  "../node_modules/date-fns/differenceInISOWeekYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInMilliseconds.js
+var init_differenceInMilliseconds = __esm({
+  "../node_modules/date-fns/differenceInMilliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInMinutes.js
+var init_differenceInMinutes = __esm({
+  "../node_modules/date-fns/differenceInMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfDay.js
+var init_endOfDay = __esm({
+  "../node_modules/date-fns/endOfDay.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfMonth.js
+var init_endOfMonth = __esm({
+  "../node_modules/date-fns/endOfMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isLastDayOfMonth.js
+var init_isLastDayOfMonth = __esm({
+  "../node_modules/date-fns/isLastDayOfMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInMonths.js
+var init_differenceInMonths = __esm({
+  "../node_modules/date-fns/differenceInMonths.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInQuarters.js
+var init_differenceInQuarters = __esm({
+  "../node_modules/date-fns/differenceInQuarters.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInSeconds.js
+var init_differenceInSeconds = __esm({
+  "../node_modules/date-fns/differenceInSeconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInWeeks.js
+var init_differenceInWeeks = __esm({
+  "../node_modules/date-fns/differenceInWeeks.js"() {
+  }
+});
+
+// ../node_modules/date-fns/differenceInYears.js
+var init_differenceInYears = __esm({
+  "../node_modules/date-fns/differenceInYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachDayOfInterval.js
+var init_eachDayOfInterval = __esm({
+  "../node_modules/date-fns/eachDayOfInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachHourOfInterval.js
+var init_eachHourOfInterval = __esm({
+  "../node_modules/date-fns/eachHourOfInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachMinuteOfInterval.js
+var init_eachMinuteOfInterval = __esm({
+  "../node_modules/date-fns/eachMinuteOfInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachMonthOfInterval.js
+var init_eachMonthOfInterval = __esm({
+  "../node_modules/date-fns/eachMonthOfInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfQuarter.js
+var init_startOfQuarter = __esm({
+  "../node_modules/date-fns/startOfQuarter.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachQuarterOfInterval.js
+var init_eachQuarterOfInterval = __esm({
+  "../node_modules/date-fns/eachQuarterOfInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachWeekOfInterval.js
+var init_eachWeekOfInterval = __esm({
+  "../node_modules/date-fns/eachWeekOfInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachWeekendOfInterval.js
+var init_eachWeekendOfInterval = __esm({
+  "../node_modules/date-fns/eachWeekendOfInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfMonth.js
+var init_startOfMonth = __esm({
+  "../node_modules/date-fns/startOfMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachWeekendOfMonth.js
+var init_eachWeekendOfMonth = __esm({
+  "../node_modules/date-fns/eachWeekendOfMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfYear.js
+var init_endOfYear = __esm({
+  "../node_modules/date-fns/endOfYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachWeekendOfYear.js
+var init_eachWeekendOfYear = __esm({
+  "../node_modules/date-fns/eachWeekendOfYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/eachYearOfInterval.js
+var init_eachYearOfInterval = __esm({
+  "../node_modules/date-fns/eachYearOfInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfDecade.js
+var init_endOfDecade = __esm({
+  "../node_modules/date-fns/endOfDecade.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfHour.js
+var init_endOfHour = __esm({
+  "../node_modules/date-fns/endOfHour.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfWeek.js
+var init_endOfWeek = __esm({
+  "../node_modules/date-fns/endOfWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfISOWeek.js
+var init_endOfISOWeek = __esm({
+  "../node_modules/date-fns/endOfISOWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfISOWeekYear.js
+var init_endOfISOWeekYear = __esm({
+  "../node_modules/date-fns/endOfISOWeekYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfMinute.js
+var init_endOfMinute = __esm({
+  "../node_modules/date-fns/endOfMinute.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfQuarter.js
+var init_endOfQuarter = __esm({
+  "../node_modules/date-fns/endOfQuarter.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfSecond.js
+var init_endOfSecond = __esm({
+  "../node_modules/date-fns/endOfSecond.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfToday.js
+var init_endOfToday = __esm({
+  "../node_modules/date-fns/endOfToday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfTomorrow.js
+var init_endOfTomorrow = __esm({
+  "../node_modules/date-fns/endOfTomorrow.js"() {
+  }
+});
+
+// ../node_modules/date-fns/endOfYesterday.js
+var init_endOfYesterday = __esm({
+  "../node_modules/date-fns/endOfYesterday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatDistance.js
+var init_formatDistance2 = __esm({
+  "../node_modules/date-fns/formatDistance.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatDistanceStrict.js
+var init_formatDistanceStrict = __esm({
+  "../node_modules/date-fns/formatDistanceStrict.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatDistanceToNow.js
+var init_formatDistanceToNow = __esm({
+  "../node_modules/date-fns/formatDistanceToNow.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatDistanceToNowStrict.js
+var init_formatDistanceToNowStrict = __esm({
+  "../node_modules/date-fns/formatDistanceToNowStrict.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatDuration.js
+var init_formatDuration = __esm({
+  "../node_modules/date-fns/formatDuration.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatISO.js
+var init_formatISO = __esm({
+  "../node_modules/date-fns/formatISO.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatISO9075.js
+var init_formatISO9075 = __esm({
+  "../node_modules/date-fns/formatISO9075.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatISODuration.js
+var init_formatISODuration = __esm({
+  "../node_modules/date-fns/formatISODuration.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatRFC3339.js
+var init_formatRFC3339 = __esm({
+  "../node_modules/date-fns/formatRFC3339.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatRFC7231.js
+var init_formatRFC7231 = __esm({
+  "../node_modules/date-fns/formatRFC7231.js"() {
+  }
+});
+
+// ../node_modules/date-fns/formatRelative.js
+var init_formatRelative2 = __esm({
+  "../node_modules/date-fns/formatRelative.js"() {
+  }
+});
+
+// ../node_modules/date-fns/fromUnixTime.js
+var init_fromUnixTime = __esm({
+  "../node_modules/date-fns/fromUnixTime.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getDate.js
+var init_getDate = __esm({
+  "../node_modules/date-fns/getDate.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getDay.js
+var init_getDay = __esm({
+  "../node_modules/date-fns/getDay.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getDaysInMonth.js
+var init_getDaysInMonth = __esm({
+  "../node_modules/date-fns/getDaysInMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isLeapYear.js
+var init_isLeapYear = __esm({
+  "../node_modules/date-fns/isLeapYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getDaysInYear.js
+var init_getDaysInYear = __esm({
+  "../node_modules/date-fns/getDaysInYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getDecade.js
+var init_getDecade = __esm({
+  "../node_modules/date-fns/getDecade.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getDefaultOptions.js
+function getDefaultOptions2() {
+  return Object.assign({}, getDefaultOptions());
+}
+var init_getDefaultOptions = __esm({
+  "../node_modules/date-fns/getDefaultOptions.js"() {
+    init_defaultOptions();
+  }
+});
+
+// ../node_modules/date-fns/getHours.js
+var init_getHours = __esm({
+  "../node_modules/date-fns/getHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getISODay.js
+var init_getISODay = __esm({
+  "../node_modules/date-fns/getISODay.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getISOWeeksInYear.js
+var init_getISOWeeksInYear = __esm({
+  "../node_modules/date-fns/getISOWeeksInYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getMilliseconds.js
+var init_getMilliseconds = __esm({
+  "../node_modules/date-fns/getMilliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getMinutes.js
+var init_getMinutes = __esm({
+  "../node_modules/date-fns/getMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getMonth.js
+var init_getMonth = __esm({
+  "../node_modules/date-fns/getMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getOverlappingDaysInIntervals.js
+var init_getOverlappingDaysInIntervals = __esm({
+  "../node_modules/date-fns/getOverlappingDaysInIntervals.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getSeconds.js
+var init_getSeconds = __esm({
+  "../node_modules/date-fns/getSeconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getTime.js
+var init_getTime = __esm({
+  "../node_modules/date-fns/getTime.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getUnixTime.js
+var init_getUnixTime = __esm({
+  "../node_modules/date-fns/getUnixTime.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getWeekOfMonth.js
+var init_getWeekOfMonth = __esm({
+  "../node_modules/date-fns/getWeekOfMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/lastDayOfMonth.js
+var init_lastDayOfMonth = __esm({
+  "../node_modules/date-fns/lastDayOfMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getWeeksInMonth.js
+var init_getWeeksInMonth = __esm({
+  "../node_modules/date-fns/getWeeksInMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/getYear.js
+var init_getYear = __esm({
+  "../node_modules/date-fns/getYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/hoursToMilliseconds.js
+var init_hoursToMilliseconds = __esm({
+  "../node_modules/date-fns/hoursToMilliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/hoursToMinutes.js
+var init_hoursToMinutes = __esm({
+  "../node_modules/date-fns/hoursToMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/hoursToSeconds.js
+var init_hoursToSeconds = __esm({
+  "../node_modules/date-fns/hoursToSeconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/interval.js
+var init_interval = __esm({
+  "../node_modules/date-fns/interval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/intervalToDuration.js
+var init_intervalToDuration = __esm({
+  "../node_modules/date-fns/intervalToDuration.js"() {
+  }
+});
+
+// ../node_modules/date-fns/intlFormat.js
+var init_intlFormat = __esm({
+  "../node_modules/date-fns/intlFormat.js"() {
+  }
+});
+
+// ../node_modules/date-fns/intlFormatDistance.js
+var init_intlFormatDistance = __esm({
+  "../node_modules/date-fns/intlFormatDistance.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isAfter.js
+var init_isAfter = __esm({
+  "../node_modules/date-fns/isAfter.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isBefore.js
+var init_isBefore = __esm({
+  "../node_modules/date-fns/isBefore.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isEqual.js
+var init_isEqual = __esm({
+  "../node_modules/date-fns/isEqual.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isExists.js
+var init_isExists = __esm({
+  "../node_modules/date-fns/isExists.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isFirstDayOfMonth.js
+var init_isFirstDayOfMonth = __esm({
+  "../node_modules/date-fns/isFirstDayOfMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isFriday.js
+var init_isFriday = __esm({
+  "../node_modules/date-fns/isFriday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isFuture.js
+var init_isFuture = __esm({
+  "../node_modules/date-fns/isFuture.js"() {
+  }
+});
+
+// ../node_modules/date-fns/transpose.js
+var init_transpose = __esm({
+  "../node_modules/date-fns/transpose.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setWeek.js
+var init_setWeek = __esm({
+  "../node_modules/date-fns/setWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setISOWeek.js
+var init_setISOWeek = __esm({
+  "../node_modules/date-fns/setISOWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setDay.js
+var init_setDay = __esm({
+  "../node_modules/date-fns/setDay.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setISODay.js
+var init_setISODay = __esm({
+  "../node_modules/date-fns/setISODay.js"() {
+  }
+});
+
+// ../node_modules/date-fns/parse.js
+var init_parse = __esm({
+  "../node_modules/date-fns/parse.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isMatch.js
+var init_isMatch = __esm({
+  "../node_modules/date-fns/isMatch.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isMonday.js
+var init_isMonday = __esm({
+  "../node_modules/date-fns/isMonday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isPast.js
+var init_isPast = __esm({
+  "../node_modules/date-fns/isPast.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfHour.js
+var init_startOfHour = __esm({
+  "../node_modules/date-fns/startOfHour.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameHour.js
+var init_isSameHour = __esm({
+  "../node_modules/date-fns/isSameHour.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameWeek.js
+var init_isSameWeek = __esm({
+  "../node_modules/date-fns/isSameWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameISOWeek.js
+var init_isSameISOWeek = __esm({
+  "../node_modules/date-fns/isSameISOWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameISOWeekYear.js
+var init_isSameISOWeekYear = __esm({
+  "../node_modules/date-fns/isSameISOWeekYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfMinute.js
+var init_startOfMinute = __esm({
+  "../node_modules/date-fns/startOfMinute.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameMinute.js
+var init_isSameMinute = __esm({
+  "../node_modules/date-fns/isSameMinute.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameMonth.js
+var init_isSameMonth = __esm({
+  "../node_modules/date-fns/isSameMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameQuarter.js
+var init_isSameQuarter = __esm({
+  "../node_modules/date-fns/isSameQuarter.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfSecond.js
+var init_startOfSecond = __esm({
+  "../node_modules/date-fns/startOfSecond.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameSecond.js
+var init_isSameSecond = __esm({
+  "../node_modules/date-fns/isSameSecond.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isSameYear.js
+var init_isSameYear = __esm({
+  "../node_modules/date-fns/isSameYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThisHour.js
+var init_isThisHour = __esm({
+  "../node_modules/date-fns/isThisHour.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThisISOWeek.js
+var init_isThisISOWeek = __esm({
+  "../node_modules/date-fns/isThisISOWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThisMinute.js
+var init_isThisMinute = __esm({
+  "../node_modules/date-fns/isThisMinute.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThisMonth.js
+var init_isThisMonth = __esm({
+  "../node_modules/date-fns/isThisMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThisQuarter.js
+var init_isThisQuarter = __esm({
+  "../node_modules/date-fns/isThisQuarter.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThisSecond.js
+var init_isThisSecond = __esm({
+  "../node_modules/date-fns/isThisSecond.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThisWeek.js
+var init_isThisWeek = __esm({
+  "../node_modules/date-fns/isThisWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThisYear.js
+var init_isThisYear = __esm({
+  "../node_modules/date-fns/isThisYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isThursday.js
+var init_isThursday = __esm({
+  "../node_modules/date-fns/isThursday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isToday.js
+var init_isToday = __esm({
+  "../node_modules/date-fns/isToday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isTomorrow.js
+var init_isTomorrow = __esm({
+  "../node_modules/date-fns/isTomorrow.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isTuesday.js
+var init_isTuesday = __esm({
+  "../node_modules/date-fns/isTuesday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isWednesday.js
+var init_isWednesday = __esm({
+  "../node_modules/date-fns/isWednesday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isWithinInterval.js
+var init_isWithinInterval = __esm({
+  "../node_modules/date-fns/isWithinInterval.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subDays.js
+var init_subDays = __esm({
+  "../node_modules/date-fns/subDays.js"() {
+  }
+});
+
+// ../node_modules/date-fns/isYesterday.js
+var init_isYesterday = __esm({
+  "../node_modules/date-fns/isYesterday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/lastDayOfDecade.js
+var init_lastDayOfDecade = __esm({
+  "../node_modules/date-fns/lastDayOfDecade.js"() {
+  }
+});
+
+// ../node_modules/date-fns/lastDayOfWeek.js
+var init_lastDayOfWeek = __esm({
+  "../node_modules/date-fns/lastDayOfWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/lastDayOfISOWeek.js
+var init_lastDayOfISOWeek = __esm({
+  "../node_modules/date-fns/lastDayOfISOWeek.js"() {
+  }
+});
+
+// ../node_modules/date-fns/lastDayOfISOWeekYear.js
+var init_lastDayOfISOWeekYear = __esm({
+  "../node_modules/date-fns/lastDayOfISOWeekYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/lastDayOfQuarter.js
+var init_lastDayOfQuarter = __esm({
+  "../node_modules/date-fns/lastDayOfQuarter.js"() {
+  }
+});
+
+// ../node_modules/date-fns/lastDayOfYear.js
+var init_lastDayOfYear = __esm({
+  "../node_modules/date-fns/lastDayOfYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/lightFormat.js
+var init_lightFormat = __esm({
+  "../node_modules/date-fns/lightFormat.js"() {
+  }
+});
+
+// ../node_modules/date-fns/milliseconds.js
+var init_milliseconds = __esm({
+  "../node_modules/date-fns/milliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/millisecondsToHours.js
+var init_millisecondsToHours = __esm({
+  "../node_modules/date-fns/millisecondsToHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/millisecondsToMinutes.js
+var init_millisecondsToMinutes = __esm({
+  "../node_modules/date-fns/millisecondsToMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/millisecondsToSeconds.js
+var init_millisecondsToSeconds = __esm({
+  "../node_modules/date-fns/millisecondsToSeconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/minutesToHours.js
+var init_minutesToHours = __esm({
+  "../node_modules/date-fns/minutesToHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/minutesToMilliseconds.js
+var init_minutesToMilliseconds = __esm({
+  "../node_modules/date-fns/minutesToMilliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/minutesToSeconds.js
+var init_minutesToSeconds = __esm({
+  "../node_modules/date-fns/minutesToSeconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/monthsToQuarters.js
+var init_monthsToQuarters = __esm({
+  "../node_modules/date-fns/monthsToQuarters.js"() {
+  }
+});
+
+// ../node_modules/date-fns/monthsToYears.js
+var init_monthsToYears = __esm({
+  "../node_modules/date-fns/monthsToYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/nextDay.js
+var init_nextDay = __esm({
+  "../node_modules/date-fns/nextDay.js"() {
+  }
+});
+
+// ../node_modules/date-fns/nextFriday.js
+var init_nextFriday = __esm({
+  "../node_modules/date-fns/nextFriday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/nextMonday.js
+var init_nextMonday = __esm({
+  "../node_modules/date-fns/nextMonday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/nextSaturday.js
+var init_nextSaturday = __esm({
+  "../node_modules/date-fns/nextSaturday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/nextSunday.js
+var init_nextSunday = __esm({
+  "../node_modules/date-fns/nextSunday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/nextThursday.js
+var init_nextThursday = __esm({
+  "../node_modules/date-fns/nextThursday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/nextTuesday.js
+var init_nextTuesday = __esm({
+  "../node_modules/date-fns/nextTuesday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/nextWednesday.js
+var init_nextWednesday = __esm({
+  "../node_modules/date-fns/nextWednesday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/parseISO.js
+var init_parseISO = __esm({
+  "../node_modules/date-fns/parseISO.js"() {
+  }
+});
+
+// ../node_modules/date-fns/parseJSON.js
+var init_parseJSON = __esm({
+  "../node_modules/date-fns/parseJSON.js"() {
+  }
+});
+
+// ../node_modules/date-fns/previousDay.js
+var init_previousDay = __esm({
+  "../node_modules/date-fns/previousDay.js"() {
+  }
+});
+
+// ../node_modules/date-fns/previousFriday.js
+var init_previousFriday = __esm({
+  "../node_modules/date-fns/previousFriday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/previousMonday.js
+var init_previousMonday = __esm({
+  "../node_modules/date-fns/previousMonday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/previousSaturday.js
+var init_previousSaturday = __esm({
+  "../node_modules/date-fns/previousSaturday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/previousSunday.js
+var init_previousSunday = __esm({
+  "../node_modules/date-fns/previousSunday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/previousThursday.js
+var init_previousThursday = __esm({
+  "../node_modules/date-fns/previousThursday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/previousTuesday.js
+var init_previousTuesday = __esm({
+  "../node_modules/date-fns/previousTuesday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/previousWednesday.js
+var init_previousWednesday = __esm({
+  "../node_modules/date-fns/previousWednesday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/quartersToMonths.js
+var init_quartersToMonths = __esm({
+  "../node_modules/date-fns/quartersToMonths.js"() {
+  }
+});
+
+// ../node_modules/date-fns/quartersToYears.js
+var init_quartersToYears = __esm({
+  "../node_modules/date-fns/quartersToYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/roundToNearestHours.js
+var init_roundToNearestHours = __esm({
+  "../node_modules/date-fns/roundToNearestHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/roundToNearestMinutes.js
+var init_roundToNearestMinutes = __esm({
+  "../node_modules/date-fns/roundToNearestMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/secondsToHours.js
+var init_secondsToHours = __esm({
+  "../node_modules/date-fns/secondsToHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/secondsToMilliseconds.js
+var init_secondsToMilliseconds = __esm({
+  "../node_modules/date-fns/secondsToMilliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/secondsToMinutes.js
+var init_secondsToMinutes = __esm({
+  "../node_modules/date-fns/secondsToMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setMonth.js
+var init_setMonth = __esm({
+  "../node_modules/date-fns/setMonth.js"() {
+  }
+});
+
+// ../node_modules/date-fns/set.js
+var init_set = __esm({
+  "../node_modules/date-fns/set.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setDate.js
+var init_setDate = __esm({
+  "../node_modules/date-fns/setDate.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setDayOfYear.js
+var init_setDayOfYear = __esm({
+  "../node_modules/date-fns/setDayOfYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setDefaultOptions.js
+var init_setDefaultOptions = __esm({
+  "../node_modules/date-fns/setDefaultOptions.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setHours.js
+var init_setHours = __esm({
+  "../node_modules/date-fns/setHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setMilliseconds.js
+var init_setMilliseconds = __esm({
+  "../node_modules/date-fns/setMilliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setMinutes.js
+var init_setMinutes = __esm({
+  "../node_modules/date-fns/setMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setQuarter.js
+var init_setQuarter = __esm({
+  "../node_modules/date-fns/setQuarter.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setSeconds.js
+var init_setSeconds = __esm({
+  "../node_modules/date-fns/setSeconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setWeekYear.js
+var init_setWeekYear = __esm({
+  "../node_modules/date-fns/setWeekYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/setYear.js
+var init_setYear = __esm({
+  "../node_modules/date-fns/setYear.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfDecade.js
+var init_startOfDecade = __esm({
+  "../node_modules/date-fns/startOfDecade.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfToday.js
+var init_startOfToday = __esm({
+  "../node_modules/date-fns/startOfToday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfTomorrow.js
+var init_startOfTomorrow = __esm({
+  "../node_modules/date-fns/startOfTomorrow.js"() {
+  }
+});
+
+// ../node_modules/date-fns/startOfYesterday.js
+var init_startOfYesterday = __esm({
+  "../node_modules/date-fns/startOfYesterday.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subMonths.js
+var init_subMonths = __esm({
+  "../node_modules/date-fns/subMonths.js"() {
+  }
+});
+
+// ../node_modules/date-fns/sub.js
+var init_sub = __esm({
+  "../node_modules/date-fns/sub.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subBusinessDays.js
+var init_subBusinessDays = __esm({
+  "../node_modules/date-fns/subBusinessDays.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subHours.js
+var init_subHours = __esm({
+  "../node_modules/date-fns/subHours.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subMilliseconds.js
+var init_subMilliseconds = __esm({
+  "../node_modules/date-fns/subMilliseconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subMinutes.js
+var init_subMinutes = __esm({
+  "../node_modules/date-fns/subMinutes.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subQuarters.js
+var init_subQuarters = __esm({
+  "../node_modules/date-fns/subQuarters.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subSeconds.js
+var init_subSeconds = __esm({
+  "../node_modules/date-fns/subSeconds.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subWeeks.js
+var init_subWeeks = __esm({
+  "../node_modules/date-fns/subWeeks.js"() {
+  }
+});
+
+// ../node_modules/date-fns/subYears.js
+var init_subYears = __esm({
+  "../node_modules/date-fns/subYears.js"() {
+  }
+});
+
+// ../node_modules/date-fns/weeksToDays.js
+var init_weeksToDays = __esm({
+  "../node_modules/date-fns/weeksToDays.js"() {
+  }
+});
+
+// ../node_modules/date-fns/yearsToDays.js
+var init_yearsToDays = __esm({
+  "../node_modules/date-fns/yearsToDays.js"() {
+  }
+});
+
+// ../node_modules/date-fns/yearsToMonths.js
+var init_yearsToMonths = __esm({
+  "../node_modules/date-fns/yearsToMonths.js"() {
+  }
+});
+
+// ../node_modules/date-fns/yearsToQuarters.js
+var init_yearsToQuarters = __esm({
+  "../node_modules/date-fns/yearsToQuarters.js"() {
+  }
+});
+
+// ../node_modules/date-fns/index.js
+var init_date_fns = __esm({
+  "../node_modules/date-fns/index.js"() {
+    init_add();
+    init_addBusinessDays();
+    init_addDays();
+    init_addHours();
+    init_addISOWeekYears();
+    init_addMilliseconds();
+    init_addMinutes();
+    init_addMonths();
+    init_addQuarters();
+    init_addSeconds();
+    init_addWeeks();
+    init_addYears();
+    init_areIntervalsOverlapping();
+    init_clamp();
+    init_closestIndexTo();
+    init_closestTo();
+    init_compareAsc();
+    init_compareDesc();
+    init_constructFrom();
+    init_constructNow();
+    init_daysToWeeks();
+    init_differenceInBusinessDays();
+    init_differenceInCalendarDays();
+    init_differenceInCalendarISOWeekYears();
+    init_differenceInCalendarISOWeeks();
+    init_differenceInCalendarMonths();
+    init_differenceInCalendarQuarters();
+    init_differenceInCalendarWeeks();
+    init_differenceInCalendarYears();
+    init_differenceInDays();
+    init_differenceInHours();
+    init_differenceInISOWeekYears();
+    init_differenceInMilliseconds();
+    init_differenceInMinutes();
+    init_differenceInMonths();
+    init_differenceInQuarters();
+    init_differenceInSeconds();
+    init_differenceInWeeks();
+    init_differenceInYears();
+    init_eachDayOfInterval();
+    init_eachHourOfInterval();
+    init_eachMinuteOfInterval();
+    init_eachMonthOfInterval();
+    init_eachQuarterOfInterval();
+    init_eachWeekOfInterval();
+    init_eachWeekendOfInterval();
+    init_eachWeekendOfMonth();
+    init_eachWeekendOfYear();
+    init_eachYearOfInterval();
+    init_endOfDay();
+    init_endOfDecade();
+    init_endOfHour();
+    init_endOfISOWeek();
+    init_endOfISOWeekYear();
+    init_endOfMinute();
+    init_endOfMonth();
+    init_endOfQuarter();
+    init_endOfSecond();
+    init_endOfToday();
+    init_endOfTomorrow();
+    init_endOfWeek();
+    init_endOfYear();
+    init_endOfYesterday();
+    init_format();
+    init_formatDistance2();
+    init_formatDistanceStrict();
+    init_formatDistanceToNow();
+    init_formatDistanceToNowStrict();
+    init_formatDuration();
+    init_formatISO();
+    init_formatISO9075();
+    init_formatISODuration();
+    init_formatRFC3339();
+    init_formatRFC7231();
+    init_formatRelative2();
+    init_fromUnixTime();
+    init_getDate();
+    init_getDay();
+    init_getDayOfYear();
+    init_getDaysInMonth();
+    init_getDaysInYear();
+    init_getDecade();
+    init_getDefaultOptions();
+    init_getHours();
+    init_getISODay();
+    init_getISOWeek();
+    init_getISOWeekYear();
+    init_getISOWeeksInYear();
+    init_getMilliseconds();
+    init_getMinutes();
+    init_getMonth();
+    init_getOverlappingDaysInIntervals();
+    init_getQuarter();
+    init_getSeconds();
+    init_getTime();
+    init_getUnixTime();
+    init_getWeek();
+    init_getWeekOfMonth();
+    init_getWeekYear();
+    init_getWeeksInMonth();
+    init_getYear();
+    init_hoursToMilliseconds();
+    init_hoursToMinutes();
+    init_hoursToSeconds();
+    init_interval();
+    init_intervalToDuration();
+    init_intlFormat();
+    init_intlFormatDistance();
+    init_isAfter();
+    init_isBefore();
+    init_isDate();
+    init_isEqual();
+    init_isExists();
+    init_isFirstDayOfMonth();
+    init_isFriday();
+    init_isFuture();
+    init_isLastDayOfMonth();
+    init_isLeapYear();
+    init_isMatch();
+    init_isMonday();
+    init_isPast();
+    init_isSameDay();
+    init_isSameHour();
+    init_isSameISOWeek();
+    init_isSameISOWeekYear();
+    init_isSameMinute();
+    init_isSameMonth();
+    init_isSameQuarter();
+    init_isSameSecond();
+    init_isSameWeek();
+    init_isSameYear();
+    init_isSaturday();
+    init_isSunday();
+    init_isThisHour();
+    init_isThisISOWeek();
+    init_isThisMinute();
+    init_isThisMonth();
+    init_isThisQuarter();
+    init_isThisSecond();
+    init_isThisWeek();
+    init_isThisYear();
+    init_isThursday();
+    init_isToday();
+    init_isTomorrow();
+    init_isTuesday();
+    init_isValid();
+    init_isWednesday();
+    init_isWeekend();
+    init_isWithinInterval();
+    init_isYesterday();
+    init_lastDayOfDecade();
+    init_lastDayOfISOWeek();
+    init_lastDayOfISOWeekYear();
+    init_lastDayOfMonth();
+    init_lastDayOfQuarter();
+    init_lastDayOfWeek();
+    init_lastDayOfYear();
+    init_lightFormat();
+    init_max();
+    init_milliseconds();
+    init_millisecondsToHours();
+    init_millisecondsToMinutes();
+    init_millisecondsToSeconds();
+    init_min();
+    init_minutesToHours();
+    init_minutesToMilliseconds();
+    init_minutesToSeconds();
+    init_monthsToQuarters();
+    init_monthsToYears();
+    init_nextDay();
+    init_nextFriday();
+    init_nextMonday();
+    init_nextSaturday();
+    init_nextSunday();
+    init_nextThursday();
+    init_nextTuesday();
+    init_nextWednesday();
+    init_parse();
+    init_parseISO();
+    init_parseJSON();
+    init_previousDay();
+    init_previousFriday();
+    init_previousMonday();
+    init_previousSaturday();
+    init_previousSunday();
+    init_previousThursday();
+    init_previousTuesday();
+    init_previousWednesday();
+    init_quartersToMonths();
+    init_quartersToYears();
+    init_roundToNearestHours();
+    init_roundToNearestMinutes();
+    init_secondsToHours();
+    init_secondsToMilliseconds();
+    init_secondsToMinutes();
+    init_set();
+    init_setDate();
+    init_setDay();
+    init_setDayOfYear();
+    init_setDefaultOptions();
+    init_setHours();
+    init_setISODay();
+    init_setISOWeek();
+    init_setISOWeekYear();
+    init_setMilliseconds();
+    init_setMinutes();
+    init_setMonth();
+    init_setQuarter();
+    init_setSeconds();
+    init_setWeek();
+    init_setWeekYear();
+    init_setYear();
+    init_startOfDay();
+    init_startOfDecade();
+    init_startOfHour();
+    init_startOfISOWeek();
+    init_startOfISOWeekYear();
+    init_startOfMinute();
+    init_startOfMonth();
+    init_startOfQuarter();
+    init_startOfSecond();
+    init_startOfToday();
+    init_startOfTomorrow();
+    init_startOfWeek();
+    init_startOfWeekYear();
+    init_startOfYear();
+    init_startOfYesterday();
+    init_sub();
+    init_subBusinessDays();
+    init_subDays();
+    init_subHours();
+    init_subISOWeekYears();
+    init_subMilliseconds();
+    init_subMinutes();
+    init_subMonths();
+    init_subQuarters();
+    init_subSeconds();
+    init_subWeeks();
+    init_subYears();
+    init_toDate();
+    init_transpose();
+    init_weeksToDays();
+    init_yearsToDays();
+    init_yearsToMonths();
+    init_yearsToQuarters();
+  }
+});
+
 // ../node_modules/date-fns-tz/dist/esm/_lib/tzIntlTimeZoneName/index.js
+function tzIntlTimeZoneName(length, date, options) {
+  const defaultOptions2 = getDefaultOptions2();
+  const dtf = getDTF(length, options.timeZone, options.locale ?? defaultOptions2.locale);
+  return "formatToParts" in dtf ? partsTimeZone(dtf, date) : hackyTimeZone(dtf, date);
+}
+function partsTimeZone(dtf, date) {
+  const formatted = dtf.formatToParts(date);
+  for (let i = formatted.length - 1; i >= 0; --i) {
+    if (formatted[i].type === "timeZoneName") {
+      return formatted[i].value;
+    }
+  }
+  return void 0;
+}
+function hackyTimeZone(dtf, date) {
+  const formatted = dtf.format(date).replace(/\u200E/g, "");
+  const tzNameMatch = / [\w-+ ]+$/.exec(formatted);
+  return tzNameMatch ? tzNameMatch[0].substr(1) : "";
+}
+function getDTF(length, timeZone, locale) {
+  return new Intl.DateTimeFormat(locale ? [locale.code, "en-US"] : void 0, {
+    timeZone,
+    timeZoneName: length
+  });
+}
 var init_tzIntlTimeZoneName = __esm({
   "../node_modules/date-fns-tz/dist/esm/_lib/tzIntlTimeZoneName/index.js"() {
+    init_date_fns();
   }
 });
 
@@ -1215,22 +4660,141 @@ var init_tzParseTimezone = __esm({
 });
 
 // ../node_modules/date-fns-tz/dist/esm/format/formatters/index.js
-var MILLISECONDS_IN_MINUTE2;
-var init_formatters = __esm({
+function getTimeZoneOffset(timeZone, originalDate) {
+  const timeZoneOffset = timeZone ? tzParseTimezone(timeZone, originalDate, true) / MILLISECONDS_IN_MINUTE2 : originalDate?.getTimezoneOffset() ?? 0;
+  if (Number.isNaN(timeZoneOffset)) {
+    throw new RangeError("Invalid time zone specified: " + timeZone);
+  }
+  return timeZoneOffset;
+}
+function addLeadingZeros2(number, targetLength) {
+  const sign = number < 0 ? "-" : "";
+  let output = Math.abs(number).toString();
+  while (output.length < targetLength) {
+    output = "0" + output;
+  }
+  return sign + output;
+}
+function formatTimezone2(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = addLeadingZeros2(Math.floor(absOffset / 60), 2);
+  const minutes = addLeadingZeros2(Math.floor(absOffset % 60), 2);
+  return sign + hours + delimiter + minutes;
+}
+function formatTimezoneWithOptionalMinutes2(offset, delimiter) {
+  if (offset % 60 === 0) {
+    const sign = offset > 0 ? "-" : "+";
+    return sign + addLeadingZeros2(Math.abs(offset) / 60, 2);
+  }
+  return formatTimezone2(offset, delimiter);
+}
+function formatTimezoneShort2(offset, delimiter = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = Math.floor(absOffset / 60);
+  const minutes = absOffset % 60;
+  if (minutes === 0) {
+    return sign + String(hours);
+  }
+  return sign + String(hours) + delimiter + addLeadingZeros2(minutes, 2);
+}
+var MILLISECONDS_IN_MINUTE2, formatters2;
+var init_formatters2 = __esm({
   "../node_modules/date-fns-tz/dist/esm/format/formatters/index.js"() {
     init_tzIntlTimeZoneName();
     init_tzParseTimezone();
     MILLISECONDS_IN_MINUTE2 = 60 * 1e3;
+    formatters2 = {
+      // Timezone (ISO-8601. If offset is 0, output is always `'Z'`)
+      X: function(date, token, options) {
+        const timezoneOffset = getTimeZoneOffset(options.timeZone, date);
+        if (timezoneOffset === 0) {
+          return "Z";
+        }
+        switch (token) {
+          // Hours and optional minutes
+          case "X":
+            return formatTimezoneWithOptionalMinutes2(timezoneOffset);
+          // Hours, minutes and optional seconds without `:` delimeter
+          // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+          // so this token always has the same output as `XX`
+          case "XXXX":
+          case "XX":
+            return formatTimezone2(timezoneOffset);
+          // Hours, minutes and optional seconds with `:` delimeter
+          // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+          // so this token always has the same output as `XXX`
+          case "XXXXX":
+          case "XXX":
+          // Hours and minutes with `:` delimeter
+          default:
+            return formatTimezone2(timezoneOffset, ":");
+        }
+      },
+      // Timezone (ISO-8601. If offset is 0, output is `'+00:00'` or equivalent)
+      x: function(date, token, options) {
+        const timezoneOffset = getTimeZoneOffset(options.timeZone, date);
+        switch (token) {
+          // Hours and optional minutes
+          case "x":
+            return formatTimezoneWithOptionalMinutes2(timezoneOffset);
+          // Hours, minutes and optional seconds without `:` delimeter
+          // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+          // so this token always has the same output as `xx`
+          case "xxxx":
+          case "xx":
+            return formatTimezone2(timezoneOffset);
+          // Hours, minutes and optional seconds with `:` delimeter
+          // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+          // so this token always has the same output as `xxx`
+          case "xxxxx":
+          case "xxx":
+          // Hours and minutes with `:` delimeter
+          default:
+            return formatTimezone2(timezoneOffset, ":");
+        }
+      },
+      // Timezone (GMT)
+      O: function(date, token, options) {
+        const timezoneOffset = getTimeZoneOffset(options.timeZone, date);
+        switch (token) {
+          // Short
+          case "O":
+          case "OO":
+          case "OOO":
+            return "GMT" + formatTimezoneShort2(timezoneOffset, ":");
+          // Long
+          case "OOOO":
+          default:
+            return "GMT" + formatTimezone2(timezoneOffset, ":");
+        }
+      },
+      // Timezone (specific non-location)
+      z: function(date, token, options) {
+        switch (token) {
+          // Short
+          case "z":
+          case "zz":
+          case "zzz":
+            return tzIntlTimeZoneName("short", date, options);
+          // Long
+          case "zzzz":
+          default:
+            return tzIntlTimeZoneName("long", date, options);
+        }
+      }
+    };
   }
 });
 
 // ../node_modules/date-fns-tz/dist/esm/_lib/getTimezoneOffsetInMilliseconds/index.js
-function getTimezoneOffsetInMilliseconds(date) {
+function getTimezoneOffsetInMilliseconds2(date) {
   const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds()));
   utcDate.setUTCFullYear(date.getFullYear());
   return +date - +utcDate;
 }
-var init_getTimezoneOffsetInMilliseconds = __esm({
+var init_getTimezoneOffsetInMilliseconds2 = __esm({
   "../node_modules/date-fns-tz/dist/esm/_lib/getTimezoneOffsetInMilliseconds/index.js"() {
   }
 });
@@ -1244,7 +4808,7 @@ var init_tzPattern = __esm({
 });
 
 // ../node_modules/date-fns-tz/dist/esm/toDate/index.js
-function toDate(argument, options = {}) {
+function toDate2(argument, options = {}) {
   if (arguments.length < 1) {
     throw new TypeError("1 argument required, but only " + arguments.length + " present");
   }
@@ -1284,8 +4848,8 @@ function toDate(argument, options = {}) {
         return /* @__PURE__ */ new Date(NaN);
       }
     } else {
-      offset = getTimezoneOffsetInMilliseconds(new Date(timestamp + time));
-      offset = getTimezoneOffsetInMilliseconds(new Date(timestamp + time + offset));
+      offset = getTimezoneOffsetInMilliseconds2(new Date(timestamp + time));
+      offset = getTimezoneOffsetInMilliseconds2(new Date(timestamp + time + offset));
     }
     return new Date(timestamp + time + offset);
   } else {
@@ -1505,9 +5069,9 @@ function validateTime(hours, minutes, seconds) {
   return true;
 }
 var MILLISECONDS_IN_HOUR2, MILLISECONDS_IN_MINUTE3, DEFAULT_ADDITIONAL_DIGITS, patterns2, DAYS_IN_MONTH, DAYS_IN_MONTH_LEAP_YEAR;
-var init_toDate = __esm({
+var init_toDate2 = __esm({
   "../node_modules/date-fns-tz/dist/esm/toDate/index.js"() {
-    init_getTimezoneOffsetInMilliseconds();
+    init_getTimezoneOffsetInMilliseconds2();
     init_tzParseTimezone();
     init_tzPattern();
     MILLISECONDS_IN_HOUR2 = 36e5;
@@ -1554,25 +5118,62 @@ var init_toDate = __esm({
 });
 
 // ../node_modules/date-fns-tz/dist/esm/format/index.js
-var init_format = __esm({
+function format2(date, formatStr, options = {}) {
+  formatStr = String(formatStr);
+  const matches = formatStr.match(tzFormattingTokensRegExp);
+  if (matches) {
+    const d = toDate2(options.originalDate || date, options);
+    formatStr = matches.reduce(function(result, token) {
+      if (token[0] === "'") {
+        return result;
+      }
+      const pos = result.indexOf(token);
+      const precededByQuotedSection = result[pos - 1] === "'";
+      const replaced = result.replace(token, "'" + formatters2[token[0]](d, token, options) + "'");
+      return precededByQuotedSection ? replaced.substring(0, pos - 1) + replaced.substring(pos + 1) : replaced;
+    }, formatStr);
+  }
+  return format(date, formatStr, options);
+}
+var tzFormattingTokensRegExp;
+var init_format2 = __esm({
   "../node_modules/date-fns-tz/dist/esm/format/index.js"() {
-    init_formatters();
-    init_toDate();
+    init_format();
+    init_formatters2();
+    init_toDate2();
+    tzFormattingTokensRegExp = /([xXOz]+)|''|'(''|[^'])+('|$)/g;
   }
 });
 
 // ../node_modules/date-fns-tz/dist/esm/toZonedTime/index.js
+function toZonedTime(date, timeZone, options) {
+  date = toDate2(date, options);
+  const offsetMilliseconds = tzParseTimezone(timeZone, date, true);
+  const d = new Date(date.getTime() - offsetMilliseconds);
+  const resultDate = /* @__PURE__ */ new Date(0);
+  resultDate.setFullYear(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  resultDate.setHours(d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds());
+  return resultDate;
+}
 var init_toZonedTime = __esm({
   "../node_modules/date-fns-tz/dist/esm/toZonedTime/index.js"() {
     init_tzParseTimezone();
-    init_toDate();
+    init_toDate2();
   }
 });
 
 // ../node_modules/date-fns-tz/dist/esm/formatInTimeZone/index.js
+function formatInTimeZone(date, timeZone, formatStr, options) {
+  options = {
+    ...options,
+    timeZone,
+    originalDate: date
+  };
+  return format2(toZonedTime(date, timeZone, { timeZone: options.timeZone }), formatStr, options);
+}
 var init_formatInTimeZone = __esm({
   "../node_modules/date-fns-tz/dist/esm/formatInTimeZone/index.js"() {
-    init_format();
+    init_format2();
     init_toZonedTime();
   }
 });
@@ -1580,16 +5181,16 @@ var init_formatInTimeZone = __esm({
 // ../node_modules/date-fns-tz/dist/esm/fromZonedTime/index.js
 function fromZonedTime(date, timeZone, options) {
   if (typeof date === "string" && !date.match(tzPattern)) {
-    return toDate(date, { ...options, timeZone });
+    return toDate2(date, { ...options, timeZone });
   }
-  date = toDate(date, options);
+  date = toDate2(date, options);
   const utc = newDateUTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds()).getTime();
   const offsetMilliseconds = tzParseTimezone(timeZone, new Date(utc));
   return new Date(utc + offsetMilliseconds);
 }
 var init_fromZonedTime = __esm({
   "../node_modules/date-fns-tz/dist/esm/fromZonedTime/index.js"() {
-    init_toDate();
+    init_toDate2();
     init_tzPattern();
     init_tzParseTimezone();
     init_newDateUTC();
@@ -1606,12 +5207,123 @@ var init_getTimezoneOffset = __esm({
 // ../node_modules/date-fns-tz/dist/esm/index.js
 var init_esm = __esm({
   "../node_modules/date-fns-tz/dist/esm/index.js"() {
-    init_format();
+    init_format2();
     init_formatInTimeZone();
     init_fromZonedTime();
     init_toZonedTime();
     init_getTimezoneOffset();
-    init_toDate();
+    init_toDate2();
+  }
+});
+
+// copied-server-source/lib/stage-execution.core.ts
+function stageReminderTarget(exec, lead) {
+  const spec = normalizeTrigger(exec?.trigger);
+  return spec.kind === "hours-before-field" ? lead.customFields.find(
+    (f) => spec.fieldId ? f.id === spec.fieldId : f.name.trim().toLocaleLowerCase() === spec.fieldName?.trim().toLocaleLowerCase()
+  )?.displayValue : void 0;
+}
+function stageActionStamp(value) {
+  const canonical = (v) => Array.isArray(v) ? v.map(canonical) : v && typeof v === "object" ? Object.fromEntries(
+    Object.entries(v).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).filter(([k, value2]) => k !== "applyToExisting" && value2 !== void 0).map(([k, value2]) => [k, canonical(value2)])
+  ) : v;
+  return JSON.stringify(canonical(value));
+}
+function stageDate(value, timezone = "America/Sao_Paulo") {
+  const raw = String(value ?? "").trim();
+  if (!raw) return NaN;
+  try {
+    return /(?:z|[+-]\d{2}:?\d{2})$/i.test(raw) ? new Date(raw).getTime() : fromZonedTime(raw, timezone).getTime();
+  } catch {
+    return NaN;
+  }
+}
+function stageDueAt(exec, lead, now = Date.now()) {
+  const base = Number(exec?.delayMinutes ?? 0);
+  if (!Number.isFinite(base) || base < 0) return null;
+  const spec = normalizeTrigger(exec?.trigger), timezone = lead?.timezone || "America/Sao_Paulo";
+  let at = now;
+  if (spec.kind === "daily") {
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(spec.time)) return null;
+    const day = formatInTimeZone(now, timezone, "yyyy-MM-dd");
+    at = stageDate(`${day}T${spec.time}:00`, timezone);
+    if (at <= now) {
+      const next = /* @__PURE__ */ new Date(day + "T12:00:00Z");
+      next.setUTCDate(next.getUTCDate() + 1);
+      at = stageDate(`${next.toISOString().slice(0, 10)}T${spec.time}:00`, timezone);
+    }
+  } else if (spec.kind === "exact-datetime") {
+    at = stageDate(spec.at, timezone);
+    if (at < now) return null;
+  } else if (spec.kind === "hours-before-field") {
+    const field = lead?.customFields.find(
+      (f) => spec.fieldId ? f.id === spec.fieldId : f.name.trim().toLowerCase() === spec.fieldName?.trim().toLowerCase()
+    );
+    const target = stageDate(field?.displayValue ?? "", timezone);
+    if (!Number.isFinite(target) || target <= now || !Number.isFinite(spec.hours) || spec.hours < 0)
+      return null;
+    at = Math.max(now, target - spec.hours * 36e5);
+  }
+  return Number.isFinite(at) ? at + base * 6e4 : null;
+}
+function stageTimerKey(actionId, leadId, stageId, exec, lead, at) {
+  const spec = normalizeTrigger(exec?.trigger);
+  const target = stageReminderTarget(exec, lead);
+  return `${actionId}:timer:${leadId}:${stageId}:${spec.kind}:${target || new Date(at).toISOString()}`;
+}
+function stageInsideWindow(exec, lead, now = Date.now()) {
+  if (!exec?.active || exec.active === "always") return true;
+  const parts = formatInTimeZone(now, lead?.timezone || "America/Sao_Paulo", "i|HH:mm").split("|");
+  const day = Number(parts[0]) % 7, current = hm(parts[1]);
+  const windows = exec.active === "business-hours" ? (lead?.businessHours?.days ?? Array.from({ length: 7 }, (_, d) => ({
+    enabled: d > 0 && d < 6,
+    start: "09:00",
+    end: "18:00"
+  }))).flatMap((d, i) => d.enabled ? [{ days: [i], from: d.start, to: d.end }] : []) : exec.activeWindows?.length ? exec.activeWindows : exec.activeWindow ? [exec.activeWindow] : [];
+  if (!windows.length) return false;
+  return windows.some((w) => {
+    const start = hm(w.from), end = hm(w.to);
+    if (start <= end) return w.days.includes(day) && current >= start && current < end;
+    return w.days.includes(day) && current >= start || w.days.includes((day + 6) % 7) && current < end;
+  });
+}
+function stageMatchesCondition(c, lead) {
+  if (c.field === "no-tag") return lead.tags.length === 0;
+  let raw;
+  if (c.field === "tag") raw = lead.tags;
+  else if (c.field === "assignee") raw = lead.assigneeId;
+  else if (c.field === "custom-field")
+    raw = lead.customFields.find(
+      (f) => c.customFieldId ? f.id === c.customFieldId : f.name === c.customFieldNome
+    )?.displayValue;
+  else if (["name", "email", "phone", "value"].includes(c.field)) raw = lead[c.field];
+  else if (c.field === "source") raw = lead.sourceId;
+  else raw = lead.attributes?.[c.field];
+  const expected = String(c.value ?? "").trim().toLocaleLowerCase();
+  if (c.field === "value") {
+    const a = Number(raw ?? 0), b = Number(c.value);
+    return c.op === "gt" ? a > b : c.op === "lt" ? a < b : c.op === "neq" ? a !== b : a === b;
+  }
+  const values = (Array.isArray(raw) ? raw : [raw]).map((v) => String(v ?? "").toLocaleLowerCase());
+  if (c.op === "contains") return values.some((v) => v.includes(expected));
+  if (c.op === "in" || c.op === "not-in") {
+    const accepted = expected.split(",").map((v) => v.trim());
+    const found = values.some((v) => accepted.includes(v));
+    return c.op === "in" ? found : !found;
+  }
+  const equal = values.includes(expected);
+  return c.op === "neq" ? !equal : equal;
+}
+var STAGE_TIMER_KINDS, hm;
+var init_stage_execution_core = __esm({
+  "copied-server-source/lib/stage-execution.core.ts"() {
+    init_esm();
+    init_crm_mock();
+    STAGE_TIMER_KINDS = ["daily", "exact-datetime", "hours-before-field"];
+    hm = (value) => {
+      const [h, m] = value.split(":").map(Number);
+      return h * 60 + m;
+    };
   }
 });
 
@@ -1639,11 +5351,12 @@ __export(stage_automation_engine_server_exports, {
   runJob: () => runJob,
   runJobById: () => runJobById,
   scheduleDelayMinutes: () => scheduleDelayMinutes,
+  scheduleStageTimerActions: () => scheduleStageTimerActions,
   shouldRunForEvent: () => shouldRunForEvent,
   tickStageAutomationJobs: () => tickStageAutomationJobs
 });
 async function loadLeadCtx(admin, leadId, expectedWorkspaceId) {
-  let query = admin.from("leads").select("id, workspace_id, pipeline_id, stage_id, crm_source_id, custom_data, name, email, phone, value, tags, workspaces(business_hours)").eq("id", leadId);
+  let query = admin.from("leads").select("id, workspace_id, pipeline_id, stage_id, crm_source_id, custom_data, responsible_id, name, email, phone, value, tags, workspaces(business_hours)").eq("id", leadId);
   if (expectedWorkspaceId) query = query.eq("workspace_id", expectedWorkspaceId);
   const { data } = await query.maybeSingle();
   const lead = data;
@@ -1672,6 +5385,9 @@ async function loadLeadCtx(admin, leadId, expectedWorkspaceId) {
     phone: lead.phone,
     value: lead.value,
     tags: Array.isArray(lead.tags) ? lead.tags : [],
+    assigneeId: lead.responsible_id,
+    attributes: lead.custom_data ?? {},
+    businessHours: lead.workspaces?.business_hours ?? void 0,
     timezone,
     customFields: custom
   };
@@ -1710,9 +5426,9 @@ async function enqueueLeadAutomationEvent(admin, input) {
       results.push({ actionId: action.id, title: action.title, ok: true, skipped: true });
       continue;
     }
-    const dueAt = new Date(Date.now() + delay * 6e4).toISOString();
+    const dueAt = new Date(stageDueAt(action.execution, lead)).toISOString();
     const eventId = input.eventId || `evt_${input.event}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const dedupeKey = `${action.id}:${eventId}`;
+    const dedupeKey = STAGE_TIMER_KINDS.includes(normalizeTrigger(action.execution?.trigger).kind) ? `${stageTimerKey(action.id, lead.id, stageId, action.execution, lead, Date.parse(dueAt))}:${await sha256Hex(stageActionStamp(action))}` : `${action.id}:${eventId}`;
     const { data: created, error: insertError } = await admin.from("crm_automation_jobs").insert({
       workspace_id: lead.workspaceId,
       lead_id: lead.id,
@@ -1722,6 +5438,8 @@ async function enqueueLeadAutomationEvent(admin, input) {
       action,
       context: {
         event: input.event,
+        timer: STAGE_TIMER_KINDS.includes(normalizeTrigger(action.execution?.trigger).kind),
+        reminderTarget: stageReminderTarget(action.execution, lead),
         fromStageId: input.fromStageId ?? null,
         tags: input.tags ?? [],
         fieldId: input.fieldId ?? null,
@@ -1755,10 +5473,10 @@ async function enqueueLeadAutomationEvent(admin, input) {
   return results;
 }
 async function runJobById(admin, jobId) {
-  const { data } = await admin.from("crm_automation_jobs").select("*").eq("id", jobId).maybeSingle();
-  const job = data;
-  if (!job) return { actionId: jobId, title: "job", ok: false, error: "job n\xE3o encontrado" };
-  return runJob(admin, job);
+  const { data, error } = await admin.from("crm_automation_jobs").update({ status: "running" }).eq("id", jobId).eq("status", "pending").lte("due_at", (/* @__PURE__ */ new Date()).toISOString()).select("*").maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return { actionId: jobId, title: "Automa\xE7\xE3o", ok: true, skipped: true };
+  return runJob(admin, data);
 }
 async function finishJob(admin, jobId, status, error, attempts) {
   await admin.from("crm_automation_jobs").update({
@@ -1777,6 +5495,22 @@ async function runJob(admin, job) {
       await finishJob(admin, job.id, "skipped", "lead removido", job.attempts ?? 0);
       return { actionId: action?.id ?? job.id, title, ok: true, skipped: true };
     }
+    if (job.stage_id && (lead.stageId !== job.stage_id || lead.pipelineId !== job.pipeline_id)) {
+      await finishJob(admin, job.id, "skipped", "O cliente saiu da etapa antes da execu\xE7\xE3o.", job.attempts ?? 0);
+      return { actionId: action.id, title, ok: true, skipped: true };
+    }
+    if (job.context?.timer === true || job.context?.backfill === true) {
+      const saved = await admin.from("crm_stage_automations").select("action,enabled").eq("workspace_id", job.workspace_id).eq("pipeline_id", job.pipeline_id).eq("action_id", action.id);
+      if (saved.error) throw new Error(saved.error.message);
+      if (!(saved.data ?? []).some((r) => r.enabled !== false && r.action?.enabled !== false && stageActionStamp(r.action) === stageActionStamp(action))) {
+        await finishJob(admin, job.id, "skipped", "Gatilho alterado ou desativado antes da execu\xE7\xE3o.", job.attempts ?? 0);
+        return { actionId: action.id, title, ok: true, skipped: true };
+      }
+    }
+    if (job.context?.reminderTarget !== void 0 && job.context.reminderTarget !== stageReminderTarget(action.execution, lead)) {
+      await finishJob(admin, job.id, "skipped", "A data do lembrete foi alterada.", job.attempts ?? 0);
+      return { actionId: action.id, title, ok: true, skipped: true };
+    }
     if (!passesExecutionRules(lead, action.execution)) {
       await finishJob(admin, job.id, "skipped", "condi\xE7\xF5es n\xE3o atendidas", job.attempts ?? 0);
       return { actionId: action.id, title, ok: true, skipped: true };
@@ -1791,6 +5525,7 @@ async function runJob(admin, job) {
   }
 }
 async function tickStageAutomationJobs(admin, limit = 100) {
+  await scheduleStageTimerActions(admin);
   const { data } = await admin.from("crm_automation_jobs").select("*").eq("status", "pending").lte("due_at", (/* @__PURE__ */ new Date()).toISOString()).order("due_at").limit(limit);
   const jobs = data ?? [];
   let processed = 0;
@@ -1805,13 +5540,14 @@ async function tickStageAutomationJobs(admin, limit = 100) {
   return { processed, failed };
 }
 async function logActivity(admin, lead, type, payload) {
-  await admin.from("lead_activities").insert({
+  const receipt = await admin.from("lead_activities").insert({
     workspace_id: lead.workspaceId,
     lead_id: lead.id,
     type,
     payload,
     occurred_at: (/* @__PURE__ */ new Date()).toISOString()
   });
+  if (receipt.error) throw new Error(receipt.error.message);
 }
 async function executeAction(admin, lead, action, ctx) {
   const config = action.config;
@@ -2089,8 +5825,15 @@ async function executeAction(admin, lead, action, ctx) {
       return;
     }
     case "msg-interna": {
+      const body = String(config.mensagem ?? "").trim();
+      if (!config.toUserId || !body || body.length > 4e3) throw new Error("Escolha o destinat\xE1rio e uma mensagem interna de at\xE9 4000 caracteres.");
+      const recipient = await admin.from("workspace_members").select("user_id,access_expires_at").eq("workspace_id", lead.workspaceId).eq("user_id", config.toUserId).maybeSingle();
+      if (recipient.error) throw new Error(recipient.error.message);
+      if (!recipient.data || recipient.data.access_expires_at && Date.parse(recipient.data.access_expires_at) <= Date.now()) throw new Error("Destinat\xE1rio indispon\xEDvel nesta empresa.");
       const to = config.toUserNome ? `@${config.toUserNome} ` : "";
-      await logActivity(admin, lead, "note", { text: `${to}${config.mensagem ?? ""}`.trim(), by: "automation" });
+      await logActivity(admin, lead, "note", { text: `${to}${body}`, by: "automation" });
+      const delivery = await admin.from("team_messages").insert({ workspace_id: lead.workspaceId, to_user_id: config.toUserId, body, origin: "salesbot" });
+      if (delivery.error) throw new Error("A nota foi gravada, mas o alerta privado n\xE3o foi entregue: " + delivery.error.message);
       return;
     }
     case "webhook": {
@@ -2267,7 +6010,7 @@ function shouldRunForEvent(action, event, input) {
       if (event !== "field-updated") return false;
       const fieldSpec = spec;
       if (fieldSpec.fieldId && fieldSpec.fieldId !== input?.fieldId) return false;
-      if (fieldSpec.fieldName) {
+      if (!fieldSpec.fieldId && fieldSpec.fieldName) {
         const expected = fieldSpec.fieldName.trim().toLocaleLowerCase();
         const actual = String(input?.fieldName ?? "").trim().toLocaleLowerCase();
         if (expected && expected !== actual) return false;
@@ -2278,7 +6021,7 @@ function shouldRunForEvent(action, event, input) {
       if (event !== "field-updated") return false;
       const fieldSpec = spec;
       if (fieldSpec.fieldId && fieldSpec.fieldId !== input?.fieldId) return false;
-      if (fieldSpec.fieldName) {
+      if (!fieldSpec.fieldId && fieldSpec.fieldName) {
         const expected = fieldSpec.fieldName.trim().toLocaleLowerCase();
         const actual = String(input?.fieldName ?? "").trim().toLocaleLowerCase();
         if (expected && expected !== actual) return false;
@@ -2304,41 +6047,8 @@ function parseAutomationDateTime(value, timezone = "America/Sao_Paulo") {
   }
 }
 function scheduleDelayMinutes(exec, lead) {
-  const base = Math.max(0, Number(exec?.delayMinutes ?? 0));
-  const spec = normalizeTrigger(exec?.trigger);
-  if (spec.kind === "hours-before-field") {
-    const fieldSpec = spec;
-    const target = lead?.customFields.find(
-      (field) => fieldSpec.fieldId && field.id === fieldSpec.fieldId || fieldSpec.fieldName && field.name.trim().toLocaleLowerCase() === fieldSpec.fieldName.trim().toLocaleLowerCase()
-    );
-    const raw = target?.displayValue ?? "";
-    const callAt = parseAutomationDateTime(raw, lead?.timezone);
-    if (!Number.isFinite(callAt)) return -1;
-    if (callAt <= Date.now()) return -1;
-    const hours = Math.max(0, Number(fieldSpec.hours ?? 0));
-    const dueAt = callAt - hours * 36e5;
-    const diff = Math.round((dueAt - Date.now()) / 6e4);
-    return Math.max(0, diff) + base;
-  }
-  if (spec.kind === "daily") {
-    const [h, m] = String(spec.time ?? "09:00").split(":").map((n) => Number(n) || 0);
-    const now = brNow();
-    const next = new Date(now);
-    next.setHours(h, m, 0, 0);
-    if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
-    return Math.round((next.getTime() - now.getTime()) / 6e4) + base;
-  }
-  if (spec.kind === "exact-datetime") {
-    const at = parseAutomationDateTime(spec.at ?? "", lead?.timezone);
-    if (!Number.isFinite(at)) return -1;
-    const diff = Math.round((at - Date.now()) / 6e4);
-    if (diff < 0) return -1;
-    return diff + base;
-  }
-  return base;
-}
-function brNow() {
-  return new Date(Date.now() - 3 * 36e5);
+  const due = stageDueAt(exec, lead);
+  return due === null ? -1 : Math.max(0, (due - Date.now()) / 6e4);
 }
 function leadMatchesSourceFilter(sourceFilter, lead) {
   if (!sourceFilter?.length) return true;
@@ -2351,97 +6061,123 @@ function leadMatchesSourceFilter(sourceFilter, lead) {
   return sourceFilter.some((source) => accepted.has(source));
 }
 function passesExecutionRules(lead, exec) {
-  if (!isInsideActiveWindow(exec)) return false;
+  if (!isInsideActiveWindow(exec, lead)) return false;
   if (!leadMatchesSourceFilter(exec?.sourceFilter, lead)) return false;
   const conditions = exec?.conditions ?? [];
   if (conditions.length === 0) return true;
   return conditions.every((condition) => matchesCondition(condition, lead));
 }
-function isInsideActiveWindow(exec) {
-  const active = exec?.active ?? "always";
-  if (active === "always") return true;
-  const now = brNow();
-  const day = now.getUTCDay();
-  const current = now.getUTCHours() * 60 + now.getUTCMinutes();
-  if (active === "business-hours") return day >= 1 && day <= 5 && current >= 9 * 60 && current <= 18 * 60;
-  const wins = exec?.activeWindows?.length ? exec.activeWindows : exec?.activeWindow ? [exec.activeWindow] : [];
-  if (!wins.length) return true;
-  return wins.some((win) => {
-    if (!(win.days ?? []).includes(day)) return false;
-    return current >= parseHm(win.from ?? "00:00") && current <= parseHm(win.to ?? "23:59");
-  });
-}
-function parseHm(value) {
-  const [h, m] = value.split(":").map((part) => Number(part));
-  return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
+function isInsideActiveWindow(exec, lead) {
+  return stageInsideWindow(exec, lead);
 }
 function matchesCondition(condition, lead) {
-  if (condition.field === "no-tag") return lead.tags.length === 0;
-  let actual = "";
-  if (condition.field === "tag") actual = lead.tags.join(", ");
-  else if (condition.field === "value") actual = String(lead.value ?? 0);
-  else if (condition.field === "name") actual = lead.name ?? "";
-  else if (condition.field === "email") actual = lead.email ?? "";
-  else if (condition.field === "phone") actual = lead.phone ?? "";
-  else if (condition.field === "custom-field") {
-    actual = lead.customFields.find(
-      (f) => f.id === condition.customFieldId || f.name === condition.customFieldNome
-    )?.displayValue ?? "";
+  return stageMatchesCondition(condition, lead);
+}
+async function* schedulingPages(admin, workspaceId, pipelineId, stageIds, action) {
+  const trigger = normalizeTrigger(action.execution?.trigger);
+  for (let offset = 0; ; offset += 500) {
+    const page = await admin.from("leads").select("id,stage_id,workspaces(business_hours)").eq("workspace_id", workspaceId).eq("pipeline_id", pipelineId).in("stage_id", stageIds).order("id").range(offset, offset + 499);
+    if (page.error) throw new Error(page.error.message);
+    const rows = page.data ?? [];
+    if (!rows.length) break;
+    let values = [];
+    if (trigger.kind === "hours-before-field") {
+      let q = admin.from("lead_custom_field_values").select("lead_id,field_id,value,lead_custom_fields(name)").eq("workspace_id", workspaceId).in("lead_id", rows.map((r) => r.id));
+      if (trigger.fieldId) q = q.eq("field_id", trigger.fieldId);
+      const result = await q;
+      if (result.error) throw new Error(result.error.message);
+      values = result.data ?? [];
+    }
+    yield rows.map((row) => ({ row, lead: {
+      timezone: row.workspaces?.business_hours?.timezone || "America/Sao_Paulo",
+      tags: [],
+      customFields: values.filter((v) => v.lead_id === row.id).map((v) => ({ id: v.field_id, name: v.lead_custom_fields?.name ?? "", displayValue: typeof v.value === "object" ? String(v.value?.display ?? "") : String(v.value ?? "") }))
+    } }));
+    if (rows.length < 500) break;
   }
-  const expected = condition.value ?? "";
-  if (condition.field === "value") {
-    const a2 = Number(actual);
-    const b2 = Number(expected);
-    if (condition.op === "gt") return a2 > b2;
-    if (condition.op === "lt") return a2 < b2;
-    if (condition.op === "neq") return a2 !== b2;
-    return a2 === b2;
-  }
-  const a = actual.toLowerCase();
-  const b = expected.toLowerCase();
-  if (condition.op === "neq") return a !== b;
-  if (condition.op === "contains") return a.includes(b);
-  if (condition.op === "not-in") return !a.includes(b);
-  return a === b;
 }
 async function backfillAutomationAction(admin, input) {
-  if (!input.stageIds.length || !isAutomationConfigured(input.action) || !input.action.config) {
-    return { queued: 0 };
-  }
-  const { data: leadRows } = await admin.from("leads").select("id, stage_id").eq("workspace_id", input.workspaceId).eq("pipeline_id", input.pipelineId).in("stage_id", input.stageIds).limit(2e3);
-  const leads = leadRows ?? [];
-  if (!leads.length) return { queued: 0 };
-  const trigger = normalizeTrigger(input.action.execution?.trigger);
-  const jobs = [];
-  for (const row of leads) {
-    let delay = Math.max(0, Number(input.action.execution?.delayMinutes ?? 0));
-    if (trigger.kind === "hours-before-field") {
-      const lead = await loadLeadCtx(admin, row.id, input.workspaceId);
-      if (!lead) continue;
-      delay = scheduleDelayMinutes(input.action.execution, lead);
-      if (delay < 0) continue;
-    }
-    jobs.push({
-      workspace_id: input.workspaceId,
-      lead_id: row.id,
-      pipeline_id: input.pipelineId,
-      stage_id: row.stage_id,
-      action_id: input.action.id,
-      action: input.action,
-      context: { event: "manual", backfill: true },
-      due_at: new Date(Date.now() + delay * 6e4).toISOString(),
-      status: "pending"
+  if (!input.stageIds.length || !isAutomationConfigured(input.action) || !input.action.config) return { queued: 0 };
+  const batch = input.requestId || await sha256Hex(stageActionStamp(input.action));
+  const stamp = await sha256Hex(stageActionStamp(input.action));
+  const timed = STAGE_TIMER_KINDS.includes(normalizeTrigger(input.action.execution?.trigger).kind);
+  let queued = 0;
+  for await (const page of schedulingPages(admin, input.workspaceId, input.pipelineId, input.stageIds, input.action)) {
+    const jobs = page.flatMap(({ row, lead }) => {
+      const due = stageDueAt(input.action.execution, lead);
+      if (due === null) return [];
+      return [{
+        workspace_id: input.workspaceId,
+        lead_id: row.id,
+        pipeline_id: input.pipelineId,
+        stage_id: row.stage_id,
+        action_id: input.action.id,
+        action: input.action,
+        context: { event: "manual", backfill: true, timer: timed, reminderTarget: stageReminderTarget(input.action.execution, lead) },
+        due_at: new Date(due).toISOString(),
+        status: "pending",
+        dedupe_key: timed ? `${stageTimerKey(input.action.id, row.id, row.stage_id, input.action.execution, lead, due)}:${stamp}` : `${input.action.id}:apply:${batch}:${stamp}:${row.id}`
+      }];
     });
+    if (!jobs.length) continue;
+    const saved = await admin.from("crm_automation_jobs").upsert(jobs, { onConflict: "workspace_id,dedupe_key", ignoreDuplicates: true }).select("id");
+    if (saved.error) throw new Error(saved.error.message);
+    queued += (saved.data ?? []).length;
   }
-  if (jobs.length === 0) return { queued: 0 };
-  const { data: created } = await admin.from("crm_automation_jobs").insert(jobs).select("id");
-  return { queued: (created ?? []).length };
+  return { queued };
 }
+async function scheduleStageTimerActions(admin, force = false, scope) {
+  const sweepKey = scope?.workspaceId || admin.ws || "all";
+  if (!force && Date.now() - (lastTimerSweep.get(sweepKey) || 0) < 6e4) return 0;
+  let queued = 0;
+  const seen = /* @__PURE__ */ new Set();
+  for (let offset = 0; ; offset += 250) {
+    let query = admin.from("crm_stage_automations").select("workspace_id,pipeline_id,stage_id,action,enabled").eq("enabled", true).in("action->execution->trigger->>kind", STAGE_TIMER_KINDS);
+    if (scope) query = query.eq("workspace_id", scope.workspaceId).eq("pipeline_id", scope.pipelineId);
+    const page = await query.order("id").range(offset, offset + 249);
+    if (page.error) throw new Error(page.error.message);
+    const rows = page.data ?? [];
+    for (const row of rows) {
+      const action = row.action, key = `${row.workspace_id}:${row.pipeline_id}:${action?.id}`;
+      if (!action?.id || action.enabled === false || seen.has(key) || !isAutomationConfigured(action)) continue;
+      seen.add(key);
+      const stamp = await sha256Hex(stageActionStamp(action));
+      for await (const leads of schedulingPages(admin, row.workspace_id, row.pipeline_id, action.stageIds?.length ? action.stageIds : [row.stage_id], action)) {
+        const jobs = leads.flatMap(({ row: leadRow, lead }) => {
+          const due = stageDueAt(action.execution, lead);
+          if (due === null) return [];
+          return [{
+            workspace_id: row.workspace_id,
+            pipeline_id: row.pipeline_id,
+            stage_id: leadRow.stage_id,
+            lead_id: leadRow.id,
+            action_id: action.id,
+            action,
+            context: { event: "scheduled", timer: true, reminderTarget: stageReminderTarget(action.execution, lead) },
+            status: "pending",
+            due_at: new Date(due).toISOString(),
+            dedupe_key: `${stageTimerKey(action.id, leadRow.id, leadRow.stage_id, action.execution, lead, due)}:${stamp}`
+          }];
+        });
+        if (!jobs.length) continue;
+        const saved = await admin.from("crm_automation_jobs").upsert(jobs, { onConflict: "workspace_id,dedupe_key", ignoreDuplicates: true }).select("id");
+        if (saved.error) throw new Error(saved.error.message);
+        queued += (saved.data ?? []).length;
+      }
+    }
+    if (rows.length < 250) break;
+  }
+  if (!scope) lastTimerSweep.set(sweepKey, Date.now());
+  return queued;
+}
+var lastTimerSweep;
 var init_stage_automation_engine_server = __esm({
   "copied-server-source/lib/stage-automation-engine.server.ts"() {
     init_crm_mock();
     init_forms_functions();
     init_esm();
+    init_stage_execution_core();
+    lastTimerSweep = /* @__PURE__ */ new Map();
   }
 });
 
@@ -3019,8 +6755,8 @@ __export(agent_sentiment_reaction_exports, {
   shouldListenToAudio: () => shouldListenToAudio,
   shouldReactToSentiment: () => shouldReactToSentiment
 });
-function pickReactionEmoji(message, sentimento) {
-  const texto = String(message ?? "");
+function pickReactionEmoji(message2, sentimento) {
+  const texto = String(message2 ?? "");
   for (const s of SINAIS) if (s.re.test(texto)) return s.emoji;
   return EMOJI_PADRAO[sentimento] ?? "\u{1F44D}";
 }
@@ -3525,13 +7261,13 @@ async function resolveSalesbotId(supabaseAdmin2, workspaceId, candidate) {
   const { data: byLocal } = await supabaseAdmin2.from("salesbots").select("id").eq("workspace_id", workspaceId).eq("local_id", id).maybeSingle();
   return byLocal?.id ?? null;
 }
-async function log(supabaseAdmin2, run, block, status, message, payload) {
+async function log(supabaseAdmin2, run, block, status, message2, payload) {
   return supabaseAdmin2.from("salesbot_run_logs").insert({
     workspace_id: run.workspace_id,
     salesbot_run_id: run.id,
     block_id: block?.id ?? null,
     status,
-    message: message ?? null,
+    message: message2 ?? null,
     payload: payload ?? {}
   });
 }
@@ -4597,10 +8333,10 @@ async function executeAgentActions(supabaseAdmin2, workspaceId, leadId, phone, a
     }
   }
 }
-async function buildTriggerContext(supabaseAdmin2, workspaceId, phone, message, history, lead) {
+async function buildTriggerContext(supabaseAdmin2, workspaceId, phone, message2, history, lead) {
   let messageFormat = "texto";
   let minutesSinceCustomerMessage = null;
-  let finalMessage = message;
+  let finalMessage = message2;
   try {
     const jidIdentity = whatsappIdentityFromJid(phone);
     const isGroup = jidIdentity?.kind === "group";
@@ -4624,7 +8360,7 @@ async function buildTriggerContext(supabaseAdmin2, workspaceId, phone, message, 
           const texto = await transcribeWhatsappAudioMessage2(supabaseAdmin2, workspaceId, ultima);
           if (texto) {
             finalMessage = `[\xE1udio transcrito] ${texto}`;
-          } else if (!String(message ?? "").trim()) {
+          } else if (!String(message2 ?? "").trim()) {
             finalMessage = "[\xE1udio recebido \u2014 n\xE3o foi poss\xEDvel transcrever]";
           }
         }
@@ -4788,9 +8524,9 @@ ${customFieldBlock}` : "Este lead ainda n\xE3o possui valores em campos personal
     const json = await resp.json();
     const raw = json.choices?.[0]?.message?.content ?? "";
     const extractionMatches = Array.from(raw.matchAll(/\[\[EXTRACT_DATA:([^\]=]+)=([^\]]+)\]\]/gi));
-    for (const match of extractionMatches) {
-      const fieldId = match[1].trim();
-      let valor = match[2].trim();
+    for (const match2 of extractionMatches) {
+      const fieldId = match2[1].trim();
+      let valor = match2[2].trim();
       if (fieldId) {
         if (/\{\{\s*agora\s*\}\}/i.test(valor)) valor = valor.replace(/\{\{\s*agora\s*\}\}/gi, (/* @__PURE__ */ new Date()).toISOString());
         await supabaseAdmin2.from("lead_custom_field_values").upsert({
@@ -4802,7 +8538,7 @@ ${customFieldBlock}` : "Este lead ainda n\xE3o possui valores em campos personal
         }, { onConflict: "lead_id,field_id" });
       }
     }
-    const actionIds = Array.from(raw.matchAll(/\[\[AGENT_ACTION:([^\]]+)\]\]/gi)).map((match) => match[1]);
+    const actionIds = Array.from(raw.matchAll(/\[\[AGENT_ACTION:([^\]]+)\]\]/gi)).map((match2) => match2[1]);
     let handoff = /\[\[HANDOFF\]\]/i.test(raw);
     const reply = raw.replace(/\[\[HANDOFF\]\]/gi, "").replace(/\[\[AGENT_ACTION:[^\]]+\]\]/gi, "").replace(/\[\[EXTRACT_DATA:[^\]]+\]\]/gi, "").trim();
     if (shouldReactToSentiment2(meta.settings?.allowed_actions)) {
@@ -5696,8 +9432,8 @@ async function evalCondition(supabaseAdmin2, run, lead, block) {
         atual = customValueToText(data?.value);
       }
     }
-    const match = operador === "igual" ? atual === valor : operador === "desigual" ? atual !== valor : operador === "contem" ? atual.toLowerCase().includes(valor.toLowerCase()) : false;
-    results.push(match);
+    const match2 = operador === "igual" ? atual === valor : operador === "desigual" ? atual !== valor : operador === "contem" ? atual.toLowerCase().includes(valor.toLowerCase()) : false;
+    results.push(match2);
   }
   return modo === "ou" ? results.some(Boolean) : results.every(Boolean);
 }
@@ -5991,7 +9727,7 @@ async function executeRun(supabaseAdmin2, runInput) {
           }
           const roundKey = `_rr_comment_${b.id}`;
           const idx = Number(run.variables?.[roundKey] ?? 0) % variants.length;
-          const message = interpolate(variants[idx], lead, run.variables);
+          const message2 = interpolate(variants[idx], lead, run.variables);
           const encKey = runtimeEnv("INTEGRATION_ENCRYPTION_KEY") ?? "";
           try {
             const { data: tok } = await supabaseAdmin2.rpc("get_meta_page_token", {
@@ -6005,7 +9741,7 @@ async function executeRun(supabaseAdmin2, runInput) {
             const r = await fetch(url, {
               method: "POST",
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: new URLSearchParams({ message, access_token: pageToken }).toString()
+              body: new URLSearchParams({ message: message2, access_token: pageToken }).toString()
             });
             const j = await r.json().catch(() => ({}));
             if (!r.ok || j.error) throw new Error(j.error?.message ?? `HTTP ${r.status}`);
@@ -7705,6 +11441,7 @@ var init_salesbot_runtime_server = __esm({
 init_salesbot_runtime_server();
 init_stage_automation_engine_server();
 export {
+  backfillAutomationAction,
   classifyWhatsappRemoteJid,
   computePausaCronometroMs,
   dispatchCustomFieldChanged,
@@ -7723,7 +11460,10 @@ export {
   resumeRunsOnFormSubmission,
   resumeRunsOnInboundMessage,
   resumeRunsOnMediaEvent,
+  runJobById,
+  scheduleStageTimerActions,
   sendWhatsappText,
+  shouldRunForEvent,
   startSalesbotRun,
   tickAiAgentInactivity,
   tickAiAgentTracking,

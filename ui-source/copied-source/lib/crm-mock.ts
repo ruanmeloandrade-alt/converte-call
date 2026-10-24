@@ -198,6 +198,7 @@ export interface ExecutionConfig {
   trigger?: ExecutionTrigger;
    /** Atraso real antes de executar a ação. 0/undefined = imediato. */
    delayMinutes?: number;
+   delayUnit?: "minutes" | "hours" | "days";
   active?: ActiveMode;
   /** Retrocompat: janela única. */
   activeWindow?: { days: number[]; from: string; to: string };

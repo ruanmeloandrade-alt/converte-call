@@ -109,7 +109,7 @@ import {
  type TriggerChannel,
  type WebhookPreset,
 } from "@/lib/crm-mock";
-import { listCrmSources, listFunnels, moveLead as moveLeadServerFn, createFunnel as createFunnelServerFn, listWorkspaceUsers, listStageAutomations as listStageAutomationsServerFn, saveStageAutomations as saveStageAutomationsServerFn, reorderPipelineStages, setDefaultCrmSource, updatePipelineStage, createPipelineStage, deletePipelineStage, renamePipeline as renamePipelineServerFn, reorderFunnels, deletePipeline as deletePipelineServerFn, listAllPipelineStages, createLead as createLeadServerFn, duplicatePipeline as duplicatePipelineServer, bulkMoveLeads, backfillAutomationAction, deleteLead as deleteLeadServerFn, duplicateLead as duplicateLeadServerFn } from "@/lib/crm.functions";
+import { listCrmSources, listFunnels, moveLead as moveLeadServerFn, createFunnel as createFunnelServerFn, listWorkspaceUsers, listStageAutomations as listStageAutomationsServerFn, saveStageAutomations as saveStageAutomationsServerFn, reorderPipelineStages, setDefaultCrmSource, updatePipelineStage, createPipelineStage, deletePipelineStage, renamePipeline as renamePipelineServerFn, reorderFunnels, deletePipeline as deletePipelineServerFn, listAllPipelineStages, createLead as createLeadServerFn, duplicatePipeline as duplicatePipelineServer, bulkMoveLeads, deleteLead as deleteLeadServerFn, duplicateLead as duplicateLeadServerFn } from "@/lib/crm.functions";
 import { updateLead as updateLeadFn, listWorkspaceTags, setLeadCustomFieldValue, listLeadCustomFields, getLeadDetail } from "@/lib/leads.functions";
 
 import { StageTriggerConfigPopover } from "@/components/crm/StageTriggerConfigPopover";
@@ -124,6 +124,7 @@ import { listForms, DEFAULT_FORM_MESSAGE_TEMPLATE, type FormRecord } from "@/lib
 import { MessageTemplateEditor } from "@/components/crm/MessageTemplateEditor";
 import { FunnelSourcesPopover } from "@/components/crm/FunnelSourcesPopover";
 import { toast } from "sonner";
+import { stageActionStamp } from "@/lib/stage-execution.core";
 import { useIsSuperAdmin } from "@/hooks/use-roles";
 import { AdminOnlyDot } from "@/components/AdminOnlyDot";
 
@@ -200,7 +201,7 @@ function CrmFunisPage() {
    const duplicatePipeFn = useServerFn(duplicatePipelineServer);
     const listUsersFn = useServerFn(listWorkspaceUsers);
     const bulkMoveLeadsFn = useServerFn(bulkMoveLeads);
-    const backfillFn = useServerFn(backfillAutomationAction);
+    const automationSaveRequest = useRef<string | null>(null);
 
   const listSources = useServerFn(listCrmSources);
   const listFunnelsServer = useServerFn(listFunnels);
@@ -634,6 +635,7 @@ function CrmFunisPage() {
      throw new Error(`O gatilho "${expectedAction.title}" não foi encontrado depois do salvamento.`);
     }
 
+    if (stageActionStamp(savedAction.execution ?? {}) !== stageActionStamp(expectedAction.execution ?? {})) throw new Error(`As opções de execução de "${expectedAction.title}" não permaneceram salvas.`);
     const expectedTrigger = expectedAction.execution?.trigger;
     const savedTrigger = savedAction.execution?.trigger;
     if (expectedTrigger && typeof expectedTrigger === "object") {
@@ -677,17 +679,25 @@ function CrmFunisPage() {
   }
  }
 
-  async function saveAutomatize() {
-    if (!draft || !funnelId || savingAutomations) return;
+  async function saveAutomatize(nextDraft = draft, keepEditing = false) {
+    if (!nextDraft || !funnelId || savingAutomations) throw new Error("Aguarde o salvamento atual.");
+    setDraft(nextDraft);
+    const requestKey = stageAutomationDraftStorageKey(funnelId)+":apply-request";
+    try {
+      localStorage.setItem(stageAutomationDraftStorageKey(funnelId),JSON.stringify(nextDraft));
+      automationSaveRequest.current ??= sessionStorage.getItem(requestKey) || crypto.randomUUID();
+      sessionStorage.setItem(requestKey,automationSaveRequest.current);
+    } catch { automationSaveRequest.current ??= crypto.randomUUID(); }
     setSavingAutomations(true);
     try {
-      const draftList = Object.entries(draft);
+      const draftList = Object.entries(nextDraft);
       const expectedCount = draftList.reduce((total, [_, actions]) => total + (actions?.length ?? 0), 0);
       
       const saved = await saveStageAutomationsServer({ 
         data: { 
           pipelineId: funnelId, 
-          automations: draft as Record<string, unknown[]> 
+          automations: nextDraft as Record<string, unknown[]>,
+          applyRequestId: automationSaveRequest.current
         } 
       });
 
@@ -695,30 +705,11 @@ function CrmFunisPage() {
         throw new Error(`O servidor confirmou ${Number(saved.count ?? 0)} gatilho(s), mas deveriam ser ${expectedCount}.`);
       }
 
-      // Backfill manual via loop de RPC para garantir feedback e evitar timeout
-      let backfilledTotal = 0;
-      for (const [stageId, actions] of draftList) {
-        for (const action of (actions ?? []) as AutomationAction[]) {
-          if (action.enabled && action.execution?.applyToExisting) {
-            try {
-              const res = await backfillFn({
-                data: {
-                  pipelineId: funnelId,
-                  action: action as any,
-                  stageIds: action.stageIds?.length ? action.stageIds : [stageId]
-                }
-              });
-              backfilledTotal += (res as any).queued || 0;
-            } catch (e) {
-              console.error("Erro no backfill individual:", e);
-            }
-          }
-        }
-      }
+      const backfilledTotal = Number(saved.backfilled ?? 0);
 
       const verified = await listStageAutomationsServer({ data: { pipelineId: funnelId } });
       const persisted = (verified.automations ?? {}) as StageAutomations;
-      assertAutomationPersistence(draft, persisted);
+      assertAutomationPersistence(Object.fromEntries(Object.entries(nextDraft).map(([id,actions])=>[id,actions.map(action=>({...action,...(action.execution?{execution:{...action.execution,applyToExisting:false}}:{})}))])), persisted);
       
       setAutomations(persisted);
       
@@ -733,15 +724,18 @@ function CrmFunisPage() {
         console.warn("Erro ao atualizar cache local:", e);
       }
 
-      setDraft(null);
+      automationSaveRequest.current = null;
+      try { sessionStorage.removeItem(requestKey); } catch { /* confirmação já recebida */ }
+      setDraft(keepEditing ? persisted : null);
       setConfiguring(null);
       setColorMode(false);
       setSelectedColorStageId(null);
-      setMode("view");
+      if (!keepEditing) setMode("view");
       toast.success("Automações salvas com sucesso.");
     } catch (error) {
       console.error("Erro ao salvar automações do CRM:", error);
       toast.error(`${error instanceof Error ? error.message : "Não foi possível salvar as automações."} Seu rascunho continua guardado neste navegador.`);
+      if (keepEditing) throw error;
     } finally {
       setSavingAutomations(false);
     }
@@ -1271,7 +1265,7 @@ function CrmFunisPage() {
  </Button>
  <Button
  size="sm"
- onClick={saveAutomatize}
+ onClick={() => void saveAutomatize()}
   disabled={savingAutomations}
  className="h-8 text-xs gap-1.5 bg-success text-success-foreground hover:bg-success/90"
  >
@@ -1352,7 +1346,11 @@ onConfigureTrigger={(stageId, actionId) => setConfiguring({ stageId, actionId })
  onExtendTrigger={extendTriggerToStage}
  onMoveTrigger={moveTriggerToStage}
 
- onSaveExecutionTrigger={(stageId, actionId, execution) => updateActionConfig(stageId, actionId, { execution })}
+ onSaveExecutionTrigger={(stageId, actionId, execution) => {
+   const base = draft ?? automations;
+   const next = {...base, [stageId]:(base[stageId]??[]).map(a=>a.id===actionId?{...a,execution}:a)};
+   return saveAutomatize(next,true);
+ }}
  onToggleTrigger={(stageId, actionId, enabled) => updateActionConfig(stageId, actionId, { enabled })}
    onReorderStages={reorderStages}
    onRenameStage={renameStage}
@@ -2501,7 +2499,7 @@ function KanbanBoard({
   onConfigureTrigger: (stageId: string, actionId: string) => void;
   onExtendTrigger: (stageId: string, actionId: string, targetStageId: string) => void;
   onMoveTrigger: (stageId: string, actionId: string, targetStageId: string) => void;
-  onSaveExecutionTrigger: (stageId: string, actionId: string, execution: ExecutionConfig) => void;
+  onSaveExecutionTrigger: (stageId: string, actionId: string, execution: ExecutionConfig) => void | Promise<void>;
   onToggleTrigger: (stageId: string, actionId: string, enabled: boolean) => void;
   onReorderStages: (fromStageId: string, toStageId: string) => void;
   onRenameStage: (stageId: string, name: string) => void;
@@ -2687,7 +2685,7 @@ function StageColumn({
   onConfigureTrigger: (id: string) => void;
   onExtendTrigger: (actionId: string, targetStageId: string) => void;
   onMoveTrigger: (actionId: string, targetStageId: string) => void;
-  onSaveExecutionTrigger: (actionId: string, execution: ExecutionConfig) => void;
+  onSaveExecutionTrigger: (actionId: string, execution: ExecutionConfig) => void | Promise<void>;
   onToggleTrigger: (actionId: string, enabled: boolean) => void;
   onLeadDrop: (leadId: string, fromStageId: string, toStageId: string) => void;
   onDelete?: () => void;
@@ -3312,7 +3310,7 @@ function AutomationRow({
  onExtend: (targetStageId: string) => void;
  onMove: (targetStageId: string) => void;
 
- onSaveExecution: (execution: ExecutionConfig) => void;
+ onSaveExecution: (execution: ExecutionConfig) => void | Promise<void>;
  onToggleEnabled: (enabled: boolean) => void;
 }) {
  const implemented = triggerIsImplemented(action.triggerId);

@@ -13,10 +13,12 @@ import {
 } from "@/lib/crm-mock";
 import { buildFormShareUrl, renderFormMessage, DEFAULT_FORM_MESSAGE_TEMPLATE } from "@/lib/forms.functions";
 import { fromZonedTime } from "date-fns-tz";
+import { stageDueAt, stageInsideWindow, stageMatchesCondition, stageTimerKey, stageActionStamp, stageReminderTarget, STAGE_TIMER_KINDS } from "./stage-execution.core";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type AnySb = {
   from: (t: string) => any;
+  ws?: string;
   rpc: (n: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: { message?: string } | null }>;
 };
 
@@ -64,6 +66,9 @@ type LeadCtx = {
   phone: string | null;
   value: number | null;
   tags: string[];
+  assigneeId?: string | null;
+  attributes?: Record<string, unknown>;
+  businessHours?: { days?: Array<{ enabled: boolean; start: string; end: string }> };
   timezone: string;
   customFields: Array<{ id: string; name: string; displayValue: string }>;
 };
@@ -73,7 +78,7 @@ type LeadCtx = {
 async function loadLeadCtx(admin: AnySb, leadId: string, expectedWorkspaceId?: string): Promise<LeadCtx | null> {
   let query = admin
     .from("leads")
-    .select("id, workspace_id, pipeline_id, stage_id, crm_source_id, custom_data, name, email, phone, value, tags, workspaces(business_hours)")
+    .select("id, workspace_id, pipeline_id, stage_id, crm_source_id, custom_data, responsible_id, name, email, phone, value, tags, workspaces(business_hours)")
     .eq("id", leadId);
   if (expectedWorkspaceId) query = query.eq("workspace_id", expectedWorkspaceId);
   const { data } = await query.maybeSingle();
@@ -85,12 +90,13 @@ async function loadLeadCtx(admin: AnySb, leadId: string, expectedWorkspaceId?: s
         stage_id: string | null;
         crm_source_id: string | null;
         custom_data: Record<string, unknown> | null;
+        responsible_id?: string | null;
         name: string | null;
         email: string | null;
         phone: string | null;
         value: number | null;
         tags: unknown;
-        workspaces?: { business_hours?: { timezone?: unknown } | null } | null;
+        workspaces?: { business_hours?: { timezone?: unknown; days?: Array<{ enabled: boolean; start: string; end: string }> } | null } | null;
       }
     | null;
   if (!lead) return null;
@@ -133,6 +139,9 @@ async function loadLeadCtx(admin: AnySb, leadId: string, expectedWorkspaceId?: s
     phone: lead.phone,
     value: lead.value,
     tags: Array.isArray(lead.tags) ? (lead.tags as string[]) : [],
+    assigneeId: lead.responsible_id,
+    attributes: lead.custom_data ?? {},
+    businessHours: lead.workspaces?.business_hours ?? undefined,
     timezone,
     customFields: custom,
   };
@@ -187,9 +196,10 @@ export async function enqueueLeadAutomationEvent(admin: AnySb, input: EmitInput)
       results.push({ actionId: action.id, title: action.title, ok: true, skipped: true });
       continue;
     }
-    const dueAt = new Date(Date.now() + delay * 60_000).toISOString();
+    const dueAt = new Date(stageDueAt(action.execution, lead)!).toISOString();
     const eventId = input.eventId || `evt_${input.event}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const dedupeKey = `${action.id}:${eventId}`;
+    const dedupeKey = STAGE_TIMER_KINDS.includes(normalizeTrigger(action.execution?.trigger).kind)
+      ? `${stageTimerKey(action.id,lead.id,stageId,action.execution,lead,Date.parse(dueAt))}:${await sha256Hex(stageActionStamp(action))}` : `${action.id}:${eventId}`;
 
     const { data: created, error: insertError } = await admin
       .from("crm_automation_jobs")
@@ -202,6 +212,8 @@ export async function enqueueLeadAutomationEvent(admin: AnySb, input: EmitInput)
         action: action as unknown,
         context: {
           event: input.event,
+          timer: STAGE_TIMER_KINDS.includes(normalizeTrigger(action.execution?.trigger).kind),
+          reminderTarget: stageReminderTarget(action.execution,lead),
           fromStageId: input.fromStageId ?? null,
           tags: input.tags ?? [],
           fieldId: input.fieldId ?? null,
@@ -254,10 +266,11 @@ type JobRow = {
 };
 
 export async function runJobById(admin: AnySb, jobId: string): Promise<JobResult> {
-  const { data } = await admin.from("crm_automation_jobs").select("*").eq("id", jobId).maybeSingle();
-  const job = data as JobRow | null;
-  if (!job) return { actionId: jobId, title: "job", ok: false, error: "job não encontrado" };
-  return runJob(admin, job);
+  const {data,error}=await admin.from("crm_automation_jobs").update({status:"running"})
+    .eq("id",jobId).eq("status","pending").lte("due_at",new Date().toISOString()).select("*").maybeSingle();
+  if(error)throw new Error(error.message);
+  if(!data)return {actionId:jobId,title:"Automação",ok:true,skipped:true};
+  return runJob(admin,data as JobRow);
 }
 
 async function finishJob(
@@ -287,6 +300,23 @@ export async function runJob(admin: AnySb, job: JobRow): Promise<JobResult> {
       await finishJob(admin, job.id, "skipped", "lead removido", job.attempts ?? 0);
       return { actionId: action?.id ?? job.id, title, ok: true, skipped: true };
     }
+    if (job.stage_id && (lead.stageId !== job.stage_id || lead.pipelineId !== job.pipeline_id)) {
+      await finishJob(admin, job.id, "skipped", "O cliente saiu da etapa antes da execução.", job.attempts ?? 0);
+      return { actionId: action.id, title, ok: true, skipped: true };
+    }
+    if (job.context?.timer === true || job.context?.backfill === true) {
+      const saved = await admin.from("crm_stage_automations").select("action,enabled")
+        .eq("workspace_id",job.workspace_id).eq("pipeline_id",job.pipeline_id).eq("action_id",action.id);
+      if (saved.error) throw new Error(saved.error.message);
+      if (!(saved.data??[]).some((r:any)=>r.enabled!==false && r.action?.enabled!==false && stageActionStamp(r.action)===stageActionStamp(action))) {
+        await finishJob(admin,job.id,"skipped","Gatilho alterado ou desativado antes da execução.",job.attempts??0);
+        return {actionId:action.id,title,ok:true,skipped:true};
+      }
+    }
+    if (job.context?.reminderTarget !== undefined && job.context.reminderTarget !== stageReminderTarget(action.execution,lead)) {
+      await finishJob(admin,job.id,"skipped","A data do lembrete foi alterada.",job.attempts??0);
+      return {actionId:action.id,title,ok:true,skipped:true};
+    }
     if (!passesExecutionRules(lead, action.execution)) {
       await finishJob(admin, job.id, "skipped", "condições não atendidas", job.attempts ?? 0);
       return { actionId: action.id, title, ok: true, skipped: true };
@@ -303,6 +333,7 @@ export async function runJob(admin: AnySb, job: JobRow): Promise<JobResult> {
 
 /** Processa jobs vencidos. Chamado pelo cron a cada minuto. */
 export async function tickStageAutomationJobs(admin: AnySb, limit = 100): Promise<{ processed: number; failed: number }> {
+  await scheduleStageTimerActions(admin);
   const { data } = await admin
     .from("crm_automation_jobs")
     .select("*")
@@ -332,13 +363,14 @@ export async function tickStageAutomationJobs(admin: AnySb, limit = 100): Promis
 /* ----------------------------------------------------------- ações ------- */
 
 async function logActivity(admin: AnySb, lead: LeadCtx, type: string, payload: Record<string, unknown>) {
-  await admin.from("lead_activities").insert({
+  const receipt=await admin.from("lead_activities").insert({
     workspace_id: lead.workspaceId,
     lead_id: lead.id,
     type,
     payload,
     occurred_at: new Date().toISOString(),
   });
+  if(receipt.error)throw new Error(receipt.error.message);
 }
 
 async function executeAction(
@@ -689,8 +721,16 @@ async function executeAction(
     }
 
     case "msg-interna": {
+      const body=String(config.mensagem??"").trim();
+      if(!config.toUserId || !body || body.length>4000)throw new Error("Escolha o destinatário e uma mensagem interna de até 4000 caracteres.");
+      const recipient=await admin.from("workspace_members").select("user_id,access_expires_at")
+        .eq("workspace_id",lead.workspaceId).eq("user_id",config.toUserId).maybeSingle();
+      if(recipient.error)throw new Error(recipient.error.message);
+      if(!recipient.data || (recipient.data.access_expires_at && Date.parse(recipient.data.access_expires_at)<=Date.now()))throw new Error("Destinatário indisponível nesta empresa.");
       const to = config.toUserNome ? `@${config.toUserNome} ` : "";
-      await logActivity(admin, lead, "note", { text: `${to}${config.mensagem ?? ""}`.trim(), by: "automation" });
+      await logActivity(admin, lead, "note", { text: `${to}${body}`, by: "automation" });
+      const delivery=await admin.from("team_messages").insert({workspace_id:lead.workspaceId,to_user_id:config.toUserId,body,origin:"salesbot"});
+      if(delivery.error)throw new Error("A nota foi gravada, mas o alerta privado não foi entregue: "+delivery.error.message);
       return;
     }
 
@@ -897,7 +937,7 @@ export function shouldRunForEvent(
       if (event !== "field-updated") return false;
       const fieldSpec = spec as { fieldId?: string; fieldName?: string };
       if (fieldSpec.fieldId && fieldSpec.fieldId !== input?.fieldId) return false;
-      if (fieldSpec.fieldName) {
+      if (!fieldSpec.fieldId && fieldSpec.fieldName) {
         const expected = fieldSpec.fieldName.trim().toLocaleLowerCase();
         const actual = String(input?.fieldName ?? "").trim().toLocaleLowerCase();
         if (expected && expected !== actual) return false;
@@ -908,7 +948,7 @@ export function shouldRunForEvent(
       if (event !== "field-updated") return false;
       const fieldSpec = spec as { fieldId?: string; fieldName?: string };
       if (fieldSpec.fieldId && fieldSpec.fieldId !== input?.fieldId) return false;
-      if (fieldSpec.fieldName) {
+      if (!fieldSpec.fieldId && fieldSpec.fieldName) {
         const expected = fieldSpec.fieldName.trim().toLocaleLowerCase();
         const actual = String(input?.fieldName ?? "").trim().toLocaleLowerCase();
         if (expected && expected !== actual) return false;
@@ -942,39 +982,8 @@ export function parseAutomationDateTime(
 
 /** Minutos até a execução. -1 = não deve executar. */
 export function scheduleDelayMinutes(exec: ExecutionConfig | undefined, lead?: LeadCtx): number {
-  const base = Math.max(0, Number(exec?.delayMinutes ?? 0));
-  const spec = normalizeTrigger(exec?.trigger);
-  if (spec.kind === "hours-before-field") {
-    const fieldSpec = spec as { hours?: number; fieldId?: string; fieldName?: string };
-    const target = lead?.customFields.find(
-      (field) => (fieldSpec.fieldId && field.id === fieldSpec.fieldId)
-        || (fieldSpec.fieldName && field.name.trim().toLocaleLowerCase() === fieldSpec.fieldName.trim().toLocaleLowerCase()),
-    );
-    const raw = target?.displayValue ?? "";
-    const callAt = parseAutomationDateTime(raw, lead?.timezone);
-    if (!Number.isFinite(callAt)) return -1;
-    if (callAt <= Date.now()) return -1;
-    const hours = Math.max(0, Number(fieldSpec.hours ?? 0));
-    const dueAt = callAt - hours * 3_600_000;
-    const diff = Math.round((dueAt - Date.now()) / 60_000);
-    return Math.max(0, diff) + base;
-  }
-  if (spec.kind === "daily") {
-    const [h, m] = String(spec.time ?? "09:00").split(":").map((n) => Number(n) || 0);
-    const now = brNow();
-    const next = new Date(now);
-    next.setHours(h, m, 0, 0);
-    if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
-    return Math.round((next.getTime() - now.getTime()) / 60_000) + base;
-  }
-  if (spec.kind === "exact-datetime") {
-    const at = parseAutomationDateTime(spec.at ?? "", lead?.timezone);
-    if (!Number.isFinite(at)) return -1;
-    const diff = Math.round((at - Date.now()) / 60_000);
-    if (diff < 0) return -1;
-    return diff + base;
-  }
-  return base;
+  const due = stageDueAt(exec, lead);
+  return due === null ? -1 : Math.max(0, (due - Date.now()) / 60_000);
 }
 
 /** Agora no fuso de Brasília (-03:00), independente do fuso do servidor. */
@@ -997,115 +1006,98 @@ export function leadMatchesSourceFilter(
 }
 
 function passesExecutionRules(lead: LeadCtx, exec?: ExecutionConfig): boolean {
-  if (!isInsideActiveWindow(exec)) return false;
+  if (!isInsideActiveWindow(exec, lead)) return false;
   if (!leadMatchesSourceFilter(exec?.sourceFilter, lead)) return false;
   const conditions = exec?.conditions ?? [];
   if (conditions.length === 0) return true;
   return conditions.every((condition) => matchesCondition(condition, lead));
 }
 
-function isInsideActiveWindow(exec?: ExecutionConfig): boolean {
-  const active = exec?.active ?? "always";
-  if (active === "always") return true;
-  const now = brNow();
-  const day = now.getUTCDay();
-  const current = now.getUTCHours() * 60 + now.getUTCMinutes();
-  if (active === "business-hours") return day >= 1 && day <= 5 && current >= 9 * 60 && current <= 18 * 60;
-  const wins = exec?.activeWindows?.length ? exec.activeWindows : exec?.activeWindow ? [exec.activeWindow] : [];
-  if (!wins.length) return true;
-  return wins.some((win) => {
-    if (!(win.days ?? []).includes(day)) return false;
-    return current >= parseHm(win.from ?? "00:00") && current <= parseHm(win.to ?? "23:59");
-  });
-}
+function isInsideActiveWindow(exec?: ExecutionConfig, lead?: LeadCtx): boolean { return stageInsideWindow(exec,lead); }
 
 function parseHm(value: string): number {
   const [h, m] = value.split(":").map((part) => Number(part));
   return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
 }
 
-function matchesCondition(condition: ExecutionCondition, lead: LeadCtx): boolean {
-  if (condition.field === "no-tag") return lead.tags.length === 0;
-  let actual = "";
-  if (condition.field === "tag") actual = lead.tags.join(", ");
-  else if (condition.field === "value") actual = String(lead.value ?? 0);
-  else if (condition.field === "name") actual = lead.name ?? "";
-  else if (condition.field === "email") actual = lead.email ?? "";
-  else if (condition.field === "phone") actual = lead.phone ?? "";
-  else if (condition.field === "custom-field") {
-    actual = lead.customFields.find(
-      (f) => f.id === condition.customFieldId || f.name === condition.customFieldNome,
-    )?.displayValue ?? "";
-  }
-  const expected = condition.value ?? "";
-  if (condition.field === "value") {
-    const a = Number(actual);
-    const b = Number(expected);
-    if (condition.op === "gt") return a > b;
-    if (condition.op === "lt") return a < b;
-    if (condition.op === "neq") return a !== b;
-    return a === b;
-  }
-  const a = actual.toLowerCase();
-  const b = expected.toLowerCase();
-  if (condition.op === "neq") return a !== b;
-  if (condition.op === "contains") return a.includes(b);
-  if (condition.op === "not-in") return !a.includes(b);
-  return a === b;
-}
+function matchesCondition(condition: ExecutionCondition, lead: LeadCtx): boolean { return stageMatchesCondition(condition,lead); }
 
 /* --------------------------------------------------------------- backfill --
  * "Aplicar o gatilho a todos os leads já nesta etapa": enfileira a ação
  * escolhida para cada lead que já está nas etapas cobertas. Roda no servidor.
  */
-export async function backfillAutomationAction(
-  admin: AnySb,
-  input: { workspaceId: string; pipelineId: string; action: AutomationAction; stageIds: string[] },
-): Promise<{ queued: number }> {
-  if (!input.stageIds.length || !isAutomationConfigured(input.action) || !input.action.config) {
-    return { queued: 0 };
-  }
-  const { data: leadRows } = await admin
-    .from("leads")
-    .select("id, stage_id")
-    .eq("workspace_id", input.workspaceId)
-    .eq("pipeline_id", input.pipelineId)
-    .in("stage_id", input.stageIds)
-    .limit(2000);
-
-  const leads = (leadRows ?? []) as Array<{ id: string; stage_id: string }>;
-  if (!leads.length) return { queued: 0 };
-
-  const trigger = normalizeTrigger(input.action.execution?.trigger);
-  const jobs: Array<Record<string, unknown>> = [];
-
-  for (const row of leads) {
-    let delay = Math.max(0, Number(input.action.execution?.delayMinutes ?? 0));
-
-    // Gatilhos baseados em um campo de data precisam do valor individual de
-    // cada lead; nunca podem cair em "0 min" só porque o backfill não tinha
-    // carregado o contexto do lead.
-    if (trigger.kind === "hours-before-field") {
-      const lead = await loadLeadCtx(admin, row.id, input.workspaceId);
-      if (!lead) continue;
-      delay = scheduleDelayMinutes(input.action.execution, lead);
-      if (delay < 0) continue;
+async function* schedulingPages(admin: AnySb, workspaceId: string, pipelineId: string, stageIds: string[], action: AutomationAction) {
+  const trigger=normalizeTrigger(action.execution?.trigger);
+  for(let offset=0;;offset+=500){
+    const page=await admin.from("leads").select("id,stage_id,workspaces(business_hours)")
+      .eq("workspace_id",workspaceId).eq("pipeline_id",pipelineId).in("stage_id",stageIds).order("id").range(offset,offset+499);
+    if(page.error)throw new Error(page.error.message);
+    const rows=page.data??[];
+    if(!rows.length)break;
+    let values:any[]=[];
+    if(trigger.kind==="hours-before-field"){
+      let q=admin.from("lead_custom_field_values").select("lead_id,field_id,value,lead_custom_fields(name)")
+        .eq("workspace_id",workspaceId).in("lead_id",rows.map((r:any)=>r.id));
+      if(trigger.fieldId)q=q.eq("field_id",trigger.fieldId);
+      const result=await q;if(result.error)throw new Error(result.error.message);values=result.data??[];
     }
-
-    jobs.push({
-      workspace_id: input.workspaceId,
-      lead_id: row.id,
-      pipeline_id: input.pipelineId,
-      stage_id: row.stage_id,
-      action_id: input.action.id,
-      action: input.action as unknown,
-      context: { event: "manual", backfill: true },
-      due_at: new Date(Date.now() + delay * 60_000).toISOString(),
-      status: "pending",
-    });
+    yield rows.map((row:any)=>({row,lead:{timezone:row.workspaces?.business_hours?.timezone||"America/Sao_Paulo",tags:[],
+      customFields:values.filter(v=>v.lead_id===row.id).map(v=>({id:v.field_id,name:v.lead_custom_fields?.name??"",displayValue:typeof v.value==="object"?String(v.value?.display??""):String(v.value??"")}))}}));
+    if(rows.length<500)break;
   }
+}
+export async function backfillAutomationAction(admin: AnySb,
+  input: {workspaceId:string;pipelineId:string;action:AutomationAction;stageIds:string[];requestId?:string},
+): Promise<{queued:number}> {
+  if(!input.stageIds.length||!isAutomationConfigured(input.action)||!input.action.config)return{queued:0};
+  const batch=input.requestId||await sha256Hex(stageActionStamp(input.action));
+  const stamp=await sha256Hex(stageActionStamp(input.action));
+  const timed=STAGE_TIMER_KINDS.includes(normalizeTrigger(input.action.execution?.trigger).kind);
+  let queued=0;
+  for await(const page of schedulingPages(admin,input.workspaceId,input.pipelineId,input.stageIds,input.action)){
+    const jobs=page.flatMap(({row,lead}:any)=>{
+      const due=stageDueAt(input.action.execution,lead);if(due===null)return[];
+      return [{workspace_id:input.workspaceId,lead_id:row.id,pipeline_id:input.pipelineId,stage_id:row.stage_id,
+        action_id:input.action.id,action:input.action,context:{event:"manual",backfill:true,timer:timed,reminderTarget:stageReminderTarget(input.action.execution,lead)},
+        due_at:new Date(due).toISOString(),status:"pending",dedupe_key:timed?`${stageTimerKey(input.action.id,row.id,row.stage_id,input.action.execution,lead,due)}:${stamp}`:`${input.action.id}:apply:${batch}:${stamp}:${row.id}`}];
+    });
+    if(!jobs.length)continue;
+    const saved=await admin.from("crm_automation_jobs").upsert(jobs,{onConflict:"workspace_id,dedupe_key",ignoreDuplicates:true}).select("id");
+    if(saved.error)throw new Error(saved.error.message);queued+=(saved.data??[]).length;
+  }
+  return{queued};
+}
 
-  if (jobs.length === 0) return { queued: 0 };
-  const { data: created } = await admin.from("crm_automation_jobs").insert(jobs).select("id");
-  return { queued: ((created ?? []) as unknown[]).length };
+const lastTimerSweep=new Map<string,number>();
+/** Reconciles timers for leads already in a stage, independently of browser activity. */
+export async function scheduleStageTimerActions(admin:AnySb,force=false,scope?:{workspaceId:string;pipelineId:string}):Promise<number>{
+  const sweepKey=scope?.workspaceId||admin.ws||"all";
+  if(!force&&Date.now()-(lastTimerSweep.get(sweepKey)||0)<60_000)return 0;
+  let queued=0;const seen=new Set<string>();
+  for(let offset=0;;offset+=250){
+    let query=admin.from("crm_stage_automations").select("workspace_id,pipeline_id,stage_id,action,enabled")
+      .eq("enabled",true).in("action->execution->trigger->>kind",STAGE_TIMER_KINDS);
+    if(scope)query=query.eq("workspace_id",scope.workspaceId).eq("pipeline_id",scope.pipelineId);
+    const page=await query.order("id").range(offset,offset+249);
+    if(page.error)throw new Error(page.error.message);
+    const rows=page.data??[];
+    for(const row of rows){
+      const action=row.action as AutomationAction,key=`${row.workspace_id}:${row.pipeline_id}:${action?.id}`;
+      if(!action?.id||action.enabled===false||seen.has(key)||!isAutomationConfigured(action))continue;seen.add(key);
+      const stamp=await sha256Hex(stageActionStamp(action));
+      for await(const leads of schedulingPages(admin,row.workspace_id,row.pipeline_id,action.stageIds?.length?action.stageIds:[row.stage_id],action)){
+        const jobs=leads.flatMap(({row:leadRow,lead}:any)=>{
+          const due=stageDueAt(action.execution,lead);if(due===null)return[];
+          return[{workspace_id:row.workspace_id,pipeline_id:row.pipeline_id,stage_id:leadRow.stage_id,lead_id:leadRow.id,
+            action_id:action.id,action,context:{event:"scheduled",timer:true,reminderTarget:stageReminderTarget(action.execution,lead)},status:"pending",due_at:new Date(due).toISOString(),
+            dedupe_key:`${stageTimerKey(action.id,leadRow.id,leadRow.stage_id,action.execution,lead,due)}:${stamp}`}];
+        });
+        if(!jobs.length)continue;
+        const saved=await admin.from("crm_automation_jobs").upsert(jobs,{onConflict:"workspace_id,dedupe_key",ignoreDuplicates:true}).select("id");
+        if(saved.error)throw new Error(saved.error.message);queued+=(saved.data??[]).length;
+      }
+    }
+    if(rows.length<250)break;
+  }
+  if(!scope)lastTimerSweep.set(sweepKey,Date.now());return queued;
 }
