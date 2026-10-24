@@ -1,3 +1,4 @@
+import {isCompanyMessageTarget} from './companies.mjs';
 import {randomUUID} from 'node:crypto';import {queryMatchingLeads} from './audience-filter.original.mjs';import {visibleWorkspace,requirePermission,requireOwner} from './teams.mjs';
 const fail=(status,message)=>Object.assign(Error(message),{status});
 class DatasetQuery{
@@ -17,6 +18,6 @@ export async function audienceRPC(store,user,name,arg={}){requirePermission(stor
  if(name==='updateCrmAudience'){const next={...audience,...Object.fromEntries(['name','description','filters'].filter(k=>p[k]!==undefined).map(k=>[k,p[k]])),updated_at:at};if(String(next.name).trim().length<2||String(next.name).length>120)throw fail(400,'Nome do público inválido.');await matches(next.filters);store.mutate(ws,data=>Object.assign(data.audiences.find(a=>a.id===audience.id),next));return {ok:true};}
  const rows=await matches(audience.filters);
  if(name==='refreshCrmAudience'){store.mutate(ws,data=>Object.assign(data.audiences.find(a=>a.id===audience.id),{cached_count:rows.length,cached_at:at,updated_at:at}));return {count:rows.length};}
- if(name==='broadcastCrmAudience'){requireOwner(store,user);const text=String(p.text||p.message||'').trim();if(!text||text.length>20000)throw fail(400,'Escreva a mensagem.');const instance=store.one('SELECT status FROM instances WHERE workspace_id=?',ws);if(instance?.status!=='connected')throw fail(409,'Conecte seu WhatsApp antes de enviar.');const batch=randomUUID(),recipients=rows.filter(r=>r.phone);store.transaction(()=>{for(let i=0;i<recipients.length;i++)store.enqueue(ws,'audience-message',{leadId:recipients[i].id,text,batch},{id:batch+':'+recipients[i].id,dueAt:Date.now()+i*3000});});return {queued:recipients.length,sent:0,failed:0,total:rows.length,batchId:batch};}
+ if(name==='broadcastCrmAudience'){requireOwner(store,user);const text=String(p.text||p.message||'').trim();if(!text||text.length>20000)throw fail(400,'Escreva a mensagem.');const instance=store.one('SELECT status FROM instances WHERE workspace_id=?',ws);if(instance?.status!=='connected')throw fail(409,'Conecte seu WhatsApp antes de enviar.');const batch=randomUUID(),recipients=rows.filter(r=>r.phone&&isCompanyMessageTarget(d,r));store.transaction(()=>{for(let i=0;i<recipients.length;i++)store.enqueue(ws,'audience-message',{leadId:recipients[i].id,text,batch},{id:batch+':'+recipients[i].id,dueAt:Date.now()+i*3000});});return {queued:recipients.length,sent:0,failed:0,total:rows.length,batchId:batch};}
  throw fail(400,'Operação de público inválida.');
 }

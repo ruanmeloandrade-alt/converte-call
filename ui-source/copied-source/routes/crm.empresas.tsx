@@ -58,7 +58,7 @@ function SuppliersPage() {
     queryKey: ["suppliers"],
     queryFn: async () => {
       const response = await listSuppliersFn();
-      return response.companies as Supplier[];
+      return response.companies.filter((c:any)=>c.kind!=="customer") as Supplier[];
     },
     staleTime: 30_000,
   });

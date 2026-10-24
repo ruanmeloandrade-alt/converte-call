@@ -18,7 +18,7 @@
     },
     {
       "path": "legacy\\crm.funis-de-venda.legacy.tsx",
-      "sha256": "da7fedd91540ef7350dad71cc620b95a7bb1aa6bbe341a5ee7d8bd9b2bb81747",
+      "sha256": "c14a5f702d94c7e0f8a754f172c5974ce579df035777c6d68c9b57a2100abd5c",
       "platformAdapted": true
     },
     {
@@ -48,7 +48,7 @@
     },
     {
       "path": "routes\\crm.empresas.tsx",
-      "sha256": "f37c915f168fcfd73773707da42f5d23e1f28b8383d26f27fb84b518caff4890",
+      "sha256": "f75a9ae11743301e4248b0b04ea4f93feccd695070578d5c5fd59e1b4d7a5b44",
       "platformAdapted": true
     },
     {
@@ -83,7 +83,7 @@
     },
     {
       "path": "lib\\crm-mock.ts",
-      "sha256": "08c687fa1d8050746752687e2121333c15b47e0467de74d824324cda65da29cd",
+      "sha256": "66d46a6a85a6e6cbc65d867fe356c04ff8f22b8752817eea9cf062afd248543e",
       "platformAdapted": false
     },
     {
@@ -173,7 +173,7 @@
     },
     {
       "path": "components\\crm\\Lead360Section.tsx",
-      "sha256": "134141d41cbbc3405e498b031109357a2340e57dc65d1f4910aaaa6d7566e984",
+      "sha256": "fde740fdcb7fa6c33ac484f63887cbbdb80cd31d8cf8198f5c1301a3d3b3bffa",
       "platformAdapted": false
     },
     {

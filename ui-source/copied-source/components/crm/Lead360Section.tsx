@@ -93,7 +93,7 @@ export function Lead360Section({ leadId }: { leadId: string }) {
   });
   const companiesQ = useQuery({
     queryKey: ["companies"],
-    queryFn: () => loadCompanies(),
+    queryFn: () => loadCompanies({ data: {kind:"customer"} }),
     enabled: editingCompany,
     staleTime: 60_000,
   });
@@ -140,7 +140,7 @@ export function Lead360Section({ leadId }: { leadId: string }) {
   if (!d) return null;
 
   const allProducts = (catalogsQ.data ?? []).flatMap((c) => c.products.map((p) => ({ ...p, catalogName: c.name })));
-  const companies = (companiesQ.data?.companies ?? []) as Array<{ id: string; name: string }>;
+  const companies = (companiesQ.data?.companies ?? []).filter((c:any)=>c.kind === "customer") as Array<{ id: string; name: string }>;
 
   return (
     <div className="pb-4">

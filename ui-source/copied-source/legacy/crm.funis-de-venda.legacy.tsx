@@ -245,6 +245,8 @@ function CrmFunisPage() {
   lastMessageFrom: (l.lastMessageFrom?? "none") as LeadMessageDirection,
   createdAt: l.createdAt,
   companyId: l.companyId,
+  company: (l as any).company,
+  companyCard: (l as any).companyCard,
   tags: l.tags,
   email: (l as any).email ?? null,
   phone: (l as any).phone ?? null,

@@ -8,6 +8,7 @@ export interface CrmLead {
  name: string;
  company?: string;
  companyId?: string | null;
+ companyCard?: boolean;
  avatar?: string;
  value: number;
  source: "whatsapp" | "instagram" | "facebook" | "google" | "indicacao" | "outro";

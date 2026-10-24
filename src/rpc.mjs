@@ -1,3 +1,4 @@
+import {companiesRPC,customerCompany,companyMembers,companyPrimary} from './companies.mjs';
 import {SalesbotStore} from './salesbot-store.mjs';
 import * as StageRuntime from './salesbot-runtime.original.mjs';
 import {objectivePixelOptions} from './pixel-leads.mjs';
@@ -23,7 +24,7 @@ function leadRow(d, l) {
   return { ...l, email: l.email || null, phone: l.phone || null, value: Number(l.value) || 0, pipeline_id: l.funnelId, stage_id: stage?.id, createdAt: l.createdAt, created_at: l.createdAt, tags: l.tags || l.tag ? [...l.tags || [], ...l.tag ? [l.tag] : []] : [], lastMessageFrom: "none", stageName: l.stage, pipelineName: funnel?.name };
 }
 function funnels(d, lite = false) {
-  return d.funnels.map((f) => ({ ...f, stages: f.stages.map((s) => ({ ...s, status: s.name === "Venda realizada" ? "ganha" : s.name === "Perdida" ? "perdida" : "aberta", leads: lite ? [] : d.leads.filter((l) => l.funnelId === f.id && l.stage === s.name).map((l) => leadRow(d, l)) })) }));
+  return d.funnels.map((f) => ({ ...f, stages: f.stages.map((s) => ({ ...s, status: s.name === "Venda realizada" ? "ganha" : s.name === "Perdida" ? "perdida" : "aberta", leads: lite ? [] : d.leads.filter((l) => {const c=customerCompany(d,l);return l.funnelId===f.id&&l.stage===s.name&&(!c||(companyPrimary(d,c)||companyMembers(d,c)[0])?.id===l.id);}).map(l=>{const row=leadRow(d,l),c=customerCompany(d,l);return c?{...row,name:c.name,company:`${companyMembers(d,c).length} contatos · Responsável: ${companyPrimary(d,c)?.name||'não definido'}`,companyCard:true}:row;}) })) }));
 }
 const findLead = (d, p) => {
   const l = d.leads.find((l2) => l2.id === (p.leadId || p.id));
@@ -48,6 +49,7 @@ async function rpc(store, ws, module, name, arg = {}) {
   const createdLeadIds=[];
   const workspaceUsers=()=>store.all('SELECT u.id,u.email,p.profile FROM users u JOIN team_members m ON m.user_id=u.id LEFT JOIN account_profiles p ON p.user_id=u.id WHERE m.workspace_id=? AND m.active=1',ws).map(u=>{const profile=u.profile?store.vault.open(u.profile):{};return {id:u.id,email:u.email,name:[profile.firstName,profile.lastName].filter(Boolean).join(' ')||u.email};});
   const now = () => (/* @__PURE__ */ new Date()).toISOString();
+  if(module==='@/lib/companies.functions'&&name!=='uploadCompanyLogo'){const response=companiesRPC(d,name,p,Core,store.actorId);if(response.changed)store.put(ws,d);return response.result;}
   if(module==='@/lib/workflow.functions'){const response=workflowRPC(d,name,p,Core);if(response.changed)store.put(ws,d);return response.result;}
   switch (name) {
     case 'getLeadSales':
@@ -302,11 +304,18 @@ async function rpc(store, ws, module, name, arg = {}) {
       result = { lead: leadRow(d, l), company: c ? { ...c, logoUrl: c.logo_signed_url, leadsCount: d.leads.filter((l2) => l2.companyId === c.id).length } : null, products, forms: [], allForms: d.forms.map((f) => ({ id: f.id, nome: f.name || f.nome })), files: [], activities, tasks, agent: l.agentId ? d.agents.find((a) => a.id === l.agentId) : null, totals: { produtos: products.length, arquivos: 0, formularios: 0, atividades: activities.length, tarefas: tasks.length } };
       break;
     }
-    case "setLeadCompany":
-      findLead(d, p).companyId = p.companyId;
+    case "setLeadCompany": {
+      const lead=findLead(d,p),old=customerCompany(d,lead);
+      if(old?.primaryLeadId===lead.id&&old.id!==p.companyId&&companyMembers(d,old).length>1)throw Error('Escolha outro contato principal antes de desvincular o responsável.');
+      const company=p.companyId?d.companies.find(c=>c.id===p.companyId):null;
+      if(p.companyId&&!company)throw Error('Empresa não encontrada nesta conta.');
+      if(old?.primaryLeadId===lead.id&&old.id!==p.companyId)old.primaryLeadId=null;
+      lead.companyId=p.companyId||null;
+      if(company?.kind==='customer'&&!company.primaryLeadId)company.primaryLeadId=lead.id;
       result = { ok: true };
       changed = true;
       break;
+    }
     case "linkLeadProduct":
       if (!d.leadProducts.some((x) => x.leadId === p.leadId && x.productId === p.productId && x.kind === p.kind)) d.leadProducts.push({ ...p, id: id() });
       result = { ok: true };

@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "./copied-source";
 @source "./entry.tsx";
+@source "./companies-page.tsx";
 @source "./dashboard-page.tsx";
 @custom-variant dark (&:is(.dark *));
 @theme inline {
@@ -35,3 +36,6 @@ body:has(.cc-profile-page){--chat-panel:#fff;--chat-bg:#f7f6fb;--chat-text:#2923
 /* Converte Call spectrum: shared accents only; preserve semantic success/error colors. */
 :root{--brand-magenta:#b22f78;--brand-ember:#ed7c32;--brand-violet:#a83cdb;--brand-gradient:linear-gradient(120deg,#a83cdb,#d63b91 54%,#f49339);--purple:#b22f78;--lav:#fbedf4;--primary:#b22f78;--primary-foreground:#fff;--color-primary:var(--primary);--color-secondary:#fbedf4;--color-secondary-foreground:#8a3764;--color-accent:#fbedf4;--color-accent-foreground:#8a3764;--color-ring:#d869a3;--ring:#d869a3;--chat-accent:#b22f78}
 .dark{--primary:#dc72ac;--primary-foreground:#301020;--color-primary-foreground:#301020;--color-secondary:#3d2034;--color-secondary-foreground:#f1c4dd;--color-accent:#44223a;--color-accent-foreground:#f2c4df;--chat-accent:#dc72ac}
+
+.cc-companies-page{height:100dvh;overflow-y:auto}
+#root>.cc-companies-page{max-height:100dvh}
