@@ -346,6 +346,7 @@ function AutomacoesPage() {
      expectedRevision: loaded.revision,
      baseBlockLocalIds: loaded.baseBlockLocalIds,
      source: "automation-central",
+     isActive: b.isActive ?? full.isActive ?? false,
     } } as never);
     }
     return syncFn({ data: { bot: {
@@ -361,6 +362,7 @@ function AutomacoesPage() {
     expectedRevision: null,
     baseBlockLocalIds: [],
     source: "automation-central-create",
+    isActive: b.isActive ?? false,
    } } as never);
    }),
   );
@@ -596,6 +598,7 @@ function AutomacoesPage() {
    next.id = idMap.get(String(bl.id ?? ""));
    next.nextBlockId = remap(bl.nextBlockId);
    if ("falseNextBlockId" in next) next.falseNextBlockId = remap(next.falseNextBlockId);
+   if ("webhookErrorNextBlockId" in next) next.webhookErrorNextBlockId = remap(next.webhookErrorNextBlockId);
    if ("roleta" in next) next.roleta = remapBranches(next.roleta);
    if ("pausas" in next) next.pausas = remapBranches(next.pausas);
    if ("condicoes" in next) next.condicoes = remapBranches(next.condicoes);
@@ -606,6 +609,7 @@ function AutomacoesPage() {
   const copia = {
    ...source,
    id: newId("bot"),
+   revision: 0, // A cópia ainda não existe no servidor.
    nome: nome.slice(0, 80),
    blocks,
    startBlockId: source.startBlockId ? idMap.get(source.startBlockId) : undefined,

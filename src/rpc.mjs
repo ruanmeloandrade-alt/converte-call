@@ -456,9 +456,10 @@ async function rpc(store, ws, module, name, arg = {}) {
       break;
     }
     case "syncSalesbotFromLocal": {
-      const bot = p.bot;
-      if (!bot?.id) throw Error("Defini\xE7\xE3o de bot inv\xE1lida.");
-      bot.revision = (d.bots.find((b) => b.id === bot.id)?.revision || 0) + 1;
+      if (!p.bot?.id || !Array.isArray(p.bot.blocks)) throw Error("Defini\xE7\xE3o de bot inv\xE1lida.");
+      const existing=d.bots.find(b=>b.id===p.bot.id),bot={...existing,...p.bot};
+      bot.isActive=typeof p.isActive==='boolean'?p.isActive:typeof p.bot.isActive==='boolean'?p.bot.isActive:existing?.isActive??false;
+      bot.revision = (existing?.revision || 0) + 1;
       bot.updatedAt = now();
       upsert(d.bots, bot);
       changed = true;
