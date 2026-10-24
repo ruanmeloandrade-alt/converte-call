@@ -343,8 +343,8 @@ export function LeadProfilePanel({
  }
 
  /** Cria/atualiza/remove campos personalizados direto no banco. */
- async function persistMainFields(next: LeadProfileField[]) {
-  const current = customFields;
+ async function persistMainFields(next: LeadProfileField[], baselineKeys?: string[]) {
+  const current = baselineKeys ? customFields.filter(f => baselineKeys.includes(f.key)) : customFields;
   const nextKeys = new Set(next.map((f) => f.key));
   const removed = current.filter((old) => !nextKeys.has(old.key));
   // Só entram como "novos" os campos criados no diálogo (`custom_<ts>`).
@@ -531,7 +531,7 @@ export function LeadProfilePanel({
  funnels={[]}
  initialView="__main__"
  onClose={() => setSettingsOpen(false)}
- onSaveMain={(next) => persistMainFields(next)}
+ onSaveMain={(next, baselineKeys) => persistMainFields(next, baselineKeys)}
  />
   )}
   <CreateGroupFromLeadDialog
@@ -726,9 +726,10 @@ function CustomFieldsDialog({
  funnels: FunnelDef[];
  initialView: string;
  onClose: () => void;
- onSaveMain: (fields: LeadProfileField[]) => Promise<void>;
+ onSaveMain: (fields: LeadProfileField[], baselineKeys?: string[]) => Promise<void>;
 }) {
  const [mainList, setMainList] = useState<LeadProfileField[]>(mainFields);
+ const [baselineKeys] = useState(() => mainFields.map(f => f.key));
 
  const [label, setLabel] = useState("");
  const [type, setType] = useState<LeadFieldType>("text");
@@ -746,22 +747,25 @@ function CustomFieldsDialog({
  }
 
  function addField() {
- if (!label.trim()) return;
+ if (!label.trim()) return null;
  const needsOptions = type === "select" || type === "multiselect";
- if (needsOptions && options.length === 0) return;
- const key = `custom_${Date.now()}`;
+ const finalOptions = [...new Set([...options, optionDraft.trim()].filter(Boolean))];
+ if (needsOptions && finalOptions.length === 0) return null;
+ const key = `custom_${crypto.randomUUID()}`;
  const newField: LeadProfileField = {
  key,
  label: label.trim(),
  type,
  group: "Personalizados",
-...(needsOptions? { options: [...options] }: {}),
+...(needsOptions? { options: finalOptions }: {}),
  };
- setCurrentList([...currentList, newField]);
+ const next = [...currentList, newField];
+ setCurrentList(next);
  setLabel("");
  setType("text");
  setOptions([]);
  setOptionDraft("");
+ return next;
  }
 
  function removeField(key: string) {
@@ -774,7 +778,11 @@ function CustomFieldsDialog({
  if (saveLock.current) return;
  saveLock.current = true;
  setSavingFields(true);
- try { await onSaveMain(mainList); onClose(); }
+ try {
+ const pending = label.trim() ? addField() : mainList;
+ if (!pending) throw new Error("Adicione as opções do campo de seleção.");
+ await onSaveMain(pending, baselineKeys); onClose();
+ }
  catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar os campos."); }
  finally { saveLock.current = false; setSavingFields(false); }
  }
@@ -782,7 +790,7 @@ function CustomFieldsDialog({
  const needsOptions = type === "select" || type === "multiselect";
 
  return (
- <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" onClick={() => { if (!saveLock.current) onClose(); }}>
+ <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
  <div
  className="w-full max-w-lg rounded-xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto"
  style={{ backgroundColor: "var(--chat-panel)", color: "var(--chat-text)", border: "1px solid var(--chat-divider)" }}
@@ -883,7 +891,7 @@ function CustomFieldsDialog({
 
  <button
  onClick={addField}
- disabled={!label.trim() || (needsOptions && options.length === 0)}
+ disabled={!label.trim() || (needsOptions && options.length === 0 && !optionDraft.trim())}
  className="w-full h-8 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-40"
  style={{ backgroundColor: "var(--chat-accent)", color: "oklch(0.12 0.02 162)" }}
  >

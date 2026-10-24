@@ -53,7 +53,7 @@
     },
     {
       "path": "components\\inbox\\LeadProfilePanel.tsx",
-      "sha256": "421e742ec5857671a779e14b4d073449c73c2c06610c29c97461ae5571345168",
+      "sha256": "fe2b0abd97978806c63bc899976d1d9c825059ee02fb5c0a4d7d9130a9610664",
       "platformAdapted": true
     },
     {
@@ -293,7 +293,7 @@
     },
     {
       "path": "components\\automations\\SalesbotBuilder.tsx",
-      "sha256": "cc4aca6f0b90a00a62377f8e2cb02a489457e2e659a5c745d2bc0330191f667a",
+      "sha256": "b770be85f28520db88330b9ffff412a1f27d1ab6ea5e6a19ffb4b0be9851c044",
       "platformAdapted": true
     },
     {
@@ -368,16 +368,16 @@
     }
   ],
   "platformAdaptations": [
-    "routes\\crm.publicos.tsx",
     "routes\\fluxo-trabalho.tsx",
-    "legacy\\crm.funis-de-venda.legacy.tsx",
+    "routes\\crm.publicos.tsx",
     "legacy\\crm.automacoes.legacy.tsx",
-    "components\\automations\\ConversationAgentsPanel.tsx",
     "legacy\\crm.produtos.legacy.tsx",
-    "routes\\pedidos.tsx",
     "routes\\crm.estoque.tsx",
+    "components\\automations\\ConversationAgentsPanel.tsx",
     "routes\\crm.empresas.tsx",
+    "routes\\pedidos.tsx",
     "components\\inbox\\LeadProfilePanel.tsx",
+    "legacy\\crm.funis-de-venda.legacy.tsx",
     "components\\inbox\\InboxPage.legacy.tsx",
     "components\\dashboard\\DashboardV4ConfigurableBoard.tsx",
     "components\\automations\\ObjectiveTree.tsx",

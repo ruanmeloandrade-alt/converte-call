@@ -3022,7 +3022,7 @@ async function runAction(
         .map((id) => rows.find((r) => r.id === id))
         .filter((r): r is { id: string; slug?: string; nome?: string } => Boolean(r?.slug));
       if (!found.length) return { ok: false, message: "formulário não encontrado" };
-      const urls = found.map((f) => `${origin}/f/${encodeURIComponent(String(f.slug))}?lead=${lead.id}`);
+      const urls = found.map((f) => `${origin}/f/${encodeURIComponent(String(f.slug))}?leadId=${encodeURIComponent(lead.id)}`);
       const template = String(cfg.formularioMensagem ?? "Olá! Preencha por favor:").trim();
       // Legado: se o usuário ainda usa {{url}}, substitui pelo primeiro link.
       const base = template.replace(/\{\{\s*url\s*\}\}/g, urls[0] ?? "");
@@ -3628,13 +3628,14 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
         case "msg-interna": {
           const texto = interpolate(String(b.config.texto ?? ""), lead, run.variables);
           const corpo = texto || "(mensagem interna)";
-          await supabaseAdmin.from("lead_activities").insert({
+          const { error: noteError } = await supabaseAdmin.from("lead_activities").insert({
             workspace_id: run.workspace_id,
             lead_id: lead.id,
             type: "note",
             payload: { text: corpo, by: null, salesbot_run_id: run.id, internal: true },
           });
 
+          if (noteError) throw new Error(`Nota interna não gravada: ${noteError.message}`);
           // Alerta do sistema no Chat da equipe, para quem foi escolhido no bloco
           try {
             const destinoTipo = String(b.config.msgInternaDestinoTipo ?? "usuario");
@@ -3686,11 +3687,13 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
             }
 
             if (rows.length > 0) {
-              await supabaseAdmin.from("team_messages").insert(rows);
+              const { error: deliveryError } = await supabaseAdmin.from("team_messages").insert(rows);
+              if (deliveryError) throw new Error(deliveryError.message);
             }
           } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             await log(supabaseAdmin, run, b, "error", `alerta interno não entregue: ${msg}`);
+            break;
           }
 
           await log(supabaseAdmin, run, b, "ok");
@@ -3739,6 +3742,7 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
                 const lastMedia = mediaKind === null
                   ? undefined
                   : findLatestSentMedia(run.variables.salesbot_last_sent_media, mediaKind);
+                if (mediaKind && !lastMedia?.messageId) throw new Error("Envie a mídia neste fluxo antes de aguardar a confirmação do WhatsApp.");
                 waitingEvents.push({
                   type: tipo,
                   nextBlockId: branchNext ?? null,
@@ -3749,7 +3753,7 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
 
               if (tipo === "exceto-expediente" || tipo === "exceto-fora-expediente") {
                 const inHours = isBusinessHoursNow(bhCfg);
-                const mayRunNow = (tipo === "exceto-expediente" && inHours) || (tipo === "exceto-fora-expediente" && !inHours);
+                const mayRunNow = (tipo === "exceto-expediente" && !inHours) || (tipo === "exceto-fora-expediente" && inHours);
                 if (mayRunNow) {
                   nextId = branchNext;
                   resolvedByPausa = true;
@@ -3757,7 +3761,7 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
                   break;
                 }
                 setTimerCandidate(
-                  tipo === "exceto-expediente" ? nextBusinessHoursStart(bhCfg) : nextBusinessHoursEnd(bhCfg),
+                  tipo === "exceto-expediente" ? nextBusinessHoursEnd(bhCfg) : nextBusinessHoursStart(bhCfg),
                   branchNext,
                 );
                 continue;
@@ -3895,12 +3899,12 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
           }
           if (tipo === "exceto-expediente" || tipo === "exceto-fora-expediente") {
             const inHours = isBusinessHoursNow(bhCfg);
-            const mayRunNow = (tipo === "exceto-expediente" && inHours) || (tipo === "exceto-fora-expediente" && !inHours);
+            const mayRunNow = (tipo === "exceto-expediente" && !inHours) || (tipo === "exceto-fora-expediente" && inHours);
             if (mayRunNow) {
               await log(supabaseAdmin, run, b, "ok", `fora da exceção (${tipo})`);
               break;
             }
-            const until = (tipo === "exceto-expediente" ? nextBusinessHoursStart(bhCfg) : nextBusinessHoursEnd(bhCfg)).toISOString();
+            const until = (tipo === "exceto-expediente" ? nextBusinessHoursEnd(bhCfg) : nextBusinessHoursStart(bhCfg)).toISOString();
             await supabaseAdmin.from("salesbot_runs")
               .update({ status: "waiting_timer", waiting_until: until, current_block_id: b.id })
               .eq("id", run.id);
@@ -3949,6 +3953,7 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
           if (tipo === "video-aberto" || tipo === "video-fechado" || tipo === "audio-aberto" || tipo === "audio-fechado") {
             const mediaKind = tipo.startsWith("video") ? "video" : "audio";
             const lastMedia = findLatestSentMedia(run.variables.salesbot_last_sent_media, mediaKind);
+            if (!lastMedia?.messageId) throw new Error("Envie a mídia neste fluxo antes de aguardar a confirmação do WhatsApp.");
             const waitBranch = {
               blockId: b.id,
               waitingEvents: [{
@@ -3973,7 +3978,7 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
             : [];
           const modoOu = String(b.config.condicaoModo ?? "e") === "ou";
           const falseNext = (b.config.falseNextBlockId as string | undefined) ?? null;
-          if (modoOu && conds.length > 1) {
+          if (modoOu) {
             // Cada condição tem seu próprio caminho: a primeira que bater define a saída.
             let matched: Record<string, unknown> | null = null;
             for (const c of conds) {
@@ -4699,6 +4704,7 @@ export async function resumeRunsOnInboundMessage(
         p_sender_phone: params.senderPhone ?? null,
         p_sender_name: params.senderName ?? null,
         p_next_block_id: nextIdLote,
+        p_message_id: params.messageId ?? null,
       });
 
       if (rpcErr) {
@@ -4815,7 +4821,7 @@ export async function resumeRunsOnMediaEvent(
       : [];
     const matched = waitingEvents.find((event) =>
       acceptedTypes.has(event.type)
-      && (!event.messageId || event.messageId === params.messageId),
+      && typeof event.messageId === "string" && !!event.messageId && event.messageId === params.messageId,
     );
     if (!matched) continue;
 
