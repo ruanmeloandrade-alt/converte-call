@@ -469,9 +469,12 @@ async function rpc(store, ws, module, name, arg = {}) {
     case "setSalesbotActive": {
       const b = d.bots.find((b2) => b2.id === (p.localId || p.botId || p.id));
       if (!b) throw Error("Bot n\xE3o encontrado.");
+      if (typeof (p.active ?? p.isActive) !== "boolean") throw Object.assign(Error("Estado do bot inválido."), {status:400});
       b.isActive = p.active ?? p.isActive;
+      b.revision = (b.revision || 0) + 1;
+      b.updatedAt = now();
       changed = true;
-      result = { ok: true };
+      result = { ok: true, isActive: b.isActive, revision: b.revision };
       break;
     }
     case "deleteSalesbotByLocalId":
@@ -479,8 +482,12 @@ async function rpc(store, ws, module, name, arg = {}) {
       changed = true;
       result = { ok: true };
       break;
-    case "uploadSalesbotMedia":
-      return uploadAsset(store, ws, p);
+    case "uploadSalesbotMedia": {
+      const mime=String(p.mimeType||"application/octet-stream"),kind=mime.startsWith("audio/")?"audio":mime.startsWith("image/")?"image":mime.startsWith("video/")?"video":"document";
+      const asset=uploadAsset(store,ws,p);
+      store.run("INSERT INTO asset_aliases VALUES(?,?,?)",ws,asset.path,asset.path);
+      return {...asset,kind,mime,fileName:String(p.fileName||"arquivo").slice(0,200)};
+    }
     case "getSalesbotMediaSignedUrl": {
       const url = signedAsset(store, ws, p.path);
       return { url, signedUrl: url };

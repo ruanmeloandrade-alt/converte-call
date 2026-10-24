@@ -8776,11 +8776,11 @@ async function sendWhatsappMedia(supabaseAdmin2, workspaceId, phone, mediaPath, 
   const mediaUrl = signed?.data?.signedUrl;
   if (!mediaUrl) return { ok: false, error: "Falha ao gerar URL da m\xEDdia" };
   try {
-    const sendAsVoice = mediaKind === "audio" && asVoice === true;
+    const sendAsVoice = mediaKind === "audio";
     const url = sendAsVoice ? `${base}/message/sendWhatsAppAudio/${encodeURIComponent(c.instance_name)}` : `${base}/message/sendMedia/${encodeURIComponent(c.instance_name)}`;
     const body = sendAsVoice ? { number: target, audio: mediaUrl, encoding: true } : {
       number: target,
-      mediatype: mediaKind === "audio" ? "document" : mediaKind,
+      mediatype: mediaKind,
       // image | video | document
       mimetype: mimeType,
       media: mediaUrl,
@@ -9626,7 +9626,7 @@ async function executeRun(supabaseAdmin2, runInput) {
           }
           for (const it of items) {
             const delay = Math.max(0, Math.min(2e4, Number(it.delayMs ?? 0)));
-            const isVoice = it.kind === "audio" && it.asVoice === true;
+            const isVoice = it.kind === "audio";
             if (delay > 0) {
               const presence = isVoice ? "recording" : "composing";
               await sendWhatsappPresence(supabaseAdmin2, run.workspace_id, phone, presence, delay, routeSessionId);

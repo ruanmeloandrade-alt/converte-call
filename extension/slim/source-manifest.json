@@ -58,7 +58,7 @@
     },
     {
       "path": "components\\inbox\\InboxPage.legacy.tsx",
-      "sha256": "e7dcf298cb523adfbee261a39bbb07229d0b453df6f21372ecf182e192a901d2",
+      "sha256": "88f9ebd1b2ceef76fc48e94c72b8f2924ed998ce8a3de24ea8bc44fb99ec4f25",
       "platformAdapted": true
     },
     {
@@ -293,7 +293,7 @@
     },
     {
       "path": "components\\automations\\SalesbotBuilder.tsx",
-      "sha256": "b770be85f28520db88330b9ffff412a1f27d1ab6ea5e6a19ffb4b0be9851c044",
+      "sha256": "4a6f048c25e33ff1f701141333725c9a5079fd8dba694d7f1059b2479ea277d7",
       "platformAdapted": true
     },
     {

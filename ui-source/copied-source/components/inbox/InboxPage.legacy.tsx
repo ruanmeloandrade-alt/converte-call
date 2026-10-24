@@ -2394,6 +2394,7 @@ function ChatThread({
       };
     },
     enabled: isLead && activityCacheReady && Boolean(cacheScope),
+    refetchInterval: 10_000,
     staleTime: 10_000,
   });
 

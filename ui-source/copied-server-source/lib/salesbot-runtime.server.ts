@@ -2302,10 +2302,8 @@ async function sendWhatsappMedia(
   if (!mediaUrl) return { ok: false, error: "Falha ao gerar URL da mídia" };
 
   try {
-    // Áudio só vai como mensagem de voz (PTT) quando o usuário marcou "enviar
-    // como voz" (gravação pelo microfone, ou anexo convertido). Áudio anexado
-    // "puro" segue como documento/anexo, sem virar PTT.
-    const sendAsVoice = mediaKind === "audio" && asVoice === true;
+    // Todo bloco de áudio usa mensagem de voz, inclusive anexos de bots antigos.
+    const sendAsVoice = mediaKind === "audio";
     const url = sendAsVoice
       ? `${base}/message/sendWhatsAppAudio/${encodeURIComponent(c.instance_name)}`
       : `${base}/message/sendMedia/${encodeURIComponent(c.instance_name)}`;
@@ -2313,7 +2311,7 @@ async function sendWhatsappMedia(
       ? { number: target, audio: mediaUrl, encoding: true }
       : {
           number: target,
-          mediatype: mediaKind === "audio" ? "document" : mediaKind, // image | video | document
+          mediatype: mediaKind, // image | video | document
           mimetype: mimeType,
           media: mediaUrl,
           fileName,
@@ -3440,7 +3438,7 @@ export async function executeRun(supabaseAdmin: AnySb, runInput: string | RunRow
           // 2) Anexos em sequência
           for (const it of items) {
             const delay = Math.max(0, Math.min(20_000, Number(it.delayMs ?? 0)));
-            const isVoice = it.kind === "audio" && it.asVoice === true;
+            const isVoice = it.kind === "audio";
             if (delay > 0) {
               const presence = isVoice ? "recording" : "composing";
               await sendWhatsappPresence(supabaseAdmin, run.workspace_id, phone, presence, delay, routeSessionId);

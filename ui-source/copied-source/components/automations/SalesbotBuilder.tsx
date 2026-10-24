@@ -2366,13 +2366,12 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
    const newItem: MediaItem = {
     id: newId("mi"),
     path: r.path,
-    kind: r.kind,
-    mime: r.mime,
-    filename: r.fileName,
+    kind: r.kind ?? kind,
+    mime: r.mime ?? file.type ?? "application/octet-stream",
+    filename: r.fileName ?? file.name,
     delayMs: 0,
-    // Só marca como voz automaticamente quando é uma gravação do microfone.
-    // Áudios anexados entram como anexo normal até o usuário converter.
-    asVoice: kind === "audio" && opts?.asVoice === true ? true : undefined,
+    // Áudios anexados e gravados são mensagens de voz.
+    asVoice: kind === "audio" ? true : undefined,
    };
    commitItems([...items, newItem]);
   } catch (e) {
@@ -2384,6 +2383,7 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
 
  // Gravação de áudio pelo microfone → sobe como mensagem de voz (PTT).
  const [recording, setRecording] = useState(false);
+ const [micBlocked, setMicBlocked] = useState(false);
  const recorderRef = useRef<MediaRecorder | null>(null);
  const recStreamRef = useRef<MediaStream | null>(null);
  const recChunksRef = useRef<BlobPart[]>([]);
@@ -2395,6 +2395,7 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
   }
   try {
    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+   setMicBlocked(false);
    recStreamRef.current = stream;
    recChunksRef.current = [];
    const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
@@ -2422,7 +2423,11 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
    rec.start();
    setRecording(true);
   } catch (e) {
-   setUploadError(e instanceof Error ? e.message : "Não foi possível iniciar a gravação.");
+   recStreamRef.current?.getTracks().forEach((t) => t.stop());
+   recStreamRef.current = null;
+   const blocked = e instanceof Error && (e.name === "NotAllowedError" || e.name === "SecurityError");
+   setMicBlocked(blocked);
+   setUploadError(blocked ? "O navegador bloqueou o microfone. Autorize o acesso e clique em gravar novamente." : e instanceof Error ? e.message : "Não foi possível iniciar a gravação.");
   }
  }
  function stopRecording() {
@@ -2518,8 +2523,7 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
 
    {items.length > 0 && (
     <p className="text-[10px] leading-snug text-slate-400 pl-1">
-     Ordem de envio: <span className="text-slate-300">o texto acima vai primeiro</span>, depois os anexos na
-     ordem da lista. Para o texto ir <span className="text-slate-300">junto da imagem</span> (embaixo dela),
+     {hasTexto ? "O texto vai primeiro, seguido dos anexos." : "Esta mensagem contém os anexos abaixo. O texto é opcional e os anexos serão enviados mesmo sem texto."} Para o texto ir <span className="text-slate-300">junto da imagem</span> (embaixo dela),
      deixe o texto acima vazio e escreva na <span className="text-slate-300">legenda</span> do anexo.
     </p>
    )}
@@ -2571,6 +2575,7 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
     </button>
    </div>
    {uploadError && <div className="text-[10px] text-rose-400">{uploadError}</div>}
+   {micBlocked && /^(chrome|moz)-extension:$/.test(location.protocol) && <button type="button" className="text-xs underline" onClick={async () => { const result = await chrome.runtime.sendMessage({channel:"cc",type:"open-mic-permission"}); if (!result?.ok) setUploadError(result?.error || "Não foi possível abrir a autorização do microfone."); }}>Autorizar microfone</button>}
 
    {items.length > 1 && (
     <p className="text-[10px] text-slate-500 leading-snug pl-1">
@@ -2661,7 +2666,7 @@ function MediaItemRow({
 
  const delayS = Math.round((item.delayMs ?? 0) / 1000);
  const isAudio = item.kind === "audio";
- const presenceLabel = isAudio && item.asVoice ? "gravando áudio…" : "digitando…";
+ const presenceLabel = isAudio ? "gravando áudio…" : "digitando…";
 
  return (
   <div className="rounded border border-slate-700 bg-slate-800/60 p-2 space-y-1.5">
@@ -2697,24 +2702,7 @@ function MediaItemRow({
     <audio src={previewUrl} controls className="w-full h-8" />
    )}
 
-   {isAudio && (
-    <label className="flex items-start gap-1.5 text-[10px] text-slate-300 leading-snug">
-     <input
-      type="checkbox"
-      checked={item.asVoice === true}
-      onChange={(e) => onChange({ asVoice: e.target.checked })}
-      className="accent-emerald-500 mt-0.5"
-     />
-     <span>
-      Enviar como <b>mensagem de voz</b> (PTT).{" "}
-      <span className="text-slate-500">
-       {item.asVoice
-        ? "Vai como áudio de voz, igual gravado no WhatsApp."
-        : "Desmarcado: vai como anexo de áudio (encaminhado)."}
-      </span>
-     </span>
-    </label>
-   )}
+   {isAudio && <p className="text-[10px] text-slate-300">Mensagem de áudio: enviada como voz no WhatsApp.</p>}
 
    {!isAudio && (
     <input

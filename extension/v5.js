@@ -1,7 +1,7 @@
 'use strict';
 const slimModules={companies:'companies',audiences:'audiences','employee-inbox':'inbox',dashboard:'dashboard','project-board':'projects',pipeline:'funnel',automations:'bots',bots:'bots',agents:'agents',brain:'brain',products:'products',sales:'orders',orders:'orders',suppliers:'suppliers',inventory:'inventory'};
 let profileLeadId='';
-for(const [view,module]of Object.entries(slimModules))views[view]=()=>`<iframe class="slim-module" title="Converte Call • ${module}" src="slim.html?module=${module}${view==='project-board'?'&projectId='+encodeURIComponent(data.activeProjectId):''}" allow="clipboard-write"></iframe>`;
+for(const [view,module]of Object.entries(slimModules))views[view]=()=>`<iframe class="slim-module" title="Converte Call • ${module}" src="slim.html?module=${module}${view==='project-board'?'&projectId='+encodeURIComponent(data.activeProjectId):''}" allow="microphone; clipboard-write"></iframe>`;
 views['lead-profile']=()=>`<iframe class="slim-module" title="Ficha do cliente" src="slim.html?module=lead&leadId=${encodeURIComponent(profileLeadId)}"></iframe>`;
 groupsV4.find(g=>g[0]==='Operação')[1].push(['orders','Tirar pedido','note'],['products','Produtos','note'],['suppliers','Fornecedores','users'],['inventory','Estoque','chart']);
 groupsV4.find(g=>g[0]==='Conta')[1].push(['notifications','Notificações','sms']);
