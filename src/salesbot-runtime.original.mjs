@@ -6806,6 +6806,9 @@ async function resumeRunsOnInboundMessage(supabaseAdmin2, params) {
   const { data: runs } = await supabaseAdmin2.from("salesbot_runs").select("id, variables").eq("workspace_id", params.workspaceId).eq("lead_id", params.leadId).eq("status", "waiting_message");
   const list = runs ?? [];
   for (const r of list) {
+    if (params.resumableRunIds && !params.resumableRunIds.includes(r.id)) continue;
+    if (params.messageId && r.variables?.salesbot_last_inbound_message_id === params.messageId) continue;
+    if (params.messageId) r.variables = { ...r.variables, salesbot_last_inbound_message_id: params.messageId };
     if (params.senderPhone) {
       r.variables = {
         ...r.variables ?? {},

@@ -4576,7 +4576,7 @@ export async function resumeRunsOnFormSubmission(
 /** Destrava runs aguardando mensagem do lead. */
 export async function resumeRunsOnInboundMessage(
   supabaseAdmin: AnySb,
-  params: { workspaceId: string; leadId: string; text: string; senderPhone?: string | null; senderName?: string | null },
+  params: { workspaceId: string; leadId: string; text: string; senderPhone?: string | null; senderName?: string | null; resumableRunIds?: string[]; messageId?: string },
 ): Promise<void> {
   const { data: runs } = await supabaseAdmin.from("salesbot_runs")
     .select("id, variables")
@@ -4585,6 +4585,11 @@ export async function resumeRunsOnInboundMessage(
     .eq("status", "waiting_message");
   const list = (runs ?? []) as Array<{ id: string; variables: Record<string, unknown> }>;
   for (const r of list) {
+    // Only waits that existed when this inbound arrived may consume it.
+    // A lead-created action can start a bot and reach a new wait in this same turn.
+    if (params.resumableRunIds && !params.resumableRunIds.includes(r.id)) continue;
+    if (params.messageId && r.variables?.salesbot_last_inbound_message_id === params.messageId) continue;
+    if (params.messageId) r.variables = { ...r.variables, salesbot_last_inbound_message_id: params.messageId };
     // Grupos: guarda quem falou por último para permitir menção `{@participante}`.
     if (params.senderPhone) {
       r.variables = {
@@ -5175,6 +5180,8 @@ export async function dispatchInboundMessage(
     canalId?: string;
     mediaType?: "audio" | "imagem" | "video" | "documento" | null;
     isFirstMessage?: boolean;
+    resumableRunIds?: string[];
+    messageId?: string;
     /** Grupos: telefone/nome de quem enviou a mensagem dentro do grupo. */
     senderPhone?: string | null;
     senderName?: string | null;
