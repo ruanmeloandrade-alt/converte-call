@@ -101,7 +101,7 @@ export function AgentWebhookTrigger({
       {open && (
       <div className="px-3 pb-3">
       <p className="text-[11px] text-muted-foreground">
-        Um <code>POST</code> autenticado dispara o agente, útil pra Hotmart (venda),
+        Uma solicitação autenticada dispara o agente, útil pra Hotmart (venda),
         Zoom/Meet (reunião iniciada), OBS/Live, Zapier/Make, etc.
       </p>
 
@@ -136,7 +136,7 @@ export function AgentWebhookTrigger({
 
           <div>
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Segredo <span className="normal-case text-muted-foreground/70">(header <code>x-webhook-secret</code>)</span>
+              Segredo <span className="normal-case text-muted-foreground/70">(autenticação da integração)</span>
             </label>
             <div className="flex items-center gap-1.5 mt-1">
               <input
@@ -173,7 +173,7 @@ export function AgentWebhookTrigger({
           <div className="grid grid-cols-1 gap-2">
             <div>
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {targetLabel} padrão <span className="normal-case text-muted-foreground/70">(pode ser sobrescrito no payload em <code>target</code>)</span>
+                {targetLabel} padrão <span className="normal-case text-muted-foreground/70">(pode ser definido pela integração)</span>
               </label>
               <input
                 value={value.target}
@@ -184,7 +184,7 @@ export function AgentWebhookTrigger({
             </div>
             <div>
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Mensagem <span className="normal-case text-muted-foreground/70">(use <code>{"{{campo}}"}</code> pra ler o payload; ou envie <code>message</code> na requisição)</span>
+                Mensagem <span className="normal-case text-muted-foreground/70">(personalize com os campos recebidos pela integração)</span>
               </label>
               <textarea
                 value={value.template}
@@ -198,21 +198,9 @@ export function AgentWebhookTrigger({
             </div>
           </div>
 
-          <details className="mt-1">
-            <summary className="text-[11px] font-medium cursor-pointer text-muted-foreground hover:text-foreground">
-              Ver exemplo de requisição
-            </summary>
-            <div className="mt-1.5 relative">
-              <pre className="text-[10px] bg-background border border-border rounded p-2 overflow-x-auto font-mono whitespace-pre">{curl}</pre>
-              <button
-                type="button"
-                onClick={() => copy("curl", curl)}
-                className="absolute top-1.5 right-1.5 p-1 rounded border border-border bg-card hover:bg-muted"
-              >
-                {copied === "curl" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-              </button>
-            </div>
-          </details>
+          <button type="button" onClick={() => copy("curl", curl)} className="text-[11px] px-2 py-1 rounded border border-border hover:bg-muted">
+            {copied === "curl" ? "Copiado" : "Copiar configuração da integração"}
+          </button>
         </div>
       )}
       </div>

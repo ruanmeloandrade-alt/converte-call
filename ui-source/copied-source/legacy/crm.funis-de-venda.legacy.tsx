@@ -4650,36 +4650,13 @@ function WebhookConfigForm({
      )}
     </div>
     <p className="text-[10px] text-muted-foreground mt-1">
-     Enviado no header <code className="bg-muted rounded px-1">X-Saude-Slim-Signature</code> (HMAC-SHA256 do corpo).
+     As informações são enviadas com assinatura de segurança para a integração.
     </p>
    </div>
 
-   {/* Prévia do payload */}
-   <div className="rounded border border-border overflow-hidden">
-    <button
-     type="button"
-     onClick={() => setShowPayload((s) => !s)}
-     className="w-full flex items-center justify-between px-2.5 py-1.5 bg-muted/40 hover:bg-muted/60 text-[11px] font-medium"
-    >
-     <span>📦 Prévia do JSON enviado</span>
-     <ChevronDown className={cn("w-3 h-3 transition-transform", showPayload && "rotate-180")} />
-    </button>
-    {showPayload && (
-     <div className="relative">
-      <pre className="text-[10px] leading-relaxed p-2.5 bg-background overflow-x-auto max-h-56 font-mono">
-{payloadJson}
-      </pre>
-      <button
-       type="button"
-       onClick={() => copyToClipboard(payloadJson)}
-       className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-primary bg-background/80 border border-border rounded p-1"
-       title="Copiar JSON"
-      >
-       <Copy className="w-3 h-3" />
-      </button>
-     </div>
-    )}
-   </div>
+   <Button type="button" variant="outline" size="sm" onClick={() => copyToClipboard(payloadJson)}>
+    <Copy className="w-3 h-3 mr-1" /> Copiar configuração da integração
+   </Button>
 
    {/* Ajuda */}
    <div className="rounded border border-border overflow-hidden">
@@ -4864,32 +4841,9 @@ function WebhookInboundConfigForm({
     </div>
    </div>
 
-   {/* Exemplo curl */}
-   <div className="rounded border border-border overflow-hidden">
-    <button
-     type="button"
-     onClick={() => setShowCurl((s) => !s)}
-     className="w-full flex items-center justify-between px-2.5 py-1.5 bg-muted/40 hover:bg-muted/60 text-[11px] font-medium"
-    >
-     <span>🧪 Testar com curl</span>
-     <ChevronDown className={cn("w-3 h-3 transition-transform", showCurl && "rotate-180")} />
-    </button>
-    {showCurl && (
-     <div className="relative">
-      <pre className="text-[10px] leading-relaxed p-2.5 bg-background overflow-x-auto max-h-56 font-mono">
-{curlExample}
-      </pre>
-      <button
-       type="button"
-       onClick={() => copy(curlExample)}
-       className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-primary bg-background/80 border border-border rounded p-1"
-       title="Copiar comando"
-      >
-       <Copy className="w-3 h-3" />
-      </button>
-     </div>
-    )}
-   </div>
+   <Button type="button" variant="outline" size="sm" onClick={() => copy(curlExample)}>
+    <Copy className="w-3 h-3 mr-1" /> Copiar exemplo para integração
+   </Button>
 
    {/* Ajuda */}
    <div className="rounded border border-border overflow-hidden">
@@ -5568,14 +5522,14 @@ function MetaAdsForm({
    )}
    {modo === "capturar" && (
     <div className="rounded border border-dashed border-border bg-muted/30 p-2 space-y-1.5">
-     <p className="text-[11px] font-medium">Snippet pro site do cliente</p>
-     <p className="text-[10px] text-muted-foreground">Cole antes do <code>&lt;/head&gt;</code>. Formulários que representarem um lead devem incluir <code>{formHint}</code>.</p>
-     <pre className="text-[10px] bg-background border border-border rounded p-2 overflow-x-auto whitespace-pre-wrap break-all">{snippet}</pre>
+     <p className="text-[11px] font-medium">Conectar o site do cliente</p>
+     <p className="text-[10px] text-muted-foreground">Copie a configuração e aplique-a no gerenciador do site para conectar os formulários.</p>
+     
      <button
       type="button"
       onClick={() => { try { navigator.clipboard.writeText(snippet); } catch {} }}
       className="text-[10px] px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90"
-     >Copiar snippet</button>
+     >Copiar configuração</button>
     </div>
    )}
    <p className="text-[10px] text-muted-foreground">
