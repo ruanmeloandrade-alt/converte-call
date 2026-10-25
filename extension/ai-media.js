@@ -45,12 +45,12 @@ function startLiveAI(a,tracks,speakerHint='mixed'){
  async function process(segment){
   try{
    if(!isCurrent())return;const text=segment.text,transcript=segment.transcript;
-   const {data}=await aiSettings(),nodes=Array.isArray(a.meta.workflow)?a.meta.workflow:[],requestNode=a.meta.workflowNode,policy=nodes.find(n=>n.id===requestNode);
+   const {data}=await aiSettings(),nodes=Array.isArray(a.meta.workflow)?a.meta.workflow:[],requestNode=a.meta.workflowNode,requestWorkflowRevision=a.meta.workflowRevision||0,policy=nodes.find(n=>n.id===requestNode);
    const purpose=a.meta.contentType==='auto'?(a.meta.workflowPurpose||'call'):(a.meta.contentType||'call');
    a.meta.livePhase='thinking';await put(a.meta);
    const raw=await textResponse(JSON.stringify({latestUtterance:text,speakerHint,recentConversation:transcript.slice(-12000),conversationOpening:live.opening,conversationContext:live.contextMemory,previousSuggestion:a.meta.liveAdvice?.suggestion||'',currentNode:requestNode,workflowGoal:a.meta.workflowGoal||'',workflow:nodes,brain:callBrainContext(data),allowedFields:policy?.captureEnabled?(data.customFields||[]).filter(f=>(policy.captureFields||[]).includes(f.id)):[],existingFields:policy?.captureEnabled?(data.customFields||[]).map(f=>({id:f.id,label:f.label,type:f.type})):[]}),CCRecordingAnalysis.liveInstructions(purpose)+(policy?.captureEnabled?' '+extractionInstructions:''));
    let parsed;try{parsed=parseCallJSON(raw);}catch{throw Error('O modelo não retornou uma sugestão estruturada.');}
-   if(!isCurrent()||a.meta.workflowNode!==requestNode)return;
+   if(!isCurrent()||a.meta.workflowNode!==requestNode||(a.meta.workflowRevision||0)!==requestWorkflowRevision)return;
    if(typeof parsed.conversationContext==='string'&&parsed.conversationContext.trim())live.contextMemory=parsed.conversationContext.trim().slice(0,3000);
    const suggestion=CCRecordingAnalysis.liveAdvice(parsed,text),current=nodes.find(n=>n.id===requestNode);
    a.meta.livePhase='listening';a.meta.liveError='';
@@ -63,8 +63,8 @@ function startLiveAI(a,tracks,speakerHint='mixed'){
    await put(a.meta);
    if(live.utterance.startsWith(text))live.utterance=live.utterance.slice(text.length).trim();
    saveHistory(row=>{row.suggestions||=[];row.suggestions.push({...suggestion,timeMs:segment.endMs,nodeId:requestNode});});
-   if(policy?.captureEnabled&&a.meta.lead&&isCurrent())try{await syncCallFields(a.meta.id,requestNode,parsed);}catch(error){a.meta.fieldExtractionError=error.message;}
-   if(a.meta.workflowAdvance==='ai'&&suggestion.nextNode&&suggestion.nextNode!==current?.id&&isCurrent()&&a.meta.workflowNode===requestNode){a.meta.workflowNode=suggestion.nextNode;a.meta.events.push({type:'branch',timeMs:segment.endMs,text:'Avanço da IA: '+(nodes.find(n=>n.id===suggestion.nextNode)?.name||''),nodeId:suggestion.nextNode});const action=await chrome.runtime.sendMessage({channel:'cc',type:'call-node-action',meta:a.meta,nodeId:suggestion.nextNode,entryKey:a.meta.events.length});if(!action?.ok)a.meta.events.push({type:'action-error',timeMs:segment.endMs,text:action?.error||'Falha na ação opcional.'});}
+   if(policy?.captureEnabled&&a.meta.lead&&isCurrent()&&(a.meta.workflowRevision||0)===requestWorkflowRevision)try{await syncCallFields(a.meta.id,requestNode,parsed);}catch(error){a.meta.fieldExtractionError=error.message;}
+   if(a.meta.workflowAdvance==='ai'&&suggestion.nextNode&&suggestion.nextNode!==current?.id&&isCurrent()&&a.meta.workflowNode===requestNode&&(a.meta.workflowRevision||0)===requestWorkflowRevision){a.meta.workflowNode=suggestion.nextNode;a.meta.events.push({type:'branch',timeMs:segment.endMs,text:'Avanço da IA: '+(nodes.find(n=>n.id===suggestion.nextNode)?.name||''),nodeId:suggestion.nextNode});const action=await chrome.runtime.sendMessage({channel:'cc',type:'call-node-action',meta:a.meta,nodeId:suggestion.nextNode,entryKey:a.meta.events.length});if(!action?.ok)a.meta.events.push({type:'action-error',timeMs:segment.endMs,text:action?.error||'Falha na ação opcional.'});}
    if(isCurrent())await put(a.meta);
   }catch(error){if(isCurrent()){a.meta.liveError=error.message;a.meta.livePhase='listening';await put(a.meta);}}
   finally{if(isCurrent())await put(a.meta);}

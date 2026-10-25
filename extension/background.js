@@ -2,7 +2,7 @@
 importScripts('credential-vault.js','internal-config.js','core.js','core-v4.js','notification-catalog.js','notification-center.js','call-fields.js','services.js','portal-services.js','cloud-sync.js');
 let creating;
 async function normalHost(){const win=await chrome.windows.getLastFocused({windowTypes:['normal']});return (await chrome.tabs.query({active:true,windowId:win.id}))[0];}
-async function openFloating(kind){if(!['hud','dock'].includes(kind))throw Error('Janela inválida.');const key='ccFloating:'+kind,existing=(await chrome.storage.session.get(key))[key];if(existing){try{await chrome.windows.update(existing,{focused:true,state:'normal'});return {ok:true,windowId:existing};}catch{await chrome.storage.session.remove(key);}}const host=await normalHost(),popup=await chrome.windows.create({type:'popup',url:chrome.runtime.getURL('floating.html')+'#kind='+kind,width:kind==='dock'?460:380,height:kind==='dock'?170:360,focused:true});await chrome.storage.session.set({[key]:popup.id});if(host?.id)await chrome.tabs.sendMessage(host.id,{channel:'cc',type:'surface-detached',kind}).catch(()=>{});return {ok:true,windowId:popup.id};}
+async function openFloating(kind){if(!['hud','dock'].includes(kind))throw Error('Janela inválida.');const key='ccFloating:'+kind,existing=(await chrome.storage.session.get(key))[key];if(existing){try{await chrome.windows.update(existing,{focused:true,state:'normal'});return {ok:true,windowId:existing};}catch{await chrome.storage.session.remove(key);}}const host=await normalHost(),popup=await chrome.windows.create({type:'popup',url:chrome.runtime.getURL('floating.html')+'#kind='+kind,width:kind==='dock'?460:380,height:kind==='dock'?170:220,focused:true});await chrome.storage.session.set({[key]:popup.id});if(host?.id)await chrome.tabs.sendMessage(host.id,{channel:'cc',type:'surface-detached',kind}).catch(()=>{});return {ok:true,windowId:popup.id};}
 async function engine(){
  const url=chrome.runtime.getURL('offscreen.html');
  if((await chrome.runtime.getContexts({contextTypes:['OFFSCREEN_DOCUMENT'],documentUrls:[url]})).length)return;
@@ -65,6 +65,7 @@ async function handle(m,sender){
   const result=await media({type:'start',options});if(result.ok)await notify();return result;
  }
  if(m.type==='capture-status')return media({type:'status'});
+ if(m.type==='capture-workflow'){const d=CCCore.migrate((await chrome.storage.local.get('converteCallWorkspace')).converteCallWorkspace||{}),w=m.workflowId?(d.workflows||[]).find(w=>w.id===m.workflowId):null;if(m.workflowId&&!w)throw Error('Workflow não encontrado nesta conta.');return media({type:'workflow-set',workflow:w?{id:w.id,name:w.name,goal:w.goal||w.name,purpose:w.purpose||'call',nodes:w.nodes||[],start:w.start||w.nodes?.[0]?.id}:null});}
  if(m.type==='capture-pause'||m.type==='capture-resume')return media({type:m.type==='capture-pause'?'pause':'resume'});
  if(m.type==='capture-stop'){const r=await media({type:'stop'});if(r.ok&&r.id){try{r.download=await downloadRecording(r.id);}catch(e){r.downloadError=e.message;}}if(r.ok&&r.id)await CCNotification.emit({category:'recording',key:'recording:'+r.id,title:'Gravação salva',message:'Sua call está no histórico de gravações.',entityId:r.id,view:'calls'});await notify();return r;}
  if(m.type==='recording-cloud-sync')return media({type:'cloud-sync',id:m.id});

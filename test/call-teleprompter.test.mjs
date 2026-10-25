@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+
+test('compact HUD renders only the spoken phrase, real controls and editable workflow choice across updates',async()=>{
+ const events={},sent=[],posts=[],workspace={workflows:[{id:'new',name:'Nova abordagem',nodes:[{id:'start',questions:'Não mostrar roteiro no teleprompter'}]}]},state={recording:true,elapsed:1000,meta:{liveAI:true,workflow:[],workflowId:null,liveAdvice:{suggestion:'O que pesa mais para você hoje: o valor ou o prazo?',reason:'NÃO MOSTRAR ORIENTAÇÃO',clientQuote:'Está caro'}}};let html='';
+ const ctx=vm.createContext({view:'hud',state,workspace,busy:false,headerHTML:()=>'<header>original</header>',hud:()=>'',hudNodes:()=>ctx.state.meta.workflow,hudPath:[],hudNode:'',esc:s=>String(s??'').replaceAll('<','&lt;'),formatTime:()=> '00:01',root:{addEventListener:(type,fn)=>events[type]=fn,getBoundingClientRect:()=>({height:140})},document:{body:{classList:{add(){}}},querySelector:()=>({value:'new'})},ResizeObserver:class{observe(){}},CCWorkspace:{get:async()=>workspace},send:async(type,data)=>{sent.push({type,...data});return {ok:true,recording:true,meta:{workflowId:data.workflowId,workflow:[],workflowNode:'start'}};},post:(...args)=>posts.push(args),toast:assert.fail,render:()=>{html=ctx.headerHTML()+ctx.hud();}});
+ vm.runInContext(read('extension/surface-controls.js'),ctx);assert(html.includes(state.meta.liveAdvice.suggestion));assert(!html.includes('NÃO MOSTRAR'));assert(!html.includes('DIGA ASSIM'));assert(html.indexOf('data-action="pause"')<html.indexOf('data-action="stop"'));assert(html.indexOf('data-action="stop"')<html.indexOf('data-action="mark"'));assert(html.includes('aria-label="Trocar workflow ao vivo"'));
+ const click=action=>events.click({target:{closest:()=>({dataset:{action}})}});await click('hud-workflow');events.change({target:{id:'hud-workflow-select',value:'new'}});ctx.render();assert.match(html,/value="new" selected/);await click('hud-workflow-apply');assert.equal(sent[0].type,'capture-workflow');assert.equal(sent[0].workflowId,'new');assert.equal(ctx.state.meta.workflowId,'new');
+ ctx.state={recording:true,paused:true,meta:{liveAI:true,workflow:[]}};ctx.render();assert(html.includes('data-action="resume"'));assert(html.includes('Gravação pausada'));
+ ctx.view='customer';assert.equal(ctx.headerHTML(),'<header>original</header>');
+});
+
+test('actual capture engine replaces workflow without restarting capture or losing accumulated conversation',async()=>{
+ const source=read('extension/offscreen.js'),begin=source.indexOf('async function handle(m){'),end=source.indexOf('chrome.runtime.onMessage.addListener',begin),writes=[],active={pauseAt:0,live:{contextMemory:'Cliente precisa de suporte',transcript:'Histórico completo',queued:[{audio:'preservar'}]},recorder:{state:'recording'},meta:{id:'call',workflow:[{id:'old'}],workflowNode:'old',events:[],liveAdvice:{suggestion:'Fala anterior'}}};
+ const ctx=vm.createContext({active,structuredClone,elapsed:()=>12345,put:async meta=>writes.push(structuredClone(meta)),state:()=>({ok:true,recording:true,meta:active.meta}),CCRecordingAnalysis:{kind:x=>x}});vm.runInContext(source.slice(begin,end),ctx);
+ const live=active.live,recorder=active.recorder;await ctx.handle({type:'workflow-set',workflow:{id:'new',name:'Novo roteiro',goal:'Nova meta',purpose:'call',start:'start',nodes:[{id:'start'}]}});assert.equal(active.recorder,recorder);assert.equal(active.live,live);assert.equal(live.contextMemory,'Cliente precisa de suporte');assert.equal(live.transcript,'Histórico completo');assert.equal(live.queued.length,1);assert.equal(active.meta.workflowRevision,1);assert.equal(active.meta.liveAdvice,null);assert.equal(writes.length,1);assert.equal(active.meta.events[0].timeMs,12345);
+ await ctx.handle({type:'workflow-set',workflow:null});assert.equal(active.meta.workflow.length,0);assert.equal(active.meta.workflowId,null);assert.equal(active.meta.workflowRevision,2);
+});
+
+test('teleprompter rejects coaching prefixes and an in-flight answer from the old workflow',async()=>{
+ const a={meta:{id:'call',liveAI:true,workflow:[{id:'shared'}],workflowNode:'shared',workflowRevision:0,events:[],contentType:'call'}},requests=[];let resolveModel;const provider=new Promise(r=>resolveModel=r);
+ class Recorder{constructor(){this.state='inactive';this.mimeType='audio/webm';}start(){this.state='recording';}stop(){this.state='inactive';this.ondataavailable?.({data:new Blob(['audio'])});this.onstop?.();}}
+ const ctx=vm.createContext({Blob,MediaRecorder:Recorder,MediaStream:class{},structuredClone,console,setTimeout:()=>1,clearTimeout(){},setInterval:()=>1,clearInterval(){},active:a,elapsed:()=>10000,put:async()=>{},chrome:{storage:{local:{get:async()=>({converteCallWorkspace:{providers:{ai:'openai'},analyses:[]}})}},runtime:{sendMessage:async m=>{if(m.type==='portal-ai-text'){requests.push(m.input);return provider;}if(m.type==='call-analysis-commit')return {ok:true};throw Error(m.type);}}}});
+ vm.runInContext(read('extension/recording-analysis.js'),ctx);for(const phrase of ['Fale: entendi','Diga para o cliente que entendeu','Responda: posso ajudar','Você pode dizer que entendeu','Pergunte sobre o prazo'])assert.equal(ctx.CCRecordingAnalysis.liveAdvice({ready:true,suggestion:phrase,clientQuote:'Está caro'},'Está caro'),null);
+ vm.runInContext(read('extension/ai-media.js'),ctx);vm.runInContext("transcribeBlob=async()=> 'Está caro';startLiveAI(active,[{}]);active.live.contextMemory='Contexto já acumulado';active.live.recorder.stop();",ctx);
+ for(let i=0;i<40&&!requests.length;i++)await new Promise(r=>setImmediate(r));assert.equal(requests.length,1);assert.match(requests[0].input,/Contexto já acumulado/);a.meta.workflowRevision=1;a.meta.workflowGoal='Novo objetivo';
+ resolveModel({ok:true,text:JSON.stringify({ready:true,suggestion:'Qual prazo funciona melhor para você?',clientQuote:'Está caro',conversationContext:'Não aceitar memória antiga'})});await vm.runInContext('aiPipeline',ctx);assert.equal(a.meta.liveAdvice,undefined);assert.equal(a.live.contextMemory,'Contexto já acumulado');
+});
