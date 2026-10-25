@@ -47,3 +47,10 @@ body.call-hud{background:transparent;color:#171b32;overflow-x:hidden}
 @media(prefers-reduced-motion:no-preference){.prompter-stop.is-recording .prompter-orb{animation:prompter-breathe 3s ease-in-out infinite}.prompter-speech.has-advice p{animation:prompter-fade .22s ease-out}@keyframes prompter-breathe{50%{box-shadow:inset -3px -3px 8px #ffffffa0,0 0 0 3px #c544a219}}@keyframes prompter-fade{from{opacity:.5}to{opacity:1}}}
 
 .prompter-toolbar,.prompter-meta{cursor:grab;touch-action:none;user-select:none}.prompter-speech{cursor:text}
+
+/* The iframe canvas must also be transparent, not only its body. */
+html.call-hud-root,html.call-hud-root body,html.call-hud-root #root{background:transparent!important;border:0!important;box-shadow:none!important}
+html.call-hud-root .prompter-speech{border:0;box-shadow:none}
+
+html.call-hud-root .prompter-meta,html.call-hud-root .prompter-meta button{background:transparent!important;border:0!important;box-shadow:none!important}
+html.call-hud-root .prompter-meta button{opacity:.35;padding:0 2px;border-radius:0}html.call-hud-root .prompter-meta button:hover,html.call-hud-root .prompter-meta button:focus-visible{opacity:.85}
