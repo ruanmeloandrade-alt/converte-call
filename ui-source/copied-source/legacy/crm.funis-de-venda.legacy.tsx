@@ -172,7 +172,7 @@ function CrmFunisPage() {
       const next = new Set(prev);
       const allIncluded = ids.every(id => next.has(id));
       const shouldSelect = forceState !== undefined ? forceState : !allIncluded;
-      
+
       ids.forEach(id => {
         if (shouldSelect) next.add(id);
         else next.delete(id);
@@ -401,7 +401,7 @@ function CrmFunisPage() {
     return (localStorage.getItem("saude-slim.crmView") as View) || "kanban";
   });
   const [mode, setMode] = useState<Mode>("view");
-  
+
   useEffect(() => {
     localStorage.setItem("saude-slim.crmView", view);
   }, [view]);
@@ -694,7 +694,7 @@ function CrmFunisPage() {
     try {
       const draftList = Object.entries(nextDraft);
       const expectedCount = draftList.reduce((total, [_, actions]) => total + (actions?.length ?? 0), 0);
-      
+
       const saved = await saveStageAutomationsServer({ 
         data: { 
           pipelineId: funnelId, 
@@ -712,9 +712,9 @@ function CrmFunisPage() {
       const verified = await listStageAutomationsServer({ data: { pipelineId: funnelId } });
       const persisted = (verified.automations ?? {}) as StageAutomations;
       assertAutomationPersistence(Object.fromEntries(Object.entries(nextDraft).map(([id,actions])=>[id,actions.map(action=>({...action,...(action.execution?{execution:{...action.execution,applyToExisting:false}}:{})}))])), persisted);
-      
+
       setAutomations(persisted);
-      
+
       if (backfilledTotal > 0) {
         toast.success(`${backfilledTotal} lead(s) já existentes entraram na fila do gatilho.`);
       }
@@ -748,13 +748,13 @@ function CrmFunisPage() {
       const base = prev ?? automations;
       const existing = base[stageId] ?? [];
       const kind = configKindFor(item.id);
-      
+
       const initialConfig: AutomationConfig = kind === "webhook"
         ? { kind: "webhook", preset: WEBHOOK_PRESET_BY_TRIGGER[item.id] ?? "custom", method: "POST" }
         : kind === "webhook-inbound"
           ? { kind: "webhook-inbound", createInStageId: stageId, mapName: "name", mapEmail: "email", mapPhone: "phone" }
           : ({ kind } as AutomationConfig);
-      
+
       const next: AutomationAction = {
         id: newActionId,
         triggerId: item.id,
@@ -765,7 +765,7 @@ function CrmFunisPage() {
         config: initialConfig,
         execution: { trigger: { kind: "created-or-moved" } }
       };
-      
+
       const result = { ...base, [stageId]: [...existing, next] };
       if (funnelId) {
         try { localStorage.setItem(stageAutomationDraftStorageKey(funnelId), JSON.stringify(result)); } catch (e) { /* noop */ }
@@ -1278,7 +1278,7 @@ function CrmFunisPage() {
 
   </div>
   </div>
-  
+
   {mode === "view" && selectedLeadIds.size > 0 && (
     <div className="mx-6 mt-2 flex items-center gap-3 p-2 px-4 rounded-lg bg-primary/5 border border-primary/20 animate-in slide-in-from-top-2">
       <div className="text-[11px] font-semibold text-primary">
@@ -1603,7 +1603,7 @@ onConfigureTrigger={(stageId, actionId) => setConfiguring({ stageId, actionId })
                 }
               }
             });
-            
+
             if (!res.ok) throw new Error("Erro ao atualizar campos do lead");
 
             // 2. Atualizar campos personalizados se houver
@@ -1630,16 +1630,16 @@ onConfigureTrigger={(stageId, actionId) => setConfiguring({ stageId, actionId })
                 }
               });
             }
-            
+
             await queryClient.invalidateQueries({ queryKey: ["crm-funnels"] });
             await queryClient.invalidateQueries({ queryKey: ["crm-leads"] });
             await reloadFunnels(crmSourceId);
-            
+
             if (data.pipelineId && data.pipelineId !== currentPipelineId) {
               setFunnelId(data.pipelineId);
               await navigate({ to: "/crm/funis-de-venda", search: { funnelId: data.pipelineId }, replace: true });
             }
-            
+
             setQuickEditingLead(null);
             toast.success("Lead atualizado com sucesso");
           } catch (e) {
@@ -2543,7 +2543,7 @@ function KanbanBoard({
 
   function activateWobble() { if (canReorderStages) setWobble(true); }
 
-  
+
 
 
 
@@ -5324,7 +5324,7 @@ function GerarFormForm({
     >
      <option value="whatsapp">Enviar por WhatsApp</option>
      <option value="link">Só gerar o link (registrar como nota no lead)</option>
-     
+
     </select>
    </div>
     {canal === "whatsapp" && (
@@ -5524,7 +5524,7 @@ function MetaAdsForm({
     <div className="rounded border border-dashed border-border bg-muted/30 p-2 space-y-1.5">
      <p className="text-[11px] font-medium">Conectar o site do cliente</p>
      <p className="text-[10px] text-muted-foreground">Copie a configuração e aplique-a no gerenciador do site para conectar os formulários.</p>
-     
+
      <button
       type="button"
       onClick={() => { try { navigator.clipboard.writeText(snippet); } catch {} }}
