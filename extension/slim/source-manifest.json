@@ -168,7 +168,7 @@
     },
     {
       "path": "components\\inbox\\LeadSalesPanel.tsx",
-      "sha256": "bc72636b71a10f2ff0276bdd6b9e73aac875172ade9f695d601826ce4e385a33",
+      "sha256": "a14f3e83c0a2b0fe649ed1d4feb8705b8aeafa3fa2f259c16d5a6ee7ce1ee530",
       "platformAdapted": false
     },
     {
@@ -369,6 +369,11 @@
     {
       "path": "lib\\stage-execution.core.ts",
       "sha256": "208754584d75a02de4e839be94ead67845fae2902e726e42afea4985df90d591",
+      "platformAdapted": false
+    },
+    {
+      "path": "components\\sales\\SalesManagementPage.tsx",
+      "sha256": "1c6adb99ea3213a123fbc389e6f94b11a4673cfc025656aeb91a1a6076283fc1",
       "platformAdapted": false
     }
   ],

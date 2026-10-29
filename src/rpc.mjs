@@ -2,7 +2,7 @@ import {companiesRPC,customerCompany,companyMembers,companyPrimary} from './comp
 import {SalesbotStore} from './salesbot-store.mjs';
 import * as StageRuntime from './salesbot-runtime.original.mjs';
 import {objectivePixelOptions} from './pixel-leads.mjs';
-import {leadSales} from './lead-sales.mjs';
+import {leadSales,listLeadSales} from './lead-sales.mjs';
 import {normalizeProduct, prepareOrder, applyOrderStock} from './product-policy.mjs';
 import {workflowRPC} from './workflow-adapter.mjs';
 import { Core } from "./database.mjs";
@@ -52,6 +52,8 @@ async function rpc(store, ws, module, name, arg = {}) {
   if(module==='@/lib/companies.functions'&&name!=='uploadCompanyLogo'){const response=companiesRPC(d,name,p,Core,store.actorId);if(response.changed)store.put(ws,d);return response.result;}
   if(module==='@/lib/workflow.functions'){const response=workflowRPC(d,name,p,Core);if(response.changed)store.put(ws,d);return response.result;}
   switch (name) {
+    case 'listLeadSales':
+      return listLeadSales(d,p);
     case 'getLeadSales':
       return leadSales(d,name,p);
     case 'saveLeadSale': {

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Converte Call",
-  "version": "0.15.21",
+  "version": "0.15.22",
   "description": "CRM no WhatsApp Web, funis, bots, agentes, projetos Kanban, UTMs e gravação local.",
   "permissions": [
     "activeTab",

@@ -379,5 +379,10 @@
   ],
   "@/lib/salesbot-external-automations.functions": [
     "listSalesbotExternalAutomations"
+  ],
+  "@/lib/sales.functions": [
+    "listLeadSales",
+    "getLeadSales",
+    "saveLeadSale"
   ]
 }
