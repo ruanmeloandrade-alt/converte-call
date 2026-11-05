@@ -14,5 +14,13 @@ test('original audience filter uses persisted fields/tags and employee Inbox onl
  await app.worker.reactivateAudience(job);
  assert.equal(sent.length,1,'local reactivation block does not send an external message');
  assert.equal(app.worker.automation.adapter(ws,lead1).rows('lead_activities').some(activity=>activity.payload?.text==='Reativação agendada'),true);
+ app.store.run('INSERT INTO instances(workspace_id,slot,instance_name,hook_hash,credentials,status,updated_at) VALUES(?,?,?,?,?,?,?)',ws,2,'cc-audience-secondary','fixture-2',app.store.vault.seal({instanceKey:'fixture-2'}),'connected',at);
+ const routed=[];
+ app.evolution.send=async(workspace,phone,text,slot)=>{routed.push({workspace,phone,text,slot});return {key:{id:'secondary-message'}};};
+ await inboxRPC(app.store,member,app.evolution,'sendLeadMessage',{leadId:lead1,text:'Pela segunda conexão',connectionSlot:2});
+ assert.deepEqual(routed,[{workspace:ws,phone:'5522991234567',text:'Pela segunda conexão',slot:2}]);
+ const secondary=(await inboxRPC(app.store,member,app.evolution,'listLeadActivities',{leadId:lead1})).activities.find(activity=>activity.whatsappMessageId==='secondary-message');
+ assert.equal(secondary.connectionSlot,2);
+ await assert.rejects(inboxRPC(app.store,member,app.evolution,'sendLeadMessage',{leadId:lead1,text:'Indisponível',connectionSlot:3}),error=>error.status===409);
  await audienceRPC(app.store,owner,'deleteCrmAudience',{audienceId:created.audience.id});assert.equal((await audienceRPC(app.store,owner,'listCrmAudiences')).audiences.length,0);await assert.rejects(audienceRPC(app.store,member,'listCrmAudiences'),e=>e.status===403);
  }finally{await app.close();rmSync(dir,{recursive:true,force:true});}});

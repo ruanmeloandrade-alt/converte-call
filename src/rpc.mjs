@@ -575,7 +575,7 @@ async function rpc(store, ws, module, name, arg = {}) {
       result = { pipelines: d.projects.map((p2) => ({ id: p2.id, name: p2.name, stages: p2.columns })) };
       break;
     case "listConnectedLeadSources": {
-      const instance=store.one("SELECT instance_name,phone FROM instances WHERE workspace_id=? AND status='connected'",ws);
+      const instance=store.one("SELECT instance_name,phone FROM instances WHERE workspace_id=? AND slot=1 AND status='connected'",ws);
       result={sources:[...d.crmSources.map(s=>({...s,label:s.label||s.display_name||s.name||s.provider})),...(instance?[{id:instance.instance_name,label:instance.phone?`WhatsApp ${instance.phone}`:'WhatsApp conectado',provider:'whatsapp'}]:[])]};
       break;
     }
