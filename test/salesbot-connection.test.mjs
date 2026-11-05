@@ -4,6 +4,7 @@ import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
+import {grantConnections} from '../src/connection-entitlements.mjs';
 import {createApp} from '../src/server.mjs';
 
 test('a bot waits and resumes on its selected WhatsApp connection',async()=>{
@@ -17,6 +18,7 @@ test('a bot waits and resumes on its selected WhatsApp connection',async()=>{
  }});
  try{
   const ws=app.store.createWorkspace(),leadId=randomUUID(),botId=randomUUID();
+  grantConnections(app.store,ws,2);
   for(const slot of [1,2])app.store.run('INSERT INTO instances(workspace_id,slot,instance_name,hook_hash,credentials,status,updated_at) VALUES(?,?,?,?,?,?,?)',ws,slot,'connection-'+slot,'hook-'+slot,app.store.vault.seal({instanceKey:'key-'+slot}),'connected',new Date().toISOString());
   app.store.mutate(ws,d=>{
    d.leads.push({id:leadId,name:'QA',phone:'5522991234567',source:'WhatsApp',custom:{}});

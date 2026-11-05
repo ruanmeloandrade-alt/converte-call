@@ -27,7 +27,7 @@ export class BillingCoupons{
  }
  setActive(actor,id,active){requireAdmin(this.store,actor);if(typeof active!=='boolean')throw fail(400,'Informe se o cupom está ativo.');const row=this.store.one('SELECT * FROM billing_coupons WHERE id=?',id);if(!row)throw fail(404,'Cupom não encontrado.');this.store.run('UPDATE billing_coupons SET active=? WHERE id=?',Number(active),id);this.billing.audit(actor.id,actor.workspace_id,'coupon-status',{couponId:id,active});return {coupon:this.row({...row,active:Number(active)})};}
  async preview(user,input){
-  requireOwner(this.store,user);const quote=this.billing.currencies.quote(input.plan,input.seats??1,input.currency||'brl');return this.resolve(input.code,quote.currency,quote.amount);
+  requireOwner(this.store,user);const quote=this.billing.currencies.quote(input.plan,input.connections??input.seats??1,input.currency||'brl',input.connections===undefined?'seats':'whatsapp-v1');return this.resolve(input.code,quote.currency,quote.amount);
  }
  async resolve(code,currency,subtotal){
   const row=this.store.one('SELECT * FROM billing_coupons WHERE code=?',normalize(code));if(!row||!row.active||!row.stripe_id)throw fail(400,'Cupom inválido ou desativado.');const def=JSON.parse(row.definition);

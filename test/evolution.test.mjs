@@ -1,4 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {randomUUID} from 'node:crypto';import {Store} from '../src/database.mjs';import {Evolution} from '../src/evolution.mjs';import {Worker} from '../src/worker.mjs';import {uploadAsset} from '../src/assets.mjs';import {brainQuery,indexSource} from '../src/brain.mjs';
+import {grantConnections} from '../src/connection-entitlements.mjs';
 import {digest} from '../src/security.mjs';
 
 test('legacy WhatsApp connection survives migration and the second slot stays separate',async()=>{
@@ -17,6 +18,8 @@ test('legacy WhatsApp connection survives migration and the second slot stays se
   }});
   assert.equal(evolution.instance(ws).credentials,primary);
   assert.equal(evolution.instance(ws).phone,'5511999990000');
+  await assert.rejects(evolution.connect(ws,2),error=>error.status===403);
+  grantConnections(store,ws,2);
   await evolution.connect(ws,2);
   const second=evolution.instance(ws,2),credentials=store.vault.open(second.credentials);
   assert.notEqual(second.instance_name,'legacy');

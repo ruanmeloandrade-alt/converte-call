@@ -11,3 +11,13 @@ globalThis.CCBillingQuote=function(planId,seats=1){
  const pixMessage=employees?plan.pixMessage.replace(/\*R\$[\d,]+\*/, '*'+new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(brl/100).replace(/\s/g,'')+'*')+' Equipe: '+seats+' pessoas (titular + '+employees+' funcionário'+(employees===1?'':'s')+').':plan.pixMessage;
  return {plan:plan.id,seats,employees,usd,brl,pixMessage};
 };
+
+globalThis.CCWhatsAppPricing=Object.freeze({maxConnections:3,usdPerMonth:150,brlPerMonth:825,includedSeats:2});
+globalThis.CCWhatsAppQuote=function(planId,connections=1){
+ const plan=globalThis.CCBillingCatalog.find(item=>item.id===planId);
+ if(!plan||!Number.isInteger(connections)||connections<1||connections>3)throw new RangeError('Escolha um plano e entre um e três WhatsApps.');
+ const additional=connections-1,usd=plan.usd+additional*globalThis.CCWhatsAppPricing.usdPerMonth*plan.months,brl=plan.brl+additional*globalThis.CCWhatsAppPricing.brlPerMonth*plan.months;
+ const amount=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(brl/100).replace(/\s/g,'');
+ const pixMessage=plan.pixMessage.replace(/\*R\$[\d,]+\*/,'*'+amount+'*')+' WhatsApps: '+connections+'. Inclui titular e um convidado.';
+ return {plan:plan.id,connections,additional,seats:connections,usd,brl,pixMessage,model:'whatsapp-v1'};
+};
