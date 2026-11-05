@@ -3118,8 +3118,9 @@ async function evalCondition(supabaseAdmin: AnySb, run: RunRow, lead: LeadRow, b
     } else if (sujeito === "etapa") {
       atual = String(lead.stage_id ?? "");
     } else if (sujeito === "tag") {
-      const tags = Array.isArray(lead.tags) ? (lead.tags as string[]) : [];
-      const found = tags.some((t) => t.toLowerCase() === valor.toLowerCase());
+      const tags = Array.isArray(lead.tags) ? lead.tags : [];
+      const wantedTag = valor.toLowerCase();
+      const found = tags.some((tag) => typeof tag === "string" && tag.toLowerCase() === wantedTag);
       // Tag: reinterpreta operador
       results.push(operador === "desigual" ? !found : found);
       continue;

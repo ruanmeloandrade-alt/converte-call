@@ -958,3 +958,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Navegador interno: componentes reais com transporte HTTP para servidor/banco local isolado, 13 pedidos. Conferidos 10+3, pesquisa, edição, exclusão confirmada, restauração e persistência após recarregar. Perfil do Inbox mostra o valor corrigido e botões reais. Evidências Temp/convertecall-gestao-vendas-qa.png e Temp/convertecall-venda-inbox-qa.png. Sem dados de produção ou Chrome do usuário. Processo/aba de QA encerrados.
 - Fontes alteradas: src/{lead-sales,dashboard,rpc,teams}.mjs; ui-source/copied-source/components/inbox/LeadSalesPanel.tsx; novo ui-source/copied-source/components/sales/SalesManagementPage.tsx; ui-source/{entry,platform-router}.tsx; extension/{v5.js,manifest.json}; public/{mobile,web-bridge}.js; vendor/rpc-contract.json; test/{lead-sales,sales-navigation}.test.mjs; docs/CODEX_STATUS.md. Gerados: extension/slim/{runtime.js,rpc-contract.json,source-manifest.json,mobile-runtime.json} e build/extensions/{chrome,edge,firefox}. Sem dependências novas.
 - Janela separada transparente da call permanece pendente. Não incluído componente nativo Windows e não alegada correção por CSS; floating.* e captura não alterados neste candidato. Extensão/mobile são ativados apenas pelo upload do proprietário no administrador.
+
+## SalesBot — condições de etiqueta
+- Erro reproduzido no executor com número, nulo e objeto em uma lista de etiquetas. O fluxo parava antes de avaliar a etiqueta válida.
+- A condição agora compara apenas etiquetas de texto, sem distinção entre maiúsculas e minúsculas. A lista persistida não é modificada.
+- Teste de regressão cobre igualdade, diferença e desvio nos modos E e OU. Suíte local: 216 testes passaram.

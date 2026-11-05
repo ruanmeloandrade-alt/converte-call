@@ -9422,7 +9422,8 @@ async function evalCondition(supabaseAdmin2, run, lead, block) {
       atual = String(lead.stage_id ?? "");
     } else if (sujeito === "tag") {
       const tags = Array.isArray(lead.tags) ? lead.tags : [];
-      const found = tags.some((t) => t.toLowerCase() === valor.toLowerCase());
+      const wantedTag = valor.toLowerCase();
+      const found = tags.some((tag) => typeof tag === "string" && tag.toLowerCase() === wantedTag);
       results.push(operador === "desigual" ? !found : found);
       continue;
     } else if (sujeito === "campo-personalizado") {

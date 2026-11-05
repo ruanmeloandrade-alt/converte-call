@@ -47,6 +47,31 @@ test('actual executor persists different OU destinations, one-rule OU, disconnec
  }finally{await app.close();rmSync(dir,{recursive:true,force:true});}
 });
 
+test('tag conditions route leads with mixed legacy tag data',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'cc-tag-condition-')),app=createApp({dir,master:'c'.repeat(64)});
+ try{
+  const ws=app.store.createWorkspace(),leadId=randomUUID();
+  app.store.mutate(ws,d=>d.leads.push({id:leadId,name:'QA',phone:'5522991234567',tags:[123,null,{name:'VIP'},'ViP']}));
+  const adapter=new SalesbotStore(app.store,app.evolution,ws);
+  for(const [mode,operator,value,expected] of [
+   ['e','igual','vip','match'],
+   ['ou','desigual','outro','match'],
+   ['ou','igual','outro','else'],
+   ['e','desigual','VIP','else']
+  ]){
+   const botId=randomUUID();
+   app.store.mutate(ws,d=>d.bots.push({id:botId,startBlockId:'condition',blocks:[
+    {id:'condition',kind:'condicao',condicaoModo:mode,condicoes:[{id:'tag-rule',sujeito:'tag',operador:operator,valor:value,nextBlockId:'match'}],nextBlockId:'match',falseNextBlockId:'else'},
+    ...['match','else'].map(id=>({id,kind:'msg-interna',texto:id}))
+   ]}));
+   const runId=await adapter.run(()=>Runtime.startSalesbotRun(adapter,{workspaceId:ws,leadId,salesbotId:botId}));
+   const notes=adapter.rows('lead_activities').filter(a=>a.payload?.salesbot_run_id===runId);
+   assert.deepEqual(notes.map(n=>n.payload.text),[expected]);
+   assert.equal(adapter.rows('salesbot_run_logs').filter(l=>l.salesbot_run_id===runId&&l.status==='error').length,0);
+  }
+ }finally{await app.close();rmSync(dir,{recursive:true,force:true});}
+});
+
 test('custom field Save includes a pending select and typed last option without requiring the plus buttons',async()=>{
  const source=readFileSync(new URL('../ui-source/copied-source/components/inbox/LeadProfilePanel.tsx',import.meta.url),'utf8');let saved,closed=false,nextList;
  const addSource=extract(source,'function addField()','function removeField(');
