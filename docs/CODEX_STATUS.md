@@ -1062,3 +1062,13 @@ Atualizado em 05/11/2026. Produção anuncia a extensão 0.15.22. Os ZIPs 0.15.2
 - Ambos passaram. Após as últimas alterações, 41 testes direcionados de contas, sessões, agendamento e bot também passaram.
 - Navegador interno, conta descartável local: Central de Automações abriu; criado fluxo pelo modelo Primeiro atendimento, salvo, página recarregada e bot reaberto com três blocos e três cabos. Integrações abriu sem Google/Gmail e com e-mail marketing pendente. Não equivale a homologação de WhatsApp real ou extensão instalada.
 - Semáforo continua amarelo. Ainda não publicado e nenhum ZIP intermediário entregue.
+
+## Entrega consolidada 0.15.27 para teste — 05/11/2026
+- Compilação final gerou 77 arquivos por navegador. Chrome e Edge idênticos; ZIP único entregue em outputs/ConverteCall-0.15.27-Chrome-Edge.zip, 938967 bytes. Cada entrada foi comparada por SHA256 ao build, versão 0.15.27 e ausência de fontes/segredos verificadas.
+- Suíte completa após compilação: 228 testes passaram, zero falhas.
+- Servidor publicado por avanço normal de feat/railway-server para 177208ebf4e82803bd53e206d0955c198ffc3467. Railway cd1d2282-a4f6-443b-ad5f-741d557000d3 SUCCESS. Checagem nova: /health/ready pronto, Evolution configurada; checkout/account/admin JS iguais aos arquivos finais; /v1/whatsapp/connections exige autenticação.
+- Anúncio administrativo da extensão continua 0.15.22 por decisão de entregar este lote diretamente para teste. Nenhuma publicação global do ZIP realizada.
+- Semáforo: verde para build/testes/integridade/servidor; amarelo para extensão instalada e envio/recebimento real de WhatsApp, sequência de áudios, retomadas e atualização Inbox. Não afirmar homologação ponta a ponta.
+- SUPPORT_OPENAI_API_KEY não consta nas variáveis do serviço; suporte permanece no guia até credencial de plataforma ser configurada. Nenhuma chave de cliente copiada. E-mail marketing permanece pendente conforme escopo.
+- Arquivos desta finalização: extension/manifest.json e os três manifests de build; docs/CODEX_STATUS.md. Notas de instalação e semáforo em outputs/ConverteCall-0.15.27-LEIA-ME.txt, fora do repositório.
+
