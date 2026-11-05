@@ -31,3 +31,32 @@ html,body{height:100%;overflow:hidden}#app{height:100dvh;min-height:0}.workspace
 .cc-release-status.outdated i{background:#e98cbe;box-shadow:none}
 .cc-release-status .cc-download{display:block;width:100%;margin-top:6px;padding:6px 8px;border:1px solid #ffffff30;border-radius:7px;color:white;background:#9b2e72;text-align:center;font-size:11px}
 .cc-release-status .cc-download:hover:not(:disabled){background:#b43c88}
+
+/* The remaining module shells share the Converte Call visual language. */
+.main:is([data-screen=academy],[data-screen=workflow],[data-screen=automations],[data-screen=settings],[data-screen=integrations]) .pagehead{border-bottom:1px solid var(--line);padding:4px 0 14px;margin-bottom:16px}
+.main:is([data-screen=academy],[data-screen=workflow],[data-screen=automations],[data-screen=settings],[data-screen=integrations]) .pagehead h1{letter-spacing:-.035em}
+.main[data-screen=academy] .academy-banner{position:relative;overflow:hidden;border:0;border-radius:20px;padding:26px;background:radial-gradient(ellipse at 100% 0%,#a63b976e,transparent 64%),linear-gradient(130deg,#291a36,#462244);color:#fff}
+.main[data-screen=academy] .academy-banner h1{letter-spacing:-.035em;font-size:clamp(22px,5vw,34px)}
+.main[data-screen=academy] .academy-module{border-top:1px solid var(--line);padding-top:15px}
+.main[data-screen=academy] .academy-grid .card{border-radius:14px}
+.cc-workflow-library{display:grid;gap:16px}
+.cc-workflow-section{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+.cc-workflow-section>header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:#b22f7810;color:#73284f}
+.cc-workflow-section>header span{font-size:11px}
+.cc-workflow-row{display:grid;grid-template-columns:minmax(120px,1fr) auto;align-items:center;gap:5px 16px;padding:10px 14px;border-top:1px solid var(--line)}
+.cc-workflow-row h3{margin:0}
+.cc-workflow-row p{margin:0}
+.cc-workflow-row .head-actions{grid-column:2;grid-row:1 / span 3;margin:0;flex-wrap:wrap}
+.main[data-screen=automations] .section-tabs{display:flex;flex-wrap:wrap;gap:8px;padding:8px;border:1px solid var(--line);border-radius:12px}
+.main[data-screen=automations] .card h2,.main[data-screen=settings] .card h2{border-left:3px solid #b22f78;padding-left:9px}
+.main[data-screen=integrations] .integration,.main[data-screen=settings] .card{border-radius:13px;box-shadow:none}
+.main[data-screen=integrations] .connection-icon{border-radius:9px;background:#fae9f3;color:#9b2667}
+@media(max-width:600px){.cc-workflow-row{grid-template-columns:1fr}.cc-workflow-row .head-actions{grid-column:auto;grid-row:auto;margin-top:5px}}
+
+.main[data-screen=plans] .pagehead{border-bottom:1px solid var(--line);padding-bottom:13px}
+.main[data-screen=plans] .card.purple{border-radius:18px;background:radial-gradient(ellipse at right top,#aa41853f,transparent 72%),#2c1832;color:#fff;border:0}
+.main[data-screen=plans] .card.purple .btn.primary{background:#a32970;color:#fff}
+
+.cc-pixel-followup{margin-top:12px;padding:12px 14px;border-left:3px solid #b22f78;border-radius:0 10px 10px 0;background:#f9edf4;color:#542b49}
+.cc-pixel-followup p{margin:4px 0;font-size:12px}
+.cc-pixel-followup small{font-size:11px}

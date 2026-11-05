@@ -1022,5 +1022,12 @@ Atualizado em 05/11/2026. Produção anuncia a extensão 0.15.22. Os ZIPs 0.15.2
 | 🟡 Pronto localmente | Públicos, Integrações e suporte | Reativação na fila, atrasos sorteados, botão Meta retirado, Google/Gmail retirados das telas e suporte por credencial da plataforma. Pendentes teste de envio real, configuração da credencial e decisão sobre serviços legados do Google. |
 | 🟡 Pronto localmente | Notificações e atualização | Aviso na aba ativa, fixação, lembrete de mensagem interna e download do ZIP anunciado. Validação no navegador pendente. |
 | 🟡 Pronto localmente | Pixel Call | Regra de clique aceita destino no site ou URL externa, com seletor CSS opcional. Teste cobre regra salva, clique real simulado, validação do destino e contagem. Revisão visual do link de acompanhamento e instalação em site real pendentes. |
-| 🔴 Pendente | Demais telas | Empresas, Faculdade, Configurações, Central de Automações e padronização dos ícones do produto. |
-| 🔴 Pendente | Equipe, planos e checkout | Dois acessos, ações da assinatura, seleção de moeda e checkout, euro como padrão, até três conexões de WhatsApp e preço em dólar. |
+| 🟡 Pronto localmente | Demais telas | Empresas, Faculdade, Configurações, Central de Automações, organização do Workflow e compactação do Catálogo. Validação visual da extensão pendente. |
+| 🟡 Parcial | Equipe, planos e checkout | Identidade, bandeiras e euro como padrão validados localmente. Dois acessos, cobrança por conexão adicional, até três WhatsApps e preço em dólar seguem pendentes. |
+
+## Revisão consolidada — identidade das demais telas e checkout
+- Aplicada a identidade da Converte Call em Empresas, Catálogo, Faculdade, Configurações, Integrações, Central de Automações, assinatura e link de acompanhamento do Pixel. Ícones de Início, Funil, Workflow e indicadores receberam formas próprias. Ações e dados existentes preservados.
+- Workflow agrupa roteiros por finalidade, com as ações de abrir, renomear, duplicar e excluir. Catálogo ficou mais compacto.
+- Checkout abre em euro com bandeiras e sem texto de cotação. Conferência no navegador interno mostrou o euro selecionado e a página de planos em euro, até o botão de login. Nenhuma cobrança iniciada.
+- O checkout ainda usa a quantidade de funcionários para cobrança e Evolution ainda mantém uma única instância por workspace. A mudança para titular mais convidado e cobrança por WhatsApp adicional continua pendente, junto com a conferência final de produção.
+- 223 testes automatizados passaram. Sem ZIP intermediário nesta rodada, conforme solicitado.

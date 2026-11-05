@@ -75,3 +75,10 @@ body:has(.cc-profile-page){--chat-panel:#fff;--chat-bg:#f7f6fb;--chat-text:#2923
 
 .cc-companies-page{height:100dvh;overflow-y:auto}
 #root>.cc-companies-page{max-height:100dvh}
+
+.cc-catalog-heading{padding-bottom:13px;border-bottom:1px solid #e8dbe6}
+.cc-catalog-heading h1{letter-spacing:-.035em}
+.cc-catalog-page>div{padding-block:16px}
+.cc-catalog-page .grid{row-gap:10px}
+.cc-catalog-page .group.rounded-2xl{border-radius:13px}
+.cc-companies-page{background:#fcf9fb}

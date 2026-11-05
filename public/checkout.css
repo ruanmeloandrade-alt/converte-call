@@ -8,3 +8,15 @@
 :root{--accent:#b22f78;--brand-gradient:linear-gradient(120deg,#a83cdb,#d63b91 54%,#f49339)}
 
 .coupon-box{border-top:1px solid #dedbe8;padding-top:20px;margin-top:20px}.coupon-box label{font-weight:650;font-size:14px}.coupon-entry{display:flex;gap:8px;margin-top:10px}.coupon-entry input{width:100%;min-width:0;padding:11px;border:1px solid #d6d0e2;border-radius:10px;text-transform:uppercase}.coupon-entry button{border:0;border-radius:10px;background:var(--accent);color:white;padding:10px 16px;cursor:pointer}.coupon-entry button:disabled{opacity:.6;cursor:wait}.coupon-breakdown p{display:flex;justify-content:space-between;gap:12px}.coupon-breakdown strong{color:#21765a}[hidden]{display:none!important}
+
+:root{background:#faf6fa;color:#35233a}
+body{background:radial-gradient(ellipse at top right,#f2d9eb,transparent 55%),#faf6fa}
+.brand-icon{background:linear-gradient(135deg,#a83cdb,#bc2c76 58%,#ef8a42)}
+.currency-step{border:1px solid #ead9e6;border-top:4px solid #a72a70;border-radius:22px}
+#currency{border-color:#e5cfe0;color:#492c47}
+#currency:focus-visible,.primary:focus-visible{outline-color:#be5799}
+.checkout{gap:clamp(22px,5vw,58px)}
+.summary{border-top:4px solid #a72a70}
+.primary{background:#952563;color:white}
+.primary:hover:not(:disabled){background:#7e1d53}
+.plan:has(input:checked){border-color:#b22f78;background:#fcf0f7}
