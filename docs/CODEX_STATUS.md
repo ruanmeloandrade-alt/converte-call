@@ -977,3 +977,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - A troca de aba suspendia a aba anterior antes de confirmar a instalação ou restauração do controle na aba de destino. Se a injeção falhasse, o controle anterior desaparecia.
 - A troca confirma a restauração antes de suspender os demais controles. Testes de distribuição cobrem falha de injeção, aba fixa, seguir aba, ocultação e HUD separado.
 - A validação ainda é automatizada. O restante do escopo do vídeo segue separado desta entrega.
+
+## Revisão do vídeo ConvertCall — objetivo da gravação e teleprompter
+- Configuração da gravação ganhou objetivo independente do tipo de conteúdo: seguir o Workflow, venda consultiva, qualificação ou suporte.
+- A IA recebe o bloco ativo com perguntas e saídas, mantém o contexto da conversa e descarta sugestões produzidas para uma revisão anterior do roteiro.
+- O teleprompter diferencia citação literal de objeção, fala sugerida e observação. O fundo da área de sugestões é transparente, com contraste nos textos.

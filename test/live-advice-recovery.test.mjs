@@ -35,8 +35,10 @@ for(const [name,prefix] of [['source','../extension/'],...['chrome','edge','fire
    class Audio{async resume(){}createMediaStreamDestination(){return {stream:new Stream([mixed])};}createMediaStreamSource(stream){sources.push(...stream.getAudioTracks().map(t=>t.id));return {connect(){}};}}
    class Recorder{static isTypeSupported(){return true;}start(){}constructor(){this.state='inactive';}}
    const source=readFileSync(new URL(prefix+'offscreen.js',import.meta.url),'utf8'),start=source.indexOf('async function start('),end=source.indexOf('async function stop(',start);assert(start>=0&&end>start);
-   const ctx=vm.createContext({structuredClone,crypto:{randomUUID:()=> 'call'},Date,MediaStream:Stream,MediaRecorder:Recorder,AudioContext:Audio,starting:false,active:null,put:async()=>{},aiSettings:async()=>({}),CCRecordingAnalysis:{kind:v=>v||'auto'},navigator:{mediaDevices:{getDisplayMedia:async()=>new Stream(audio?[video,shared]:[video]),getUserMedia:async()=>new Stream([mic])}},startLiveAI:(a,tracks,hint)=>captured.push({tracks,hint}),closeInputs(){},friendly:e=>e.message,state:()=>({})});
-   vm.runInContext(source.slice(start,end),ctx);await vm.runInContext("start({mode:'"+(audio?'video':'screen')+"',system:true,mic:true,liveAI:true,workflow:[]})",ctx);
+   const ctx=vm.createContext({structuredClone,crypto:{randomUUID:()=> 'call'},Date,MediaStream:Stream,MediaRecorder:Recorder,AudioContext:Audio,starting:false,active:null,put:async()=>{},aiSettings:async()=>({}),navigator:{mediaDevices:{getDisplayMedia:async()=>new Stream(audio?[video,shared]:[video]),getUserMedia:async()=>new Stream([mic])}},startLiveAI:(a,tracks,hint)=>captured.push({tracks,hint}),closeInputs(){},friendly:e=>e.message,state:()=>({})});
+   vm.runInContext(readFileSync(new URL(prefix+'recording-analysis.js',import.meta.url),'utf8'),ctx);
+   vm.runInContext(source.slice(start,end),ctx);await vm.runInContext("start({mode:'"+(audio?'video':'screen')+"',system:true,mic:true,liveAI:true,callObjective:'support',workflow:[]})",ctx);
+   assert.equal(vm.runInContext('active.meta.callObjective',ctx),'support');
    if(audio){assert.equal(captured[0].tracks[0].id,'mixed');assert.equal(captured[0].hint,'mixed');assert.deepEqual(sources,['microphone','remote']);}
    else{assert.equal(captured.length,0);assert.match(vm.runInContext('active.meta.liveError',ctx),/áudio/);}
   }

@@ -51,6 +51,11 @@ body.call-hud{background:transparent;color:#171b32;overflow-x:hidden}
 /* The iframe canvas must also be transparent, not only its body. */
 html.call-hud-root,html.call-hud-root body,html.call-hud-root #root{background:transparent!important;border:0!important;box-shadow:none!important}
 html.call-hud-root .prompter-speech{border:0;box-shadow:none}
+html.call-hud-root .prompter-speech.has-advice{background:transparent;backdrop-filter:none}
+.prompter-speech.has-advice .prompter-suggestion{color:#064e3b;background:#ecfdf5d9}
+.prompter-speech .prompter-objection{color:#881337;background:#fff1f2d9;font-size:12px}
+.prompter-speech .prompter-observation{color:#313044;background:#f8fafcd9;font-size:11px}
+.prompter-speech :is(.prompter-suggestion,.prompter-objection,.prompter-observation){border-radius:8px;padding:3px 6px}
 
 html.call-hud-root .prompter-meta,html.call-hud-root .prompter-meta button{background:transparent!important;border:0!important;box-shadow:none!important}
 html.call-hud-root .prompter-meta button{opacity:.35;padding:0 2px;border-radius:0}html.call-hud-root .prompter-meta button:hover,html.call-hud-root .prompter-meta button:focus-visible{opacity:.85}
