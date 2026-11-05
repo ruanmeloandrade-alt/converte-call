@@ -60,3 +60,46 @@ html,body{height:100%;overflow:hidden}#app{height:100dvh;min-height:0}.workspace
 .cc-pixel-followup{margin-top:12px;padding:12px 14px;border-left:3px solid #b22f78;border-radius:0 10px 10px 0;background:#f9edf4;color:#542b49}
 .cc-pixel-followup p{margin:4px 0;font-size:12px}
 .cc-pixel-followup small{font-size:11px}
+.cc-connections-workspace{display:grid;grid-template-columns:235px minmax(0,1fr);gap:32px;align-items:start}
+.cc-connections-workspace>.pagehead{display:flex;flex-direction:column;align-items:stretch;gap:25px;padding:18px 0}
+.cc-connections-workspace h1{font-size:34px;letter-spacing:-.05em;margin:10px 0}
+.cc-connections-workspace .pagehead p{font-size:13px;line-height:1.7}
+.cc-connections-workspace .btn{border-radius:999px;min-height:40px}
+.cc-connection-list{background:#fff;padding:8px 26px;border-radius:26px;border:1px solid #ece4ef}
+.cc-connection-row{display:flex;gap:22px;align-items:center;padding:30px 0;border-bottom:1px solid #eee7f1}
+.cc-connection-row:last-child{border:0}
+.cc-connection-row h2{font-size:18px;letter-spacing:-.03em;margin:0 0 6px}
+.cc-connection-row p{color:var(--muted);font-size:12px;margin:0 0 12px}
+.cc-connection-symbol{display:grid;place-items:center;width:56px;height:56px;flex:none;border-radius:18px;background:#f6e8f1;color:#b22f78}
+.cc-connection-symbol svg{width:26px;height:26px}.cc-connection-row .btn{flex:none}
+@media(max-width:850px){.cc-connections-workspace{grid-template-columns:1fr;gap:14px}.cc-connections-workspace>.pagehead{flex-direction:row;align-items:center;flex-wrap:wrap}.cc-connection-row{flex-wrap:wrap;gap:14px}.cc-connection-row .btn{margin-left:70px}.cc-connection-list{padding:0 18px}}
+
+.cc-client-workspace,.cc-tracking-workspace{display:grid;grid-template-columns:235px minmax(0,1fr);gap:26px;align-items:start}
+.cc-client-intro,.cc-tracking-workspace>.pagehead{grid-column:1;grid-row:1 / span 8;display:flex;flex-direction:column;align-items:stretch;gap:18px;border:0;padding:16px 4px;margin:0}
+.cc-client-intro h1,.cc-tracking-workspace>.pagehead h1{font-size:34px;letter-spacing:-.06em;margin:0}
+.cc-client-intro>p,.cc-tracking-workspace>.pagehead p{line-height:1.7;font-size:13px;color:var(--muted)}
+.cc-client-intro .head-actions,.cc-tracking-workspace>.pagehead .head-actions{display:grid;gap:10px;width:100%;margin-top:12px}
+.cc-client-intro .btn,.cc-tracking-workspace>.pagehead .btn{border-radius:999px;min-height:42px;justify-content:center}
+.cc-directory-count{margin-top:24px;display:grid;gap:6px;border-top:1px solid var(--line);padding-top:20px}
+.cc-directory-count strong{font-size:42px;font-weight:600;letter-spacing:-.05em}.cc-directory-count span{font-size:11px;color:var(--muted)}
+.cc-client-directory{background:#fff;border-radius:26px;padding:12px 20px;border:1px solid #ece6f0;min-width:0}
+.cc-contact-row{display:flex;gap:16px;align-items:center;padding:20px 0;border-bottom:1px solid #eee9f1}
+.cc-contact-row:last-child{border:0}.cc-contact-row h2{font-size:15px;margin:0 0 5px}.cc-contact-row p{font-size:12px;color:var(--muted);margin:0}
+.cc-contact-avatar{display:grid;place-items:center;flex:none;width:46px;height:46px;border-radius:16px;background:#f3e7f2;color:#9e3974;font-size:13px;font-weight:750}
+.cc-contact-stage{font-size:10px;color:#89647e;padding:6px 10px;background:#f6f1f8;border-radius:999px}.cc-contact-row .btn{border-radius:999px}
+.cc-tracking-workspace>div,.cc-tracking-workspace>section{grid-column:2;min-width:0;margin-top:0}
+.cc-tracking-workspace>.cards{display:flex;gap:0;border-radius:22px;background:linear-gradient(110deg,#30213e,#572545);overflow:hidden;margin-bottom:0}
+.cc-tracking-workspace>.cards .card{background:transparent;border:0;border-radius:0;flex:1;color:#fff;border-right:1px solid #ffffff18}
+.cc-tracking-workspace>.cards .card span{color:#ddc4dc}.cc-tracking-workspace>.card{border-radius:24px;border-color:#ece6f0;padding:24px}
+.cc-tracking-workspace .utm-row{border:0;border-radius:16px;background:#f8f5fa;margin-top:14px;padding:20px;gap:16px;align-items:flex-start}
+.cc-tracking-workspace .utm-row .head-actions{display:grid;gap:7px;flex:none}.cc-tracking-workspace .utm-row .btn{border-radius:999px}
+.cc-tracking-workspace .utm-row code{display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere;padding:10px 0;font-size:11px}
+.cc-tracking-workspace .pixel-site{border-radius:18px;padding:20px;background:#faf7fc;border:0;margin-top:16px}
+.cc-tracking-workspace .pixel-stats{border-top:1px solid #e6ddea;padding-top:16px}
+.main[data-screen=projects] .pagehead{display:flex;align-items:flex-start;padding:20px 0;border-bottom:1px solid var(--line)}
+.main[data-screen=projects] .pagehead h1{font-size:34px;letter-spacing:-.05em}
+.main[data-screen=projects] .pagehead .btn{border-radius:999px}
+.main[data-screen=projects] .project-filters{display:grid;grid-template-columns:1fr!important;align-content:start;background:#fff;border-radius:22px;padding:22px;border:1px solid var(--line)}
+.main[data-screen=projects] .project-filters input,.main[data-screen=projects] .project-filters select{border-radius:12px;min-height:40px}
+@media(min-width:1000px){.main[data-screen=projects]{display:grid;grid-template-columns:235px minmax(0,1fr);gap:20px;align-content:start}.main[data-screen=projects]>.back-row,.main[data-screen=projects]>.pagehead,.main[data-screen=projects]>.project-view-bar{grid-column:1/-1}.main[data-screen=projects]>.project-filters{grid-column:1;position:sticky;top:20px}.main[data-screen=projects]>#project-content{grid-column:2;min-width:0}}
+@media(max-width:850px){.cc-client-workspace,.cc-tracking-workspace{grid-template-columns:1fr}.cc-client-intro,.cc-tracking-workspace>.pagehead{grid-column:1;grid-row:auto;gap:10px}.cc-client-intro .head-actions{display:flex;flex-wrap:wrap}.cc-directory-count{display:none}.cc-tracking-workspace>div,.cc-tracking-workspace>section{grid-column:1}.cc-contact-row{flex-wrap:wrap}.cc-contact-stage{margin-left:62px}.cc-client-directory{padding:8px 16px}.cc-tracking-workspace>.pagehead .head-actions{display:flex}.cc-tracking-workspace .utm-row{flex-wrap:wrap}.cc-tracking-workspace .utm-row .head-actions{display:flex;flex-wrap:wrap}}

@@ -58,11 +58,8 @@ export function component(){
  const active=tabs.find(t=>t.id===tab)!;
  return <main className="min-w-0 space-y-5 p-4 md:p-6 text-foreground">
   <header className="cc-brain-intro">
-   <div><span className="cc-brain-eyebrow">Converte Call</span><h1>Cérebro IA</h1><p>Informações da sua empresa para orientar os agentes de atendimento.</p></div>
-   <button type="button" disabled={busy} className="cc-brain-source-link" onClick={()=>{choose('sources');sourcesTab.current?.focus();}}>
-    <span className="cc-brain-illustration"><BrainCircuit size={44} strokeWidth={1.4} aria-hidden="true" /></span>
-    <span>Explorar fontes <span aria-hidden="true">↗</span></span>
-   </button>
+   <div><span className="cc-brain-eyebrow">Converte Call</span><h1 className="cc-brain-title"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M18 7c-7-4-14 3-10 9-6 4-3 12 3 12 0 6 8 8 12 3V10m0 21c4 5 12 3 12-3 6 0 9-8 3-12 4-6-3-13-10-9M11 15l7 4m-7 9 7-4m10-9-5 4m12 9-7-4" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"/></svg>Cérebro IA</h1><p>Informações da sua empresa para orientar os agentes de atendimento.</p></div>
+
   </header>
   <div role="tablist" aria-label="Seções do Cérebro IA" className="flex flex-wrap gap-2">{tabs.map(t=><button key={t.id} ref={t.id==='sources'?sourcesTab:undefined} role="tab" aria-selected={tab===t.id} aria-controls={'brain-panel-'+t.id} id={'brain-tab-'+t.id} disabled={busy} onClick={()=>choose(t.id)} className={buttonClass+(tab===t.id?' bg-primary text-primary-foreground':' bg-card hover:bg-muted')}><t.icon size={16}/>{t.label}</button>)}</div>
   {error&&<p role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">{error}</p>}

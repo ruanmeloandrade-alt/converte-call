@@ -169,7 +169,7 @@ function FluxoTrabalhoPage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["workflow-board"] });
 
   return (
-    <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
+    <div className="cc-project-workspace flex h-screen w-full bg-background text-foreground overflow-hidden">
       <AppSidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">

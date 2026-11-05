@@ -1199,13 +1199,14 @@ export function InboxPage({ channel, selectedId }: InboxPageProps) {
   return (
     <div
       data-chat-surface
-      className="flex-1 flex min-w-0 h-[100dvh] md:h-screen overflow-hidden"
+      className="cc-inbox-workspace flex-1 flex min-w-0 h-[100dvh] md:h-screen overflow-hidden"
       style={{ backgroundColor: "var(--chat-bg)", color: "var(--chat-text)" }}
     >
+      <nav className="cc-inbox-rail" aria-label="Painéis do Inbox"><span className="cc-inbox-mark" aria-hidden="true">CC</span><button type="button" aria-label="Mostrar ou ocultar conversas" aria-pressed={!listCollapsed} onClick={()=>setListCollapsed(v=>!v)}>☰<small>Conversas</small></button>{channel==='leads'&&selected&&!selected.isGroup&&<button type="button" aria-label="Mostrar ou ocultar ficha do cliente" aria-pressed={profileOpen} onClick={()=>setProfileOpen(v=>!v)}>◎<small>Ficha</small></button>}<span className="cc-inbox-rail-label">CONVERTE<br/>CALL</span></nav>
       {/* Lista de conversas */}
       <div
         className={cn(
-          "relative flex flex-col min-h-0 transition-[width] duration-200 ease-out overflow-hidden",
+          "cc-inbox-conversations relative flex flex-col min-h-0 transition-[width] duration-200 ease-out overflow-hidden",
           hasSelection ? "hidden md:flex" : "flex",
           listCollapsed ? "w-0 md:w-0" : "w-full md:w-[360px] md:shrink-0",
         )}
@@ -1249,7 +1250,7 @@ export function InboxPage({ channel, selectedId }: InboxPageProps) {
       {/* Painel do perfil, independente do estado da lista, sempre visível quando aberto */}
       {channel === "leads" && selected && !selected.isGroup && profileOpen && (
         <div
-          className="hidden md:flex w-[360px] shrink-0 border-l"
+          className="cc-inbox-profile hidden md:flex w-[360px] shrink-0 border-l"
           style={{ borderColor: "var(--chat-divider)" }}
         >
           <LeadProfilePanel
@@ -1270,7 +1271,7 @@ export function InboxPage({ channel, selectedId }: InboxPageProps) {
 
       {/* Thread */}
       <div
-        className={cn("flex-1 flex-col min-w-0 min-h-0", hasSelection ? "flex" : "hidden md:flex")}
+        className={cn("cc-inbox-thread flex-1 flex-col min-w-0 min-h-0", hasSelection ? "flex" : "hidden md:flex")}
         style={{ backgroundColor: "var(--chat-bg)" }}
       >
         {selected ? (

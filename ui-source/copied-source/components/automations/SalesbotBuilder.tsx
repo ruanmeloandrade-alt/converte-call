@@ -94,7 +94,7 @@ interface Props {
  escopo?: "individual" | "grupo";
 }
 
-const BLOCK_W = 320;
+const BLOCK_W = 280;
 const BLOCK_H_EST = 140;
 /** Chave usada para copiar/colar blocos entre abas do navegador. */
 const BLOCK_CLIPBOARD_KEY = "mkton.salesbot.clipboard.v1";
@@ -2090,6 +2090,7 @@ function BlockCard({
  const [showBack, setShowBack] = useState(false);
  return (
  <div
+ data-block-kind={block.kind}
  className={`cc-bot-block relative border ${
  selected? "border-sky-400 ring-2 ring-sky-400/40": "border-slate-700"
  }`}
@@ -2161,7 +2162,7 @@ function BlockCard({
   </div>
  )}
 
- <div className="p-3 space-y-2 text-xs cursor-default" onMouseDown={(e) => e.stopPropagation()}>
+ <div className="cc-bot-block-content p-3 space-y-2 text-xs cursor-default" onMouseDown={(e) => e.stopPropagation()}>
  <BlockBody block={block} allBlocks={allBlocks} scope={scope} onChange={onChange} onAddAfter={onAddAfter} />
  </div>
  </div>
@@ -2518,7 +2519,7 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
 
 
 
-   <label className="flex items-center gap-2 text-[10px] text-slate-400 pl-1">
+   <details className="cc-bot-options"><summary>Digitação e ordem de envio</summary>   <label className="flex items-center gap-2 text-[10px] text-slate-400 pl-1">
     <span>⏱ Aparecer "digitando…" por</span>
     <input
      type="number" min={0} max={20} step={1}
@@ -2542,6 +2543,7 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
    )}
 
 
+</details>
    {/* Anexos em sequência */}
    {items.length > 0 && (
     <div className="space-y-1.5">
@@ -2569,8 +2571,8 @@ function EnviarMensagemEditor({ block, scope, onChange }: { block: Block; scope:
       onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.target.value = ""; }}
      />
      {uploading ? "Enviando..." : items.length === 0
-      ? "📎 Anexar imagem, vídeo, áudio ou documento"
-      : "➕ Adicionar mais um anexo"}
+      ? "Anexar arquivo"
+      : "Adicionar anexo"}
     </label>
     <button
      type="button"
@@ -2682,7 +2684,7 @@ function MediaItemRow({
  const presenceLabel = isAudio ? "gravando áudio…" : "digitando…";
 
  return (
-  <div className="rounded border border-slate-700 bg-slate-800/60 p-2 space-y-1.5">
+  <div className="cc-bot-media rounded border border-slate-700 bg-slate-800/60 p-2 space-y-1.5">
    <div className="flex items-center gap-1.5">
     <span className="text-[10px] text-slate-500 font-mono tabular-nums w-4 text-center">{index + 1}</span>
     <div className="flex-1 text-[11px] text-slate-300 truncate">
@@ -2705,7 +2707,7 @@ function MediaItemRow({
     ><X className="w-3.5 h-3.5" /></button>
    </div>
 
-   {previewUrl && item.kind === "image" && (
+   <details className="cc-bot-media-options"><summary>Prévia e tempo de envio</summary>   {previewUrl && item.kind === "image" && (
     <img src={previewUrl} alt={item.filename} className="max-h-32 rounded" />
    )}
    {previewUrl && item.kind === "video" && (
@@ -2735,7 +2737,7 @@ function MediaItemRow({
      className="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-center"
     />
     <span>seg. antes de enviar</span>
-   </label>
+   </label></details>
   </div>
  );
 }
@@ -3196,7 +3198,7 @@ function PausaEditor({
   <div className="space-y-2">
     {pausas.map((p, idx) => (
      <RowMeasure key={p.id} blockId={block.id} optionId={p.id}>
-     <div className="space-y-1.5 rounded border border-slate-700 bg-slate-900/40 p-2">
+     <div className="cc-bot-pause-row space-y-1.5 rounded border border-slate-700 bg-slate-900/40 p-2">
       <div className="flex items-center gap-1.5">
        <span className="text-[10px] uppercase tracking-wider text-slate-500 flex-1">
         {idx === 0 ? "Aguardar" : "OU aguardar"}
@@ -3487,10 +3489,10 @@ function ValidacaoEditor({
 
  return (
   <div className="space-y-2.5">
-   <p className="text-[10px] leading-snug text-slate-400">
+<details className="cc-bot-options"><summary>Como validar</summary>   <p className="text-[10px] leading-snug text-slate-400">
     A validação analisa algo que <b>já existe no sistema</b>. Escolha o que validar (resposta do cliente,
     dado do lead, campo personalizado ou tag) e a regra. A primeira regra que bater sai pelo cabo dela.
-   </p>
+   </p></details>
 
    {/* Regras */}
    <div className="space-y-2">
@@ -5507,7 +5509,7 @@ function MensagemTextoEditor({
   const [expanded, setExpanded] = useState(false);
   const linhas = value ? value.split("\n").length : 0;
   const longo = linhas > 3 || value.length > 180;
-  const rows = expanded ? Math.min(24, Math.max(8, linhas + 1)) : 3;
+  const rows = expanded ? Math.min(24, Math.max(8, linhas + 1)) : 2;
 
   return (
     <div className="space-y-1" data-canvas-no-zoom>
