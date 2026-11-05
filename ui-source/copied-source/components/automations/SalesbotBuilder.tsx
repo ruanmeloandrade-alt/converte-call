@@ -21,6 +21,7 @@ import {
  Eye,
   EyeOff,
   Power,
+  Zap,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { listInternalMessageTargets } from "@/lib/team-chat.functions";
@@ -1240,8 +1241,10 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
  <RowRegistryContext.Provider value={registerRow}>
  <div data-automation-builder className="fixed inset-0 z-50 bg-background text-foreground flex flex-col">
  {/* Top bar */}
- <header className="h-12 border-b border-border flex items-center justify-between px-4 shrink-0 z-20 bg-background">
- <div className="flex items-center gap-2 relative">
+ <header className="cc-bot-toolbar flex flex-wrap items-center justify-between gap-2 shrink-0 z-20">
+ <div className="cc-bot-identity flex items-center gap-2 relative min-w-0">
+ <span className="cc-bot-mark" title="Editor de bots"><Zap className="h-4 w-4" aria-hidden="true" /></span>
+ <span className="cc-bot-eyebrow">Fluxo do bot</span>
  {active? (
  <>
  {renaming? (
@@ -1256,14 +1259,14 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
  if (e.key === "Escape") setRenaming(false);
  }}
- className="bg-slate-800 text-sm px-2 py-1 rounded border border-slate-700 uppercase tracking-wider font-semibold"
+ className="cc-bot-name text-sm font-semibold"
  />
  ): (
  <button
  onClick={() => setBotSwitcher((v) =>!v)}
- className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider hover:text-sky-400 bg-slate-800/60 px-3 py-1.5 rounded border border-slate-700"
+ className="cc-bot-name flex min-w-0 items-center gap-2 text-sm font-semibold"
  >
-  {getBotName(active)}
+  <span className="truncate">{getBotName(active)}</span>
  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
  </button>
  )}
@@ -1307,7 +1310,7 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
  <span className="text-sm text-slate-400">Nenhum bot</span>
  )}
  </div>
- <div className="flex items-center gap-3">
+ <div className="cc-bot-actions flex flex-wrap items-center gap-2">
    {saveStatus === "error" ? (
     <span className="flex items-center gap-2">
      <span
@@ -1395,13 +1398,13 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
   </div>
 
   <button
-   className="text-sm text-slate-300 hover:text-white px-3 py-1.5"
+   className="cc-bot-close text-sm px-3 py-1.5"
    onClick={() => { void cancelAndClose(); }}
   >
  Fechar
  </button>
  <button
- className="text-sm bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded disabled:opacity-60"
+ className="cc-bot-save text-sm text-white px-3 py-1.5 disabled:opacity-60"
  disabled={closing}
  onClick={() => { void saveNow(); }}
  >
@@ -1417,8 +1420,7 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
  <div
  ref={canvasRef}
  data-canvas-bg="1"
-          className="absolute inset-0 [background-size:24px_24px] cursor-grab active:cursor-grabbing overflow-hidden select-none"
-          style={{ backgroundImage: "radial-gradient(circle, color-mix(in oklch, var(--primary) 18%, transparent) 1px, transparent 1px)" }}
+          className="cc-bot-canvas absolute inset-0 cursor-grab active:cursor-grabbing overflow-hidden select-none"
           onMouseDown={onCanvasMouseDown}
           onMouseMove={onCanvasMouseMove}
           onMouseUp={onCanvasMouseUp}
@@ -1736,7 +1738,7 @@ function StartNode({
 }) {
  return (
  <div
- className="absolute bg-card border border-border text-card-foreground rounded-lg px-3 py-2 text-xs font-semibold flex items-center justify-between gap-2 shadow-lg"
+ className="cc-bot-start absolute bg-card border border-border text-card-foreground px-3 py-2 text-xs font-semibold flex items-center justify-between gap-2"
  style={{ left: 0, top: -60, width: 230 }}
  >
  <span className="flex items-center gap-2">
@@ -2088,7 +2090,7 @@ function BlockCard({
  const [showBack, setShowBack] = useState(false);
  return (
  <div
- className={`relative bg-slate-900 border rounded-lg shadow-lg ${
+ className={`cc-bot-block relative border ${
  selected? "border-sky-400 ring-2 ring-sky-400/40": "border-slate-700"
  }`}
  >
@@ -2107,8 +2109,8 @@ function BlockCard({
    </button>
   </div>
  )}
- <div className={`h-1.5 w-full rounded-t-lg ${metaColor}`} />
- <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-slate-900/80 cursor-move">
+ <div className={`h-1 w-full rounded-t-xl ${metaColor}`} />
+ <div className="cc-bot-block-heading flex items-center justify-between px-3 py-2 border-b cursor-move">
  <div className="flex items-center gap-2 text-xs font-semibold">
  <button
   type="button"
@@ -4034,7 +4036,7 @@ function BlockPicker({ scope, onPick, onClose }: { scope: SalesbotEscopo; onPick
  return (
  <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
  <div
- className="bg-slate-900 border border-slate-700 rounded-lg w-[440px] max-h-[80vh] flex flex-col overflow-hidden shadow-2xl"
+ className="cc-bot-picker bg-card border border-border rounded-2xl w-[440px] max-h-[80vh] flex flex-col overflow-hidden shadow-2xl"
  onClick={(e) => e.stopPropagation()}
  >
  <div className="p-3 border-b border-slate-800 flex items-center justify-between">

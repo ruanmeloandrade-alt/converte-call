@@ -11,3 +11,17 @@ html,body{height:100%;overflow:hidden}#app{height:100dvh;min-height:0}.workspace
 .support-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px}.support-chat-card{min-width:0}.support-chat-log{display:flex;flex-direction:column;gap:12px;max-height:440px;overflow:auto;margin:22px 0;padding:4px}.support-bubble{max-width:90%;padding:14px 17px;border-radius:16px;line-height:1.65;font-size:14px;overflow-wrap:anywhere}.support-bubble.user{align-self:flex-end;background:#7355da;color:#fff;border-bottom-right-radius:4px}.support-bubble.assistant{align-self:flex-start;background:#f0edf8;color:#382e4a;border-bottom-left-radius:4px}.support-human-card{align-self:start}.support-chat-card textarea{min-height:80px}@media(max-width:900px){.support-layout{grid-template-columns:minmax(0,1fr)}}
 
 .forum-reactions{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.forum-reactions .btn{padding:6px 9px;min-width:38px}.forum-gif{max-width:100%;max-height:360px;object-fit:contain;border-radius:12px}
+
+.home-welcome{border-bottom:1px solid var(--line);padding:6px 0 16px;margin-bottom:16px}
+.home-welcome h1{font-size:clamp(23px,4vw,34px);letter-spacing:-.04em;margin:5px 0}
+.home-grid{gap:12px;margin-bottom:16px}
+.home-action-hero{background:radial-gradient(ellipse at 95% 5%,#b9417c55,transparent 60%),linear-gradient(135deg,#2a1835,#31182d);border-radius:20px;padding:22px}
+.home-action-hero h2{margin:12px 0 8px;font-size:clamp(20px,3vw,27px)}
+.home-action-hero>p{margin-bottom:14px}
+.home-shortcuts{margin-top:16px}
+.home-focus,.home-recent{border-radius:16px}
+.home-summary{gap:0;border:1px solid var(--line);border-top:3px solid #b22f78;border-radius:12px;background:var(--card);margin-bottom:16px}
+.home-summary .card{padding:12px 15px;border:0;border-radius:0;border-inline-end:1px solid var(--line);background:transparent;box-shadow:none}
+.home-summary .card:last-child{border-inline-end:0}
+.home-summary strong{margin-top:5px;font-size:clamp(18px,3vw,24px)}
+@media(max-width:650px){.home-summary .card:nth-child(2){border-inline-end:0}.home-summary .card:nth-child(-n+2){border-bottom:1px solid var(--line)}}

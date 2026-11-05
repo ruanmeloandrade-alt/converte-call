@@ -998,3 +998,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - O teste local confirmou filtros persistidos, isolamento, validação dos intervalos e execução de um bloco interno pelo bot enfileirado. Envio real para público continua sem homologação.
 - Agenda deixou de expor ações de sincronização Google na extensão. A tela de Integrações parou de consultar a autorização Google; e-mail marketing mantém rascunhos e indica envio pendente. Rotas legadas e outros usos de Google continuam no servidor.
 - O suporte IA passa a usar SUPPORT_OPENAI_API_KEY e SUPPORT_OPENAI_MODEL no servidor. Sem configuração, responde pelo guia existente. O teste confirmou que a chave da conta não é usada.
+
+## Revisão do vídeo ConvertCall — editor, Início e Dashboard
+- O construtor ganhou barra responsiva, contraste no canvas, cartões com cabeçalhos mais leves e seletor de blocos com a identidade Converte Call. Mantidos os controles, ações, posições persistidas e caminhos de execução.
+- Início prioriza ações do dia e agrupa os indicadores existentes em uma faixa. Dashboard ganhou cabeçalho e faixa de vendas próprios, mantendo os componentes de indicadores e dados atuais.
+- Build 0.15.25 compilado e conferido nos três pacotes, com 76 entradas por ZIP e hashes dos arquivos principais iguais aos arquivos compilados. 222 testes automatizados passaram. Validação visual e publicação pendentes.
