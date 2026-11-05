@@ -1009,3 +1009,18 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - O aviso de atualização mostra a versão instalada, a publicada e o download. A URL só aceita o ZIP da versão publicada no mesmo servidor. Teste de publicação administrativa e download verificou bytes exatos antes e depois de reiniciar o servidor local.
 - A ilustração clicável do Cérebro abre as fontes cadastradas. Acesso aos arquivos e demais abas mantidos.
 - Build 0.15.26 gerado e conferido nos três pacotes. Validação visual e publicação ainda pendentes.
+
+## Semáforo — atualização do vídeo ConvertCall
+Atualizado em 05/11/2026. Produção anuncia a extensão 0.15.22. Os ZIPs 0.15.26 foram conferidos localmente. A revisão do Pixel abaixo é posterior a esses ZIPs.
+
+| Estado | Frente | Evidência ou pendência |
+| --- | --- | --- |
+| 🟢 Produção confirmada | Publicação anunciada | O endpoint público anunciou a extensão 0.15.22. Não é o lote do vídeo. |
+| 🟡 Pronto localmente | Extensão, gravação e Workflow | Acompanhamento de abas, objetivo da call, contexto do bloco ativo e teleprompter por tipo de orientação. A organização da tela de Workflow e o QA em chamada real seguem abertos. |
+| 🟡 Pronto localmente | Identidade e CRM | Início, Dashboard, editor de bots, controles e busca do Funil e Cérebro clicável. Validação visual e publicação pendentes. |
+| 🟡 Pronto localmente | Operação | Confirmação de pedido e bloqueio de saída sem saldo. Compactação do Catálogo pendente. |
+| 🟡 Pronto localmente | Públicos, Integrações e suporte | Reativação na fila, atrasos sorteados, botão Meta retirado, Google/Gmail retirados das telas e suporte por credencial da plataforma. Pendentes teste de envio real, configuração da credencial e decisão sobre serviços legados do Google. |
+| 🟡 Pronto localmente | Notificações e atualização | Aviso na aba ativa, fixação, lembrete de mensagem interna e download do ZIP anunciado. Validação no navegador pendente. |
+| 🟡 Pronto localmente | Pixel Call | Regra de clique aceita destino no site ou URL externa, com seletor CSS opcional. Teste cobre regra salva, clique real simulado, validação do destino e contagem. Revisão visual do link de acompanhamento e instalação em site real pendentes. |
+| 🔴 Pendente | Demais telas | Empresas, Faculdade, Configurações, Central de Automações e padronização dos ícones do produto. |
+| 🔴 Pendente | Equipe, planos e checkout | Dois acessos, ações da assinatura, seleção de moeda e checkout, euro como padrão, até três conexões de WhatsApp e preço em dólar. |

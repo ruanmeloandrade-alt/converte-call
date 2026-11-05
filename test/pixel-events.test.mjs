@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {randomUUID} from 'node:crypto';import {createApp} from '../src/server.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {randomUUID} from 'node:crypto';import vm from 'node:vm';import {createApp} from '../src/server.mjs';
 test('web account preserves extension login, denies CSRF and generates/configures pixel without WhatsApp; conversions deduplicate by order',async()=>{
  const dir=mkdtempSync(join(tmpdir(),'cc-pixel-events-')),app=createApp({dir,master:'f'.repeat(64),bootstrap:'pixel-test'});await new Promise(r=>app.server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+app.server.address().port,old=process.env.PUBLIC_URL;process.env.PUBLIC_URL=base;app.billing.publicUrl=base;app.google.publicUrl=base;
  const call=async(path,body,{token,cookie,origin=base,method=body?'POST':'GET'}={})=>{const r=await fetch(base+path,{method,headers:{Origin:origin,...(token?{Authorization:'Bearer '+token}:{}),...(cookie?{Cookie:cookie}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});return {status:r.status,cookie:r.headers.get('set-cookie')?.split(';')[0],data:await r.json()};};
@@ -8,6 +8,24 @@ test('web account preserves extension login, denies CSRF and generates/configure
  assert.equal((await call('/account/api/v1/tracking/pixels',{name:'Site',url:'https://site.example'},{cookie,origin:'https://attacker.example'})).status,403);
  const created=await call('/account/api/v1/tracking/pixels',{name:'Meu checkout',url:'https://site.example/oferta'},{cookie});assert.equal(created.status,201);assert(created.data.snippet.includes('<script async'));const p=created.data.pixel,path='/account/api/v1/tracking/pixels/'+p.id;
  const click=(await call(path+'/events',{name:'Quero comprar',type:'click',selector:'#buy',conversion:true},{cookie})).data.rule;
+ const linked=(await call(path+'/events',{name:'Ir ao checkout',type:'click',destination:'/checkout',conversion:true},{cookie})).data.rule;
+ assert.equal(linked.destination,'/checkout');
+ assert.equal((await call(path+'/events',{name:'Destino inválido',type:'click',destination:'javascript:alert(1)'},{cookie})).status,400);
+ const listeners={},beacons=[],location=new URL(p.origin+'/oferta'),document={referrer:'',visibilityState:'visible',addEventListener:(type,fn)=>{listeners[type]=fn;}};
+ const script=await(await fetch(base+'/p/'+p.public_key+'.js')).text();
+ vm.runInNewContext(script,{window:{addEventListener(){}},document,location,URL,URLSearchParams,Blob,crypto:{randomUUID},performance:{now:()=>0},sessionStorage:{getItem:()=>null,setItem(){}},setInterval:()=>1,navigator:{sendBeacon:(_,body)=>{beacons.push(body);return true;}}});
+ function clickLink(href){
+  const anchor={href,tagName:'A',matches:()=>false,closest:selector=>selector==='a[href]'?anchor:null};
+  listeners.click({target:{closest:()=>anchor}});
+ }
+ clickLink('https://another.example/checkout');
+ assert.equal(JSON.parse(await beacons.at(-1).text()).ruleId,undefined);
+ clickLink(p.origin+'/checkout?session=private#payment');
+ const tracked=JSON.parse(await beacons.at(-1).text());
+ assert.equal(tracked.ruleId,linked.id);
+ assert.equal(tracked.destination,'/checkout');
+ assert.equal((await call('/p/'+p.public_key+'/events',{...tracked,destination:'/other'},{origin:p.origin})).status,400);
+ assert.equal((await call('/p/'+p.public_key+'/events',tracked,{origin:p.origin})).status,202);
  const purchase=(await call(path+'/events',{name:'Compra confirmada',type:'purchase',conversion:true},{cookie})).data.rule;
  const event={id:randomUUID(),sessionId:randomUUID(),type:'click',path:'/oferta',ruleId:click.id};assert.equal((await call('/p/'+p.public_key+'/events',event,{origin:p.origin})).status,202);
  for(let i=0;i<2;i++)assert.equal((await call('/p/'+p.public_key+'/events',{...event,id:randomUUID(),type:'purchase',ruleId:purchase.id,orderId:'order_123',valueMinor:2990,currency:'BRL'},{origin:p.origin})).status,202);
