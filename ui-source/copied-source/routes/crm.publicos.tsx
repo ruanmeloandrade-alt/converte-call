@@ -221,9 +221,6 @@ function PublicosPage() {
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-1 xl:max-w-[440px] xl:justify-end">
-                          <Button size="sm" variant="outline" className="h-8" onClick={() => setExportTarget({ id: a.id, name: a.name, synced: !!a.meta_audience_id })}>
-                            <Sparkles className="mr-1.5 h-3.5 w-3.5" /> Meta
-                          </Button>
                           <Button size="sm" variant="outline" className="h-8" onClick={() => setReactivateTarget({ id: a.id, name: a.name })}>
                             <Zap className="mr-1.5 h-3.5 w-3.5" /> Reativar
                           </Button>
@@ -1097,12 +1094,11 @@ function ReactivateDialog({ target, onOpenChange, onDone }: {
   });
   const bots = botsQ.data?.bots ?? [];
   const [salesbotId, setSalesbotId] = useState("");
-  const [botDelay, setBotDelay] = useState(0);
+  const [delays, setDelays] = useState("0");
   const [botLimit, setBotLimit] = useState(300);
 
   // Agente IA
   const loadAgents = useServerFn(listConversationAgents);
-  const loadSessions = useServerFn(listEvolutionSessions);
   const doAgent = useServerFn(reactivateCrmAudienceWithAgent);
   const agentsQ = useQuery({
     queryKey: ["agents-list", wsId],
@@ -1110,32 +1106,29 @@ function ReactivateDialog({ target, onOpenChange, onDone }: {
     enabled: !!wsId && !!target,
     staleTime: 30_000,
   });
-  const sessQ = useQuery({
-    queryKey: ["evo-sessions-react", wsId],
-    queryFn: () => loadSessions({ data: { workspaceId: wsId! } }),
-    enabled: !!wsId && !!target,
-    staleTime: 30_000,
-  });
   const agents = agentsQ.data ?? [];
-  const sessions = sessQ.data?.sessions ?? [];
   const [agentId, setAgentId] = useState("");
-  const [sessionId, setSessionId] = useState("");
   const [agentMsg, setAgentMsg] = useState("Oi {{nome}}, tudo bem? Sou da equipe e queria te chamar rapidinho.");
   const [agentLimit, setAgentLimit] = useState(200);
-  const [agentDelayMs, setAgentDelayMs] = useState(1500);
 
   async function handleRun() {
     if (!target) return;
     setBusy(true);
     try {
+      const entries = delays.split(",").map(value => value.trim());
+      const delaysSeconds = entries.map(Number);
+      if (entries.length > 10 || entries.some(value => !value) || delaysSeconds.some(value => !Number.isFinite(value) || value < 0 || value > 86400)) {
+        toast.error("Informe de 1 a 10 atrasos em segundos, separados por vírgula.");
+        return;
+      }
       if (tab === "salesbot") {
         if (!salesbotId) { toast.error("Escolha um Salesbot"); setBusy(false); return; }
-        const r = await doSalesbot({ data: { id: target.id, salesbotId, delaySeconds: botDelay, limit: botLimit } });
-        toast.success(`Salesbot disparado: ${r.started}/${r.total} (skip ${r.skipped}).`);
+        const r = await doSalesbot({ data: { id: target.id, salesbotId, delaysSeconds, limit: botLimit } } as never) as unknown as {queued: number};
+        toast.success(`SalesBot agendado para ${r.queued} contato(s).`);
       } else {
-        if (!agentId || !sessionId || !agentMsg.trim()) { toast.error("Complete os campos do Agente"); setBusy(false); return; }
-        const r = await doAgent({ data: { id: target.id, agentId, sessionId, message: agentMsg, limit: agentLimit, delayMs: agentDelayMs } });
-        toast.success(`Agente ativado: ${r.sent} envios · ${r.failed} falhas · ${r.total} leads.`);
+        if (!agentId || !agentMsg.trim()) { toast.error("Complete os campos do Agente"); setBusy(false); return; }
+        const r = await doAgent({ data: { id: target.id, agentId, message: agentMsg, limit: agentLimit, delaysSeconds } } as never) as unknown as {queued: number};
+        toast.success(`Agente agendado para ${r.queued} contato(s).`);
       }
       onDone();
     } catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao reativar"); }
@@ -1195,9 +1188,8 @@ function ReactivateDialog({ target, onOpenChange, onDone }: {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="text-xs">Atraso inicial (seg)</Label>
-                  <Input type="number" min={0} max={86400} value={botDelay}
-                    onChange={(e) => setBotDelay(Math.max(0, Number(e.target.value) || 0))} />
+                  <Label className="text-xs" htmlFor="bot-delays">Atrasos em segundos</Label>
+                  <Input id="bot-delays" value={delays} onChange={(e) => setDelays(e.target.value)} placeholder="Ex.: 5, 12, 30" />
                 </div>
                 <div>
                   <Label className="text-xs">Limite de leads</Label>
@@ -1223,19 +1215,6 @@ function ReactivateDialog({ target, onOpenChange, onDone }: {
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">WhatsApp (Evolution)</Label>
-                <Select value={sessionId} onValueChange={setSessionId}>
-                  <SelectTrigger><SelectValue placeholder={sessQ.isLoading ? "Carregando…" : "Selecione…"} /></SelectTrigger>
-                  <SelectContent>
-                    {sessions.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.phone_number ?? s.id.slice(0, 8)} · {s.status}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
                 <Label className="text-xs">Primeira mensagem</Label>
                 <Textarea rows={4} value={agentMsg} onChange={(e) => setAgentMsg(e.target.value)} />
                 <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{{nome}}"}, {"{{email}}"}</p>
@@ -1247,9 +1226,8 @@ function ReactivateDialog({ target, onOpenChange, onDone }: {
                     onChange={(e) => setAgentLimit(Math.max(1, Math.min(500, Number(e.target.value) || 200)))} />
                 </div>
                 <div>
-                  <Label className="text-xs">Intervalo (ms)</Label>
-                  <Input type="number" min={500} max={15000} value={agentDelayMs}
-                    onChange={(e) => setAgentDelayMs(Math.max(500, Math.min(15000, Number(e.target.value) || 1500)))} />
+                  <Label className="text-xs" htmlFor="agent-delays">Atrasos em segundos</Label>
+                  <Input id="agent-delays" value={delays} onChange={(e) => setDelays(e.target.value)} placeholder="Ex.: 5, 12, 30" />
                 </div>
               </div>
               <p className="text-[11px] text-muted-foreground">

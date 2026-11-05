@@ -992,3 +992,9 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Barra do Funil compactada. Novo lead, Kanban, Lista e Filtros usam ícones com nomes acessíveis. Seleção e estrutura do quadro seguem existentes.
 - Nome, empresa e etiquetas são filtrados localmente sem distinção de acentos. A busca no histórico consulta mensagens recebidas e retorna somente IDs dos cards visíveis. Para funcionários, requer também permissão de Inbox.
 - Teste local inclui mensagem persistida, isolamento por conta, funil e direção. Validação visual no navegador pendente.
+
+## Revisão do vídeo ConvertCall — Públicos, Integrações e Suporte
+- Públicos mantém a reativação sem o botão Meta. Bot e agente usam a fila existente com até dez opções de atraso por contato. O aviso informa agendamento, sem confundir com entrega.
+- O teste local confirmou filtros persistidos, isolamento, validação dos intervalos e execução de um bloco interno pelo bot enfileirado. Envio real para público continua sem homologação.
+- Agenda deixou de expor ações de sincronização Google na extensão. A tela de Integrações parou de consultar a autorização Google; e-mail marketing mantém rascunhos e indica envio pendente. Rotas legadas e outros usos de Google continuam no servidor.
+- O suporte IA passa a usar SUPPORT_OPENAI_API_KEY e SUPPORT_OPENAI_MODEL no servidor. Sem configuração, responde pelo guia existente. O teste confirmou que a chave da conta não é usada.

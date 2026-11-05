@@ -1,4 +1,5 @@
 import {isCompanyMessageTarget} from './companies.mjs';
+import {randomInt} from 'node:crypto';
 import {randomUUID} from 'node:crypto';import {queryMatchingLeads} from './audience-filter.original.mjs';import {visibleWorkspace,requirePermission,requireOwner} from './teams.mjs';
 const fail=(status,message)=>Object.assign(Error(message),{status});
 class DatasetQuery{
@@ -7,7 +8,7 @@ class DatasetQuery{
  then(resolve,reject){return Promise.resolve().then(()=>{const rows=this.rows.filter(r=>this.filters.every(f=>f(r))).sort((a,b)=>{for(const {k,ascending}of this.orders){const d=String(a[k]??'').localeCompare(String(b[k]??''));if(d)return ascending?d:-d;}return 0;}).slice(0,this.max);return {data:rows,error:null};}).then(resolve,reject);}
 }
 function sourceFor(d,ws){const tables={leads:d.leads.map(l=>{const f=d.funnels.find(f=>f.id===l.funnelId),stage=f?.stages.find(s=>s.name===l.stage),last=d.inboxEvents.filter(e=>e.leadId===l.id&&e.type==='message').at(-1),custom_data={...(l.custom_data||{})};for(const key of ['source','medium','campaign'])if(l.utm?.[key])custom_data['utm_'+key]=l.utm[key];return {...l,workspace_id:ws,pipeline_id:l.funnelId,stage_id:stage?.id||null,crm_source_id:l.crmSourceId||null,responsible_id:l.responsibleId||l.assigneeId||null,company_id:l.companyId||null,value:Number(l.value)||0,status:l.status==='won'||stage?.status==='ganha'?'won':l.status==='lost'||stage?.status==='perdida'?'lost':'active',tags:[...new Set([...(l.tags||[]),...(l.tag?[l.tag]:[])])],created_at:l.createdAt,updated_at:l.updatedAt||last?.at||l.createdAt,last_message_from:last?last.direction==='in'?'lead':'us':'none',conversation_status:l.conversationStatus||'aberta',custom_data};}),crm_sources:(d.crmSources||[]).map(s=>({...s,workspace_id:ws})),lead_products:(d.leadProducts||[]).map(p=>({...p,lead_id:p.leadId||p.lead_id})),tasks:d.tasks.map(t=>({...t,lead_id:t.lead||t.leadId,status:['done','completed','concluida'].includes(t.status)?'concluida':'pendente',end_at:t.dueAt||t.end_at})),lead_custom_field_values:d.leads.flatMap(l=>Object.entries(l.custom||{}).map(([field_id,v])=>({lead_id:l.id,field_id,value:{display:Array.isArray(v.value)?v.value.join(', '):String(v.value??'')}})))};return {from:table=>{if(!Object.hasOwn(tables,table))throw Error('Tabela não suportada: '+table);return new DatasetQuery(tables[table]);}};}
-export const audienceMethods=new Set(['listCrmAudiences','previewCrmAudience','createCrmAudience','updateCrmAudience','deleteCrmAudience','refreshCrmAudience','listAudienceFilterOptions','broadcastCrmAudience']);
+export const audienceMethods=new Set(['listCrmAudiences','previewCrmAudience','createCrmAudience','updateCrmAudience','deleteCrmAudience','refreshCrmAudience','listAudienceFilterOptions','broadcastCrmAudience','reactivateCrmAudienceWithSalesbot','reactivateCrmAudienceWithAgent']);
 export async function audienceRPC(store,user,name,arg={}){requirePermission(store,user,'clients');const ws=user.workspace_id,d=visibleWorkspace(store,user),p=arg?.data??arg??{},at=new Date().toISOString(),matches=filters=>queryMatchingLeads(sourceFor(d,ws),ws,filters||{});d.audiences||=[];
  if(name==='listCrmAudiences')return {audiences:d.audiences};
  if(name==='previewCrmAudience'){const rows=await matches(p.filters);return {count:rows.length,withEmail:rows.filter(r=>r.email).length,withPhone:rows.filter(r=>r.phone).length,sample:rows.slice(0,20).map(r=>({id:r.id,name:r.name,email:r.email,phone:r.phone,value:r.value,updatedAt:r.updated_at}))};}
@@ -19,5 +20,27 @@ export async function audienceRPC(store,user,name,arg={}){requirePermission(stor
  const rows=await matches(audience.filters);
  if(name==='refreshCrmAudience'){store.mutate(ws,data=>Object.assign(data.audiences.find(a=>a.id===audience.id),{cached_count:rows.length,cached_at:at,updated_at:at}));return {count:rows.length};}
  if(name==='broadcastCrmAudience'){requireOwner(store,user);const text=String(p.text||p.message||'').trim();if(!text||text.length>20000)throw fail(400,'Escreva a mensagem.');const instance=store.one('SELECT status FROM instances WHERE workspace_id=?',ws);if(instance?.status!=='connected')throw fail(409,'Conecte seu WhatsApp antes de enviar.');const batch=randomUUID(),recipients=rows.filter(r=>r.phone&&isCompanyMessageTarget(d,r));store.transaction(()=>{for(let i=0;i<recipients.length;i++)store.enqueue(ws,'audience-message',{leadId:recipients[i].id,text,batch},{id:batch+':'+recipients[i].id,dueAt:Date.now()+i*3000});});return {queued:recipients.length,sent:0,failed:0,total:rows.length,batchId:batch};}
+ if(name==='reactivateCrmAudienceWithSalesbot'||name==='reactivateCrmAudienceWithAgent'){
+  requireOwner(store,user);
+  const bot=name==='reactivateCrmAudienceWithSalesbot',kind=bot?'bot':'agent',assetId=bot?p.salesbotId:p.agentId;
+  const automation=(bot?d.bots:d.agents).find(item=>item.id===assetId);
+  if(!automation||(bot?automation.escopo==='grupo':automation.isActive===false||automation.enabled===false))throw fail(400,'Selecione uma automação disponível nesta conta.');
+  const instance=store.one('SELECT status,instance_name FROM instances WHERE workspace_id=?',ws);
+  if(instance?.status!=='connected')throw fail(409,'Conecte seu WhatsApp antes de reativar o público.');
+  const delays=p.delaysSeconds??[bot?p.delaySeconds??0:(p.delayMs??1500)/1000];
+  if(!Array.isArray(delays)||delays.length<1||delays.length>10||delays.some(n=>!Number.isFinite(n)||n<0||n>86400))throw fail(400,'Informe de 1 a 10 atrasos em segundos, entre 0 e 86400.');
+  const limit=p.limit??(bot?300:200),message=String(p.message??'').trim();
+  if(!Number.isInteger(limit)||limit<1||limit>1000)throw fail(400,'Informe um limite entre 1 e 1000 contatos.');
+  if(!bot&&(!message||message.length>20000))throw fail(400,'Informe a mensagem inicial do agente.');
+  const recipients=rows.filter(row=>row.phone&&isCompanyMessageTarget(d,row)).slice(0,limit);
+  let dueAt=Date.now();
+  store.transaction(()=>{
+   for(const lead of recipients){
+    dueAt+=Math.round(delays[randomInt(delays.length)]*1000);
+    store.enqueue(ws,'audience-reactivation',{leadId:lead.id,kind,assetId,message,instanceName:instance.instance_name},{id:randomUUID(),dueAt});
+   }
+  });
+  return {queued:recipients.length,total:rows.length};
+ }
  throw fail(400,'Operação de público inválida.');
 }

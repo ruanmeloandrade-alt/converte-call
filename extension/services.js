@@ -51,11 +51,10 @@ globalThis.CCServices=(()=>{
   if(m.type==='integration-status'){
    const d=await load(),errors={};
    const check=async(name,operation)=>{let timer;try{return await Promise.race([operation,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('A consulta demorou. Tente novamente.')),8000);})]);}catch(error){errors[name]=safeText(error);return null;}finally{clearTimeout(timer);}};
-   const [google,whatsapp,ai]=await Promise.all([check('google',CCPortal.request('/v1/google/status',{timeoutMs:8000})),check('whatsapp',gateway('v1/whatsapp/session')),check('ai',CCPortal.request('/v1/ai/credentials',{timeoutMs:8000}))]);
+   const [whatsapp,ai]=await Promise.all([check('whatsapp',gateway('v1/whatsapp/session')),check('ai',CCPortal.request('/v1/ai/credentials',{timeoutMs:8000}))]);
    if(whatsapp)d.connections.whatsapp={status:whatsapp.status,phone:whatsapp.phone||'',updatedAt:CCCore.now()};
-   if(google){d.connections.google={status:google.calendar?'connected':'disconnected'};d.connections.gmail={status:google.gmail?'connected':'disconnected'};}
    if(ai?.configured)d.providers={...d.providers,ai:ai.provider,model:ai.model,profiles:ai.profiles,...(ai.provider!=='anthropic'?{transcriptionProvider:ai.provider,transcriptionModel:ai.transcriptionModel}:{})};
-   await store(d);return {ok:true,checked:true,errors,ai:ai?ai.configured:null,aiProvider:ai?.provider||null,aiProfiles:ai?.profiles||{},google:google?!!google.configured:null,gateway:!!CCDeployment.accountUrl,gatewayOrigin:CCDeployment.gatewayUrl?new URL(CCDeployment.gatewayUrl).origin:'',signedIn:!!await secret('ccAccountToken'),connections:d.connections};
+   await store(d);return {ok:true,checked:true,errors,ai:ai?ai.configured:null,aiProvider:ai?.provider||null,aiProfiles:ai?.profiles||{},gateway:!!CCDeployment.accountUrl,gatewayOrigin:CCDeployment.gatewayUrl?new URL(CCDeployment.gatewayUrl).origin:'',signedIn:!!await secret('ccAccountToken'),connections:d.connections};
   }
 
   if(m.type==='wa-login'){if(!CCDeployment.gatewayUrl)throw Error('Conexão ainda não liberada.');const u=new URL(CCDeployment.gatewayUrl);if(u.protocol!=='https:'||!await chrome.permissions.contains({origins:[u.origin+'/*']}))throw Error('Autorize a conexão primeiro.');const r=await req(new URL('v1/auth/session',u.href.endsWith('/')?u.href:u.href+'/').href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:String(m.email).slice(0,200),password:String(m.password).slice(0,200)})});if(typeof r.accessToken!=='string')throw Error('O serviço não retornou uma sessão válida.');await CCCredentials.set('ccGatewayToken',r.accessToken);return {ok:true};}
