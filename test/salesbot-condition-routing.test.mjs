@@ -72,6 +72,15 @@ test('tag conditions route leads with mixed legacy tag data',async()=>{
  }finally{await app.close();rmSync(dir,{recursive:true,force:true});}
 });
 
+test('bot editor reads tag names from the workspace response before matching text',()=>{
+ const source=readFileSync(new URL('../ui-source/copied-source/lib/workspace-tag-names.ts',import.meta.url),'utf8');
+ const names=compile(source.replace('export function','function'),{},'workspaceTagNames');
+ assert.deepEqual(names([{id:'VIP',name:'VIP'},'Antiga',null,12,{name:12}]),['VIP','Antiga']);
+ assert.deepEqual(names(undefined),[]);
+ const suggestions=extract(builder,'const existing = workspaceTagNames','const current = value.split');
+ assert.deepEqual(compile(suggestions,{workspaceTagNames:names,tagsQ:{data:{tags:[{id:'VIP',name:'VIP'}]}}},'existing.map(tag => tag.toLowerCase())'),['vip']);
+});
+
 test('custom field Save includes a pending select and typed last option without requiring the plus buttons',async()=>{
  const source=readFileSync(new URL('../ui-source/copied-source/components/inbox/LeadProfilePanel.tsx',import.meta.url),'utf8');let saved,closed=false,nextList;
  const addSource=extract(source,'function addField()','function removeField(');

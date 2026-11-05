@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Paperclip, Loader2, X } from "lucide-react";
 import { listAllPipelineStages, listWorkspaceUsers } from "@/lib/crm.functions";
 import { listWorkspaceTags, listLeadCustomFields } from "@/lib/leads.functions";
+import { workspaceTagNames } from "@/lib/workspace-tag-names";
 import { listForms } from "@/lib/forms.functions";
 import { uploadSalesbotMedia, getSalesbotMediaSignedUrl, listSalesbotMedia, listSalesbots } from "@/lib/salesbots.functions";
 import { listProductCatalogs } from "@/lib/products.functions";
@@ -251,7 +252,7 @@ export function TagPicker({ value, onChange }: { value: TargetValue; onChange: T
     queryFn: async () => (await fn()) as { tags: string[] },
     staleTime: 60_000,
   });
-  const tags = q.data?.tags ?? [];
+  const tags = useMemo(() => workspaceTagNames(q.data?.tags), [q.data?.tags]);
   const [focused, setFocused] = useState(false);
   const typed = value.id ?? "";
   const matches = useMemo(() => {

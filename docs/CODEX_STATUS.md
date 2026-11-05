@@ -963,3 +963,7 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Erro reproduzido no executor com número, nulo e objeto em uma lista de etiquetas. O fluxo parava antes de avaliar a etiqueta válida.
 - A condição agora compara apenas etiquetas de texto, sem distinção entre maiúsculas e minúsculas. A lista persistida não é modificada.
 - Teste de regressão cobre igualdade, diferença e desvio nos modos E e OU. Suíte local: 216 testes passaram.
+
+## SalesBot — etiquetas no editor da extensão
+- Erro reproduzível ao comparar diretamente objetos {id, name} retornados pela consulta de etiquetas. O editor e o seletor de agente agora extraem nomes válidos antes da comparação.
+- Extensão 0.15.23 preparada para distribuição manual. Os três pacotes foram abertos e conferidos com 76 arquivos e a versão esperada. Firefox ainda requer assinatura para distribuição regular.

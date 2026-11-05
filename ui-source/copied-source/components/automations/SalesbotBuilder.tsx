@@ -55,6 +55,7 @@ import { VariableTextarea } from "@/components/ui/variable-textarea";
 
 import { useIsSuperAdmin } from "@/hooks/use-roles";
 import { listLeadCustomFields, listWorkspaceTags, createLeadCustomField } from "@/lib/leads.functions";
+import { workspaceTagNames } from "@/lib/workspace-tag-names";
 import { listWorkspaceUsers } from "@/lib/crm.functions";
 import { listLeadOrigins } from "@/lib/lead-origins.functions";
 import { testSalesbotWebhook } from "@/lib/salesbot-webhook.functions";
@@ -2873,7 +2874,7 @@ function TagsAcaoEditor({ value, onChange }: { value: string; onChange: (v: stri
     refetchOnWindowFocus: true,
   });
 
-  const existing: string[] = tagsQ.data?.tags ?? [];
+  const existing = workspaceTagNames(tagsQ.data?.tags);
 
   const current = value.split(",").map((t) => t.trim()).filter(Boolean);
   const [draft, setDraft] = useState("");
@@ -3453,7 +3454,7 @@ function ValidacaoEditor({
   queryFn: () => listTags(),
   staleTime: 30_000,
  });
- const existingTags: string[] = tagsQ.data?.tags ?? [];
+ const existingTags = workspaceTagNames(tagsQ.data?.tags);
 
  function updateRule(id: string, patch: Partial<RoletaOpcao>) {
   onChange({
@@ -3798,7 +3799,7 @@ function CondicaoEditor({ block, onChange }: { block: Block; onChange: (p: Parti
   queryFn: () => listTags(),
   staleTime: 30_000,
  });
- const existingTags: string[] = tagsQ.data?.tags ?? [];
+ const existingTags = workspaceTagNames(tagsQ.data?.tags);
 
  function update(idx: number, patch: Partial<Condicao>) {
   onChange({ condicoes: condicoes.map((c, i) => (i === idx? {...c,...patch }: c)) });
