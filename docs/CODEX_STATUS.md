@@ -967,3 +967,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 ## SalesBot — etiquetas no editor da extensão
 - Erro reproduzível ao comparar diretamente objetos {id, name} retornados pela consulta de etiquetas. O editor e o seletor de agente agora extraem nomes válidos antes da comparação.
 - Extensão 0.15.23 preparada para distribuição manual. Os três pacotes foram abertos e conferidos com 76 arquivos e a versão esperada. Firefox ainda requer assinatura para distribuição regular.
+
+## SalesBot — revisão do grafo e continuidade após áudio
+- O autosave rejeita uma revisão antiga com HTTP 409. O editor mantém as alterações em tela e só confirma o salvamento após a fila terminar.
+- Duplicação, colagem, exclusão e substituição tratam destinos de condição e os caminhos de erro correspondentes.
+- Teste local pelo mesmo endpoint do Inbox salva, rejeita a gravação atrasada, relê as conexões e envia áudio seguido pelo texto da saída condicional. A execução relatada na conta do Nardel ainda precisa ser identificada.

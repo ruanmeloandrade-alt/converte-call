@@ -427,9 +427,9 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
     try {
      await Promise.race([
       flushAllSalesbotSaves(),
-      new Promise<void>((r) => setTimeout(r, 60_000)),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Salvamento pendente")), 60_000)),
      ]);
-     return !hasFailedSalesbotSaves() && getSalesbotSaveStatus().status !== "error";
+     return !hasPendingSalesbotSaves() && !hasFailedSalesbotSaves() && getSalesbotSaveStatus().status !== "error";
     } catch {
      return false;
     }
@@ -628,6 +628,7 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
         ...x,
         nextBlockId: swap(x.nextBlockId),
         falseNextBlockId: swap(x.falseNextBlockId),
+        webhookErrorNextBlockId: swap(x.webhookErrorNextBlockId),
          roleta: x.roleta?.map((o) => ({ ...o, nextBlockId: swap(o.nextBlockId) })),
          pausas: x.pausas?.map((p) => ({ ...p, nextBlockId: swap(p.nextBlockId) })),
          condicoes: x.condicoes?.map((c) => ({ ...c, nextBlockId: swap(c.nextBlockId) })),
@@ -764,6 +765,12 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
  .map((x) => ({
  ...x,
   nextBlockId: x.nextBlockId && ids.has(x.nextBlockId)? undefined: x.nextBlockId,
+  falseNextBlockId: x.falseNextBlockId && ids.has(x.falseNextBlockId) ? undefined : x.falseNextBlockId,
+  webhookErrorNextBlockId: x.webhookErrorNextBlockId && ids.has(x.webhookErrorNextBlockId) ? undefined : x.webhookErrorNextBlockId,
+  condicoes: x.condicoes?.map((c) => ({
+    ...c,
+    nextBlockId: c.nextBlockId && ids.has(c.nextBlockId) ? undefined : c.nextBlockId,
+  })),
   roleta: x.roleta?.map((o) => ({
  ...o,
   nextBlockId: o.nextBlockId && ids.has(o.nextBlockId)? undefined: o.nextBlockId,
@@ -828,11 +835,13 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
      clone.x = (s.x ?? 0) + 48;
      clone.y = (s.y ?? 0) + 48;
      clone.nextBlockId = remap(clone.nextBlockId);
+     clone.falseNextBlockId = remap(clone.falseNextBlockId);
+     clone.webhookErrorNextBlockId = remap(clone.webhookErrorNextBlockId);
      if (clone.roleta)
       clone.roleta = clone.roleta.map((o) => ({ ...o, id: newId("o"), nextBlockId: remap(o.nextBlockId) }));
      if (clone.pausas)
       clone.pausas = clone.pausas.map((p) => ({ ...p, id: newId("p"), nextBlockId: remap(p.nextBlockId) }));
-     if (clone.condicoes) clone.condicoes = clone.condicoes.map((c) => ({ ...c, id: newId("c") }));
+     if (clone.condicoes) clone.condicoes = clone.condicoes.map((c) => ({ ...c, id: newId("c"), nextBlockId: remap(c.nextBlockId) }));
      if (clone.botoes)
       clone.botoes = clone.botoes.map((bt) => ({ ...bt, id: newId("btn"), nextBlockId: remap(bt.nextBlockId) }));
      createdIds.push(clone.id);
@@ -911,11 +920,12 @@ export function SalesbotBuilder({ open, onClose, initialBotId, autoCreate, escop
      clone.y = anchorY + ((s.y ?? 0) - minY);
      clone.nextBlockId = remap(clone.nextBlockId);
      clone.falseNextBlockId = remap(clone.falseNextBlockId);
+     clone.webhookErrorNextBlockId = remap(clone.webhookErrorNextBlockId);
      if (clone.roleta)
       clone.roleta = clone.roleta.map((o) => ({ ...o, id: newId("o"), nextBlockId: remap(o.nextBlockId) }));
      if (clone.pausas)
       clone.pausas = clone.pausas.map((p) => ({ ...p, id: newId("p"), nextBlockId: remap(p.nextBlockId) }));
-     if (clone.condicoes) clone.condicoes = clone.condicoes.map((c) => ({ ...c, id: newId("c") }));
+     if (clone.condicoes) clone.condicoes = clone.condicoes.map((c) => ({ ...c, id: newId("c"), nextBlockId: remap(c.nextBlockId) }));
      if (clone.botoes)
       clone.botoes = clone.botoes.map((bt) => ({ ...bt, id: newId("btn"), nextBlockId: remap(bt.nextBlockId) }));
      createdIds.push(clone.id);

@@ -460,6 +460,9 @@ async function rpc(store, ws, module, name, arg = {}) {
     case "syncSalesbotFromLocal": {
       if (!p.bot?.id || !Array.isArray(p.bot.blocks)) throw Error("Defini\xE7\xE3o de bot inv\xE1lida.");
       const existing=d.bots.find(b=>b.id===p.bot.id),bot={...existing,...p.bot};
+      if (p.source === "builder-autosave" && (!existing || p.expectedRevision !== (existing.revision || 1))) {
+        throw Object.assign(Error("O bot mudou desde que foi aberto. Suas alterações continuam no editor. Copie o fluxo antes de reabrir o bot."), {status:409});
+      }
       bot.isActive=typeof p.isActive==='boolean'?p.isActive:typeof p.bot.isActive==='boolean'?p.bot.isActive:existing?.isActive??false;
       bot.revision = (existing?.revision || 0) + 1;
       bot.updatedAt = now();

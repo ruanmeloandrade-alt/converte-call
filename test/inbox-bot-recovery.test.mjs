@@ -28,6 +28,25 @@ test('manual Inbox bot starts with triggers disabled, sends voice audio, preserv
   await req('/v1/whatsapp/dispatch',payload,auth.accessToken,{'Idempotency-Key':requestId});assert.equal(sent.length,1,'retry cannot send the audio twice');
   const pdf=await req('/v1/slim/rpc',{module:'@/lib/salesbots.functions',method:'uploadSalesbotMedia',data:{base64:Buffer.from('%PDF-1.4 fixture').toString('base64'),mimeType:'application/pdf',fileName:'proposta.pdf',kind:'document'}},auth.accessToken);assert.equal(pdf.data.kind,'document');const pdfBot=randomUUID();app.store.mutate(ws,d=>d.bots.push({id:pdfBot,nome:'PDF sem texto',isActive:false,startBlockId:'pdf',blocks:[{id:'pdf',kind:'enviar-mensagem',mediaItems:[{path:pdf.data.path,kind:pdf.data.kind,mime:pdf.data.mime,filename:pdf.data.fileName}]}]}));const document=await req('/v1/whatsapp/dispatch',{...payload,assetId:pdfBot},auth.accessToken,{'Idempotency-Key':randomUUID()});assert.equal(document.status,200,JSON.stringify(document.data));assert.match(sent[1].url,/sendMedia/);assert.equal(sent[1].body.mediatype,'document');assert.equal(sent[1].body.fileName,'proposta.pdf');
   const rpc=(method,data)=>req('/v1/slim/rpc',{module:'@/lib/salesbots.functions',method,data},auth.accessToken);
+  const sequenceId=randomUUID();
+  const sequence={id:sequenceId,nome:'Áudio e sequência',startBlockId:'audio',blocks:[
+   {id:'audio',kind:'enviar-mensagem',mediaItems:[{path:asset.path,kind:'audio'}],nextBlockId:'branch'},
+   {id:'branch',kind:'condicao',condicaoModo:'ou',condicoes:[{id:'rule',sujeito:'cliente',operador:'igual',valor:'sem resposta',nextBlockId:'yes'}],falseNextBlockId:'no'},
+   {id:'yes',kind:'enviar-mensagem',texto:'Saída verdadeira'},
+   {id:'no',kind:'enviar-mensagem',texto:'Depois do áudio'}
+  ]};
+  const created=await rpc('syncSalesbotFromLocal',{source:'builder-create',bot:{...sequence,blocks:[]}});
+  const saved=await rpc('syncSalesbotFromLocal',{source:'builder-autosave',expectedRevision:created.data.revision,bot:sequence});
+  assert.equal(saved.status,200);
+  const stale=await rpc('syncSalesbotFromLocal',{source:'builder-autosave',expectedRevision:created.data.revision,bot:{...sequence,blocks:[]}});
+  assert.equal(stale.status,409);
+  const loaded=await rpc('getSalesbotGraph',{localId:sequenceId});
+  assert.deepEqual(loaded.data.bot.blocks,sequence.blocks);
+  const beforeSequence=sent.length;
+  const ran=await req('/v1/whatsapp/dispatch',{...payload,assetId:sequenceId},auth.accessToken,{'Idempotency-Key':randomUUID()});
+  assert.equal(ran.status,200,JSON.stringify(ran.data));
+  assert.deepEqual(sent.slice(beforeSequence).map(message=>message.url.split('/').at(-2)),['sendWhatsAppAudio','sendText']);
+  assert.equal(sent.at(-1).body.text,'Depois do áudio');
   reply=await rpc('setSalesbotActive',{localId:botId,isActive:true});assert.equal(reply.data.isActive,true);assert.equal(reply.data.revision,4);
   reply=await rpc('setSalesbotActive',{localId:botId,isActive:false});assert.equal(reply.data.isActive,false);assert.equal(reply.data.revision,5);
   const unchanged=JSON.stringify(app.store.get(ws).bots[0]);assert.equal((await rpc('setSalesbotActive',{localId:botId})).status,400);assert.equal(JSON.stringify(app.store.get(ws).bots[0]),unchanged);
