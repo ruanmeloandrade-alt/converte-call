@@ -987,3 +987,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Retirada de pedidos abre uma confirmação com cliente, produto, quantidade, pagamento, frete, desconto e total. O envio usa o formulário original, bloqueia duplo clique e deixa os dados disponíveis em caso de erro.
 - O servidor recusa pedidos de produtos controlados quando a quantidade supera o saldo. O fluxo orienta cadastrar produto físico no catálogo e registrar a entrada antes de vender.
 - Build da extensão e 221 testes automatizados passaram. O teste de estoque confirmou que a venda recusada mantém o estado e que o pedido conclui após a reposição. Roteiros de QA de navegador atualizados, execução visual pendente.
+
+## Revisão do vídeo ConvertCall — busca e controles do Funil
+- Barra do Funil compactada. Novo lead, Kanban, Lista e Filtros usam ícones com nomes acessíveis. Seleção e estrutura do quadro seguem existentes.
+- Nome, empresa e etiquetas são filtrados localmente sem distinção de acentos. A busca no histórico consulta mensagens recebidas e retorna somente IDs dos cards visíveis. Para funcionários, requer também permissão de Inbox.
+- Teste local inclui mensagem persistida, isolamento por conta, funil e direção. Validação visual no navegador pendente.

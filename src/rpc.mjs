@@ -5,6 +5,7 @@ import {objectivePixelOptions} from './pixel-leads.mjs';
 import {leadSales,listLeadSales} from './lead-sales.mjs';
 import {normalizeProduct, prepareOrder, applyOrderStock} from './product-policy.mjs';
 import {workflowRPC} from './workflow-adapter.mjs';
+import {inboxEvents} from './inbox-data.mjs';
 import { Core } from "./database.mjs";
 import { uploadAsset, signedAsset } from "./assets.mjs";
 const id = () => crypto.randomUUID();
@@ -89,9 +90,28 @@ async function rpc(store, ws, module, name, arg = {}) {
       changed = true;
       result = { ok: true };
       break;
-    case "listFunnels":
-      result = { funnels: funnels(d) };
+    case "listFunnels": {
+      const listed = funnels(d);
+      if (typeof p.messageQuery === 'string' && p.messageQuery.trim()) {
+        const normalize = value => String(value ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+        const query = normalize(p.messageQuery.trim().slice(0, 160));
+        const cards = new Map();
+        for (const stage of listed.find(f => f.id === p.funnelId)?.stages ?? []) {
+          for (const lead of stage.leads) {
+            const company = customerCompany(d, lead);
+            for (const contact of company ? companyMembers(d, company) : [lead]) cards.set(contact.id, lead.id);
+          }
+        }
+        const matches = new Set();
+        if (query && cards.size) for (const event of inboxEvents(store, ws)) {
+          if (cards.has(event.leadId) && event.type === 'message' && event.direction === 'in' && normalize(event.text).includes(query)) {
+            matches.add(cards.get(event.leadId));
+          }
+        }
+        result = { funnels: [], matchingLeadIds: [...matches] };
+      } else result = { funnels: listed };
       break;
+    }
     case "listAllPipelineStages":
       result = { pipelines: funnels(d, true) };
       break;

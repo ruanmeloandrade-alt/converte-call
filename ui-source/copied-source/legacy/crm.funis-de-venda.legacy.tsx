@@ -406,6 +406,24 @@ function CrmFunisPage() {
     localStorage.setItem("saude-slim.crmView", view);
   }, [view]);
  const [query, setQuery] = useState("");
+ const messageQuery = query.trim().slice(0, 160);
+ const [messageMatches, setMessageMatches] = useState<{query: string; funnelId: string; ids: Set<string>}>();
+ const [messageSearchFailed, setMessageSearchFailed] = useState(false);
+ useEffect(() => {
+   setMessageSearchFailed(false);
+   if (messageQuery.length < 2 || !funnelId) return;
+   let cancelled = false;
+   const timer = setTimeout(async () => {
+     try {
+       const response = await listFunnelsServer({data: {crmSourceId, funnelId, messageQuery}} as never) as unknown as {matchingLeadIds?: string[]};
+       if (!Array.isArray(response.matchingLeadIds)) throw new Error("Busca de mensagens indisponível");
+       if (!cancelled) setMessageMatches({query: messageQuery, funnelId, ids: new Set(response.matchingLeadIds)});
+     } catch {
+       if (!cancelled) setMessageSearchFailed(true);
+     }
+   }, 300);
+   return () => { cancelled = true; clearTimeout(timer); };
+ }, [messageQuery, funnelId, crmSourceId, listFunnelsServer]);
   const [colorMode, setColorMode] = useState(false);
   const [selectedColorStageId, setSelectedColorStageId] = useState<string | null>(null);
 
@@ -495,7 +513,9 @@ function CrmFunisPage() {
 
     const filteredFunnel: Funnel | null = useMemo(() => {
       if (!funnel) return null;
-      const q = query.trim().toLowerCase();
+      const normalize = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+      const q = normalize(query.trim());
+      const matchingMessages = messageMatches?.query === messageQuery && messageMatches.funnelId === funnel.id ? messageMatches.ids : null;
       const hasSource = sourceFilters.length > 0;
       const hasTags = tagFilters.length > 0;
       const minV = minValue.trim() ? Number(minValue.replace(/[^\d.,-]/g, "").replace(",", ".")) : NaN;
@@ -514,8 +534,8 @@ function CrmFunisPage() {
                 l.lastMessagePreview ?? "",
                 (l.tags ?? []).join(" "),
                 l.owner ?? "",
-              ].join(" ").toLowerCase();
-              if (!hay.includes(q)) return false;
+              ].join(" ");
+              if (!normalize(hay).includes(q) && !matchingMessages?.has(l.id)) return false;
             }
             if (hasSource && !sourceFilters.includes(l.source)) return false;
             if (hasTags && !(l.tags ?? []).some((t) => tagFilters.includes(t))) return false;
@@ -527,7 +547,7 @@ function CrmFunisPage() {
           }),
         })),
       };
-    }, [funnel, query, sourceFilters, tagFilters, onlyWaiting, onlyWithValue, onlyUnread, minValue, hideEntry]);
+    }, [funnel, query, messageQuery, messageMatches, sourceFilters, tagFilters, onlyWaiting, onlyWithValue, onlyUnread, minValue, hideEntry]);
 
    const availableTags = useMemo(() => {
      if (!funnel) return [] as string[];
@@ -1104,15 +1124,7 @@ function CrmFunisPage() {
  {/* Header compacto: título + funil + filtros + ações em uma faixa só */}
  <div className="border-b border-border bg-card">
  <div className="px-5 py-2.5 flex flex-wrap items-center gap-2">
- <div className="flex items-center gap-2 min-w-0">
- <span className="text-[10px] font-semibold tracking-widest text-primary/80 uppercase">
- CRM
- </span>
- <span className="text-muted-foreground/40">/</span>
- <h1 className="text-sm font-semibold tracking-tight truncate">
- Funis de venda
- </h1>
- </div>
+ <h1 className="sr-only">Funis de venda</h1>
 
  <FunnelSelector
   onCreate={() => { setNewFunnelName(""); setNewFunnelOpen(true); }}
@@ -1170,9 +1182,11 @@ function CrmFunisPage() {
  <Input
  value={query}
  onChange={(e) => setQuery(e.target.value)}
+ aria-label="Buscar leads e mensagens recebidas"
  placeholder="Buscar nome, empresa, tag ou mensagem"
- className="h-8 w-64 pl-8 text-xs"
+ className="h-8 w-52 max-w-full pl-8 text-xs"
  />
+ {messageSearchFailed && <span role="status" className="text-xs text-muted-foreground">Histórico de mensagens indisponível</span>}
  </div>
 
  <LeadFiltersPopover
@@ -1223,11 +1237,13 @@ function CrmFunisPage() {
       <Button
         variant="outline"
         size="sm"
-        className="h-8 text-xs gap-1.5"
+        className="h-8 w-8 p-0"
         onClick={openNewLead}
+        aria-label="Novo lead"
+        title="Novo lead"
         disabled={!funnel || !crmSourceId}
       >
-        <UserPlus className="w-3.5 h-3.5" /> Novo Lead
+        <UserPlus className="w-3.5 h-3.5" aria-hidden="true" />
       </Button>
       <Button
         size="sm"
@@ -2353,15 +2369,17 @@ function ToggleGroup({
  <button
  key={opt.value}
  onClick={() => onChange(opt.value)}
+ aria-label={opt.label}
+ aria-pressed={active}
+ title={opt.label}
  className={cn(
- "inline-flex items-center gap-1.5 px-2.5 h-7 rounded text-xs font-medium transition-colors",
+ "inline-flex h-7 w-8 items-center justify-center rounded transition-colors",
  active
 ? "bg-primary text-primary-foreground"
 : "text-muted-foreground hover:text-foreground"
  )}
  >
  <Icon className="w-3.5 h-3.5" />
- {opt.label}
  </button>
  );
  })}
@@ -3736,9 +3754,11 @@ function LeadFiltersPopover({
  variant="outline"
  size="sm"
  disabled={disabled}
- className="h-8 text-xs gap-1.5"
+ className="h-8 min-w-8 px-2 text-xs gap-1"
+ aria-label={activeCount ? `Filtros, ${activeCount} ativos` : "Filtros"}
+ title="Filtros"
  >
- <Filter className="w-3.5 h-3.5" /> Filtros
+ <Filter className="w-3.5 h-3.5" aria-hidden="true" />
  {activeCount > 0 && (
  <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-[10px]">
  {activeCount}
