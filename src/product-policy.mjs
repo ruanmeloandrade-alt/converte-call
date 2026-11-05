@@ -21,5 +21,9 @@ export function prepareOrder(input, product) {
   return order;
 }
 export function applyOrderStock(product, order) {
-  if (product && product.trackStock !== false && product.stock > 0) product.stock = Math.max(0, product.stock - order.quantity);
+  if (!product || product.trackStock === false) return;
+  if (!Number.isInteger(product.stock) || product.stock < order.quantity) {
+    throw Object.assign(Error('Estoque insuficiente. Registre a entrada do produto antes de confirmar o pedido.'), {status:409});
+  }
+  product.stock -= order.quantity;
 }

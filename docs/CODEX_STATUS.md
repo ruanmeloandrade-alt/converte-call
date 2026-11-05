@@ -982,3 +982,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - Configuração da gravação ganhou objetivo independente do tipo de conteúdo: seguir o Workflow, venda consultiva, qualificação ou suporte.
 - A IA recebe o bloco ativo com perguntas e saídas, mantém o contexto da conversa e descarta sugestões produzidas para uma revisão anterior do roteiro.
 - O teleprompter diferencia citação literal de objeção, fala sugerida e observação. O fundo da área de sugestões é transparente, com contraste nos textos.
+
+## Revisão do vídeo ConvertCall — revisão de pedidos e estoque
+- Retirada de pedidos abre uma confirmação com cliente, produto, quantidade, pagamento, frete, desconto e total. O envio usa o formulário original, bloqueia duplo clique e deixa os dados disponíveis em caso de erro.
+- O servidor recusa pedidos de produtos controlados quando a quantidade supera o saldo. O fluxo orienta cadastrar produto físico no catálogo e registrar a entrada antes de vender.
+- Build da extensão e 221 testes automatizados passaram. O teste de estoque confirmou que a venda recusada mantém o estado e que o pedido conclui após a reposição. Roteiros de QA de navegador atualizados, execução visual pendente.

@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { ClipboardList, PackagePlus, Plus, Search, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { createCrmSource, createLead, listAllPipelineStages, listCrmSources } from "@/lib/crm.functions";
 import { listLeads } from "@/lib/leads.functions";
@@ -57,6 +58,8 @@ function PedidosPage() {
   const [discountMode, setDiscountMode] = useState<DiscountMode>("value");
   const [discount, setDiscount] = useState("");
   const [saving, setSaving] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const submitLock = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   const selectedProduct = products.find((product) => product.id === productId) as (DbProduct & { catalogName?: string }) | undefined;
@@ -69,15 +72,28 @@ function PedidosPage() {
     return [lead.name, lead.email, lead.phone].some((value) => (value ?? "").toLowerCase().includes(needle));
   }).slice(0, 8);
 
-  async function submitOrder() {
-    setError(null);
-    if (!defaultPipeline?.id || !defaultStageId) return setError("Crie um funil e uma etapa antes de registrar pedidos.");
-    if (productMode === "existing" && !selectedProduct) return setError("Selecione um produto existente.");
-    if (productMode !== "existing" && !productName.trim()) return setError("Informe o produto da venda.");
-    if (customerMode === "existing" && !customerId) return setError("Selecione um cliente ou mude o tipo de venda.");
-    if (customerMode === "new" && !customerName.trim()) return setError("Informe o nome do cliente.");
+  function orderValidationError() {
+    if (!defaultPipeline?.id || !defaultStageId) return "Crie um funil e uma etapa antes de registrar pedidos.";
+    if (productMode === "existing" && !selectedProduct) return "Selecione um produto existente.";
+    if (productMode !== "existing" && !productName.trim()) return "Informe o produto da venda.";
+    if (customerMode === "existing" && !customerId) return "Selecione um cliente ou mude o tipo de venda.";
+    if (customerMode === "new" && !customerName.trim()) return "Informe o nome do cliente.";
+    return null;
+  }
 
+  function reviewOrder() {
+    const validationError = orderValidationError();
+    setError(validationError);
+    if (!validationError) setReviewOpen(true);
+  }
+
+  async function submitOrder() {
+    if (submitLock.current) return;
+    const validationError = orderValidationError();
+    setError(validationError);
+    if (validationError || !defaultPipeline) return;
     setSaving(true);
+    submitLock.current = true;
     try {
       let resolvedProductName = selectedProduct?.name ?? productName.trim();
       let resolvedProductPrice = total;
@@ -138,6 +154,7 @@ function PedidosPage() {
         },
       });
       toast.success("Pedido enviado para o funil de vendas");
+      setReviewOpen(false);
       setProductId("");
       setProductName("");
       setProductPrice("");
@@ -151,6 +168,7 @@ function PedidosPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao registrar pedido.");
     } finally {
+      submitLock.current = false;
       setSaving(false);
     }
   }
@@ -225,10 +243,29 @@ function PedidosPage() {
               <div className="text-3xl font-semibold tracking-tight">{formatBRL(total)}</div>
               <div className="mt-1 text-xs text-muted-foreground">Base {formatBRL(basePrice)} · desconto {formatBRL(discountValue)}</div>
             </div>
-            <Button onClick={submitOrder} disabled={saving} className="h-11 gap-2"><UserPlus className="h-4 w-4" /> {saving ? "Registrando..." : "Registrar pedido"}</Button>
+            <Button onClick={reviewOrder} disabled={saving} className="h-11 gap-2"><ClipboardList className="h-4 w-4" /> Revisar pedido</Button>
           </section>
           {error && <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>}
           {productMode === "new" && !catalogsQ.data?.length && <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"><PackagePlus className="mr-2 inline h-4 w-4" />Crie um catálogo em Produtos antes de cadastrar produto durante o pedido.</div>}
+          <Dialog open={reviewOpen} onOpenChange={(open) => { if (!submitLock.current) setReviewOpen(open); }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Revisar pedido</DialogTitle>
+                <DialogDescription>Confira os dados antes de registrar a venda.</DialogDescription>
+              </DialogHeader>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+                <dt>Produto</dt><dd className="text-right">{productMode === "existing" ? selectedProduct?.name : productName.trim()}</dd>
+                <dt>Cliente</dt><dd className="text-right">{customerMode === "existing" ? leads.find((lead) => lead.id === customerId)?.name : customerMode === "new" ? customerName.trim() : "Venda avulsa"}</dd>
+                <dt>Desconto</dt><dd className="text-right">{formatBRL(discountValue)}</dd>
+                <dt className="font-semibold">Total</dt><dd className="text-right font-semibold">{formatBRL(total)}</dd>
+              </dl>
+              {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setReviewOpen(false)} disabled={saving}>Voltar e editar</Button>
+                <Button onClick={submitOrder} disabled={saving} className="gap-2"><UserPlus className="h-4 w-4" />{saving ? "Registrando..." : "Confirmar pedido"}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
     </div>
