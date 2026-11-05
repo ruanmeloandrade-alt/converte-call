@@ -1,7 +1,48 @@
 'use strict';
 globalThis.CCNotification=(()=>{
  const key='converteCallWorkspace';let queue=Promise.resolve();
- async function emitNow(options){const category=options.category||'call';const d=CCCore.migrate((await chrome.storage.local.get(key))[key]||{});if(d.notificationPreferences?.categories?.[category]===false)return null;d.notifications||=[];if(options.key&&d.notifications.some(n=>n.key===options.key))return null;const record={id:crypto.randomUUID(),category,key:options.key||'',title:String(options.title||'Converte Call').slice(0,180),message:String(options.message||'').slice(0,400),at:new Date().toISOString(),read:false,entityId:options.entityId||'',view:options.view||'notifications'};d.notifications.push(record);d.notifications=d.notifications.slice(-1000);await chrome.storage.local.set({[key]:d});if(d.notificationPreferences?.browser!==false){try{await chrome.notifications.create(record.id,{type:'basic',iconUrl:'icons/128.png',title:record.title,message:record.message});}catch{/* Central remains available if OS/Chrome suppresses the popup. */}}return record.id;}
+ const pinnedKey='ccPinnedNotification';
+ async function showOnActiveTab(notice){
+  try{
+   const [tab]=await chrome.tabs.query({active:true,lastFocusedWindow:true});
+   if(!tab?.id||!/^https?:/.test(tab.url||''))return false;
+   const send=(type,payload={})=>chrome.tabs.sendMessage(tab.id,{channel:'cc',type,...payload}).catch(()=>null);
+   if(!(await send('notification-toast-ready'))?.ok){
+    await chrome.scripting.executeScript({target:{tabId:tab.id},files:['notification-toast.js']});
+   }
+   const [current]=await chrome.tabs.query({active:true,lastFocusedWindow:true});
+   return current?.id===tab.id&&(await send('notification-toast',{notice}))?.ok===true;
+  }catch{return false;}
+ }
+ async function pin(id,pinned){
+  const d=(await chrome.storage.local.get(key))[key];
+  const record=d?.notifications?.find(n=>n.id===id);
+  if(!record||d.notificationPreferences?.browser===false)return {ok:false};
+  if(pinned)await chrome.storage.session.set({[pinnedKey]:id});
+  else if((await chrome.storage.session.get(pinnedKey))[pinnedKey]===id)await chrome.storage.session.remove(pinnedKey);
+  return {ok:true};
+ }
+ async function restorePinned(){
+  const id=(await chrome.storage.session.get(pinnedKey))[pinnedKey];
+  if(!id)return;
+  const d=(await chrome.storage.local.get(key))[key],record=d?.notifications?.find(n=>n.id===id);
+  if(!record||d.notificationPreferences?.browser===false){await chrome.storage.session.remove(pinnedKey);return;}
+  await showOnActiveTab({...record,pinned:true});
+ }
+ async function showNotice(record){
+  const id=(await chrome.storage.session.get(pinnedKey))[pinnedKey];
+  return !id&&await showOnActiveTab(record);
+ }
+ async function internalReminders(){
+  if(typeof CCPortal==='undefined')return;
+  const rows=await CCPortal.request('/v1/slim/rpc',{method:'POST',body:{module:'@/lib/internal-messages.functions',method:'listInternalMessages',data:{}},timeoutMs:8000});
+  if(!Array.isArray(rows))return;
+  const cutoff=Date.now()-120000;
+  for(const message of rows.filter(row=>!row.read_at&&Date.parse(row.created_at)>=cutoff).slice(0,5)){
+   await emit({category:'internal',key:'internal:'+message.id,title:'Nova mensagem interna',message:'Abra o Workflow para consultar a mensagem.',view:'workflow'});
+  }
+ }
+ async function emitNow(options){const category=options.category||'call';const d=CCCore.migrate((await chrome.storage.local.get(key))[key]||{});if(d.notificationPreferences?.categories?.[category]===false)return null;d.notifications||=[];if(options.key&&d.notifications.some(n=>n.key===options.key))return null;const record={id:crypto.randomUUID(),category,key:options.key||'',title:String(options.title||'Converte Call').slice(0,180),message:String(options.message||'').slice(0,400),at:new Date().toISOString(),read:false,entityId:options.entityId||'',view:options.view||'notifications'};d.notifications.push(record);d.notifications=d.notifications.slice(-1000);await chrome.storage.local.set({[key]:d});if(d.notificationPreferences?.browser!==false&&!await showNotice(record)){try{await chrome.notifications.create(record.id,{type:'basic',iconUrl:'icons/128.png',title:record.title,message:record.message});}catch{/* Central remains available if OS/Chrome suppresses the popup. */}}return record.id;}
  function emit(options){const job=queue.then(()=>emitNow(options));queue=job.catch(()=>{});return job;}
  const map=rows=>new Map((rows||[]).map(r=>[r.id,r]));
  async function diff(before,after){if(!before||!after)return;const events=[];const add=(category,title,message,key,entityId='',view='notifications')=>events.push({category,title,message,key,entityId,view});
@@ -19,6 +60,9 @@ globalThis.CCNotification=(()=>{
  }
  async function reminders(){const d=(await chrome.storage.local.get(key))[key];if(!d)return;const now=Date.now();for(const t of d.tasks||[]){if(t.status==='completed'||!t.due)continue;const due=Date.parse(t.due),delta=due-now;if(delta<=15*60000&&delta>-7*86400000)await emit({category:'task_due',title:delta>0?'Prazo de tarefa próximo':'Tarefa atrasada',message:t.title,key:'due:'+t.id+':'+t.due+':'+(delta>0?'before':'late'),entityId:t.id,view:'projects'});}for(const e of d.events||[]){const start=Date.parse(e.start),delta=start-now;if(delta>=-60000&&delta<=15*60000)await emit({category:'meeting',title:'Compromisso próximo',message:e.title+' • '+new Date(start).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),key:'meeting:'+e.id+':'+e.start,entityId:e.id,view:'agenda'});}}
  chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes[key]?.oldValue&&changes[key]?.newValue)diff(changes[key].oldValue,changes[key].newValue).catch(()=>{});});
- chrome.alarms.create('cc-notification-reminders',{periodInMinutes:1});chrome.alarms.onAlarm.addListener(a=>{if(a.name==='cc-notification-reminders')reminders().catch(()=>{});});
- return {emit,reminders,diff};
+ chrome.alarms.create('cc-notification-reminders',{periodInMinutes:1});chrome.alarms.onAlarm.addListener(a=>{if(a.name==='cc-notification-reminders'){reminders().catch(()=>{});internalReminders().catch(()=>{});}});
+ chrome.tabs?.onActivated?.addListener(()=>restorePinned().catch(()=>{}));
+ chrome.tabs?.onUpdated?.addListener((_,change,tab)=>{if(tab.active&&change.status==='complete')restorePinned().catch(()=>{});});
+ chrome.windows?.onFocusChanged?.addListener(id=>{if(id>=0)restorePinned().catch(()=>{});});
+ return {emit,reminders,diff,pin};
 })();

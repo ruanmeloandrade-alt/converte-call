@@ -1,6 +1,7 @@
 'use strict';
 globalThis.CCNotificationCatalog=[
  ['message','Relacionamento','Mensagens recebidas','Nova mensagem de cliente no WhatsApp conectado.'],
+ ['internal','Projetos','Mensagens internas','Mensagem recebida no Workflow.'],
  ['lead','Relacionamento','Novos clientes','Novo cliente criado manualmente, importado ou recebido pela integração.'],
  ['stage','Relacionamento','Troca de etapa ou funil','Cliente movido entre etapas ou funis.'],
  ['sale','Relacionamento','Vendas registradas','Nova venda ou pedido registrado.'],

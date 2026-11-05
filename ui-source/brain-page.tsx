@@ -12,7 +12,7 @@ export function component(){
  const [workspace,setWorkspace]=useState<string|null>(null),[sources,setSources]=useState<Source[]>([]),[terms,setTerms]=useState<{id:string;term:string}[]>([]);
  const [tab,setTab]=useState<Tab>('text'),[editing,setEditing]=useState<Source|null>(null),[title,setTitle]=useState(''),[content,setContent]=useState(''),[url,setUrl]=useState(''),[file,setFile]=useState<File|null>(null),[draft,setDraft]=useState('');
  const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState('');
- const lock=useRef(false),fileInput=useRef<HTMLInputElement>(null);
+ const lock=useRef(false),fileInput=useRef<HTMLInputElement>(null),sourcesTab=useRef<HTMLButtonElement>(null);
  async function load(id:string){
   const [a,b]=await Promise.all([repository.from('ai_brain_sources').select().eq('workspace_id',id).order('created_at',{ascending:false}),repository.from('ai_brain_blocked_terms').select().eq('workspace_id',id).order('term')]);
   if(a.error||b.error)throw Error(a.error?.message||b.error?.message);
@@ -57,8 +57,14 @@ export function component(){
  const visible=sources.filter(s=>tab==='sources'||s.source_type===tab);
  const active=tabs.find(t=>t.id===tab)!;
  return <main className="min-w-0 space-y-5 p-4 md:p-6 text-foreground">
-  <header><h1 className="flex items-center gap-2 text-2xl font-bold"><BrainCircuit/> Cérebro IA</h1><p className="mt-2 text-sm text-muted-foreground">Informações da sua empresa para orientar os agentes de atendimento.</p></header>
-  <div role="tablist" aria-label="Seções do Cérebro IA" className="flex flex-wrap gap-2">{tabs.map(t=><button key={t.id} role="tab" aria-selected={tab===t.id} aria-controls={'brain-panel-'+t.id} id={'brain-tab-'+t.id} disabled={busy} onClick={()=>choose(t.id)} className={buttonClass+(tab===t.id?' bg-primary text-primary-foreground':' bg-card hover:bg-muted')}><t.icon size={16}/>{t.label}</button>)}</div>
+  <header className="cc-brain-intro">
+   <div><span className="cc-brain-eyebrow">Converte Call</span><h1>Cérebro IA</h1><p>Informações da sua empresa para orientar os agentes de atendimento.</p></div>
+   <button type="button" disabled={busy} className="cc-brain-source-link" onClick={()=>{choose('sources');sourcesTab.current?.focus();}}>
+    <span className="cc-brain-illustration"><BrainCircuit size={44} strokeWidth={1.4} aria-hidden="true" /></span>
+    <span>Explorar fontes <span aria-hidden="true">↗</span></span>
+   </button>
+  </header>
+  <div role="tablist" aria-label="Seções do Cérebro IA" className="flex flex-wrap gap-2">{tabs.map(t=><button key={t.id} ref={t.id==='sources'?sourcesTab:undefined} role="tab" aria-selected={tab===t.id} aria-controls={'brain-panel-'+t.id} id={'brain-tab-'+t.id} disabled={busy} onClick={()=>choose(t.id)} className={buttonClass+(tab===t.id?' bg-primary text-primary-foreground':' bg-card hover:bg-muted')}><t.icon size={16}/>{t.label}</button>)}</div>
   {error&&<p role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">{error}</p>}
   {notice&&<p role="status" className="rounded-md border p-3 text-sm">{notice}</p>}
   {loading?<p role="status">Carregando sua base…</p>:<section role="tabpanel" id={'brain-panel-'+tab} aria-labelledby={'brain-tab-'+tab} className="space-y-5">

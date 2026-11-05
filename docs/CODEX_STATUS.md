@@ -1003,3 +1003,9 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - O construtor ganhou barra responsiva, contraste no canvas, cartões com cabeçalhos mais leves e seletor de blocos com a identidade Converte Call. Mantidos os controles, ações, posições persistidas e caminhos de execução.
 - Início prioriza ações do dia e agrupa os indicadores existentes em uma faixa. Dashboard ganhou cabeçalho e faixa de vendas próprios, mantendo os componentes de indicadores e dados atuais.
 - Build 0.15.25 compilado e conferido nos três pacotes, com 76 entradas por ZIP e hashes dos arquivos principais iguais aos arquivos compilados. 222 testes automatizados passaram. Validação visual e publicação pendentes.
+
+## Revisão do vídeo ConvertCall — notificações, atualização e Cérebro
+- Avisos são entregues à aba ativa com opção de fixar. Os temporários saem após oito segundos, ficam no histórico e usam o aviso do navegador quando a página restringe o painel. Mensagens internas recentes e não lidas geram aviso genérico pela consulta autenticada, sem expor seu conteúdo.
+- O aviso de atualização mostra a versão instalada, a publicada e o download. A URL só aceita o ZIP da versão publicada no mesmo servidor. Teste de publicação administrativa e download verificou bytes exatos antes e depois de reiniciar o servidor local.
+- A ilustração clicável do Cérebro abre as fontes cadastradas. Acesso aos arquivos e demais abas mantidos.
+- Build 0.15.26 gerado e conferido nos três pacotes. Validação visual e publicação ainda pendentes.
