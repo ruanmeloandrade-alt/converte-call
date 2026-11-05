@@ -1023,7 +1023,7 @@ Atualizado em 05/11/2026. Produção anuncia a extensão 0.15.22. Os ZIPs 0.15.2
 | 🟡 Pronto localmente | Notificações e atualização | Aviso na aba ativa, fixação, lembrete de mensagem interna e download do ZIP anunciado. Validação no navegador pendente. |
 | 🟡 Pronto localmente | Pixel Call | Regra de clique aceita destino no site ou URL externa, com seletor CSS opcional. Teste cobre regra salva, clique real simulado, validação do destino e contagem. Revisão visual do link de acompanhamento e instalação em site real pendentes. |
 | 🟡 Pronto localmente | Demais telas | Empresas, Faculdade, Configurações, Central de Automações, organização do Workflow e compactação do Catálogo. Validação visual da extensão pendente. |
-| 🟡 Parcial | Equipe, planos e checkout | Identidade, bandeiras e euro como padrão validados localmente. Estrutura de até três conexões e envio manual por conexão validados localmente. Seleção de conexão, automações por número, dois acessos, cobrança e preço em dólar seguem pendentes. |
+| 🟡 Parcial | Equipe, planos e checkout | Identidade, bandeiras e euro como padrão validados localmente. Estrutura de até três conexões e envio manual por conexão validados localmente. Seleção e retomada por conexão, dois acessos no novo plano e cobrança por WhatsApp implementados e testados localmente. Faltam QA da extensão instalada, pareamento e produção. |
 
 ## Revisão consolidada — identidade das demais telas e checkout
 - Aplicada a identidade da Converte Call em Empresas, Catálogo, Faculdade, Configurações, Integrações, Central de Automações, assinatura e link de acompanhamento do Pixel. Ícones de Início, Funil, Workflow e indicadores receberam formas próprias. Ações e dados existentes preservados.
@@ -1055,3 +1055,10 @@ Atualizado em 05/11/2026. Produção anuncia a extensão 0.15.22. Os ZIPs 0.15.2
 - Teste novo cobre preço separado de contratos antigos, não liberação no checkout, fatura assinada, repetição idempotente, upgrade, preservação durante revisão de downgrade e Pix com três WhatsApps/dois usuários. Suíte completa: 226 testes aprovados; verificações direcionadas adicionais após ajustes de página da conta e Pix.
 - Arquivos alterados: src/connection-entitlements.mjs, src/billing.mjs, src/billing-currencies.mjs, src/billing-coupons.mjs, src/checkout.mjs, src/evolution.mjs, src/server.mjs, src/automation-runtime.mjs; extension/{billing-catalog,release,services,team}.js; vendor/billing-catalog.js; public/{checkout,account,admin}.{js,html}; test/{evolution,salesbot-connection,whatsapp-billing}.test.mjs; arquivos correspondentes gerados em build/extensions e este status.
 - SEMÁFORO: 🟡 implementação local; faltam QA autenticado da extensão completa, agente IA por conexão, pareamento real dos números e validação dos serviços de produção. Sem publicação e sem ZIP intermediário. A revisão do vídeo não é anunciada como concluída.
+
+## Conferência adicional — agente IA e editor (05/11/2026)
+- test/agent-connection.test.mjs: agente ativado na conexão secundária ignora mensagem recebida na principal, responde ao webhook da secundária, não repete resposta ao webhook duplicado e respeita parada.
+- test/trigger-connection.test.mjs: alterações de tag/campo no CRM disparam pela conexão secundária da última mensagem recebida, com as credenciais corretas.
+- Ambos passaram. Após as últimas alterações, 41 testes direcionados de contas, sessões, agendamento e bot também passaram.
+- Navegador interno, conta descartável local: Central de Automações abriu; criado fluxo pelo modelo Primeiro atendimento, salvo, página recarregada e bot reaberto com três blocos e três cabos. Integrações abriu sem Google/Gmail e com e-mail marketing pendente. Não equivale a homologação de WhatsApp real ou extensão instalada.
+- Semáforo continua amarelo. Ainda não publicado e nenhum ZIP intermediário entregue.
