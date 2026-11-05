@@ -41,6 +41,20 @@ for(const [name,prefix] of [['source','../extension/'],...['chrome','edge','fire
   assert.equal(f.session.ccSurfacePlacement.hidden,false);assert.equal(f.session.ccSurfacePlacement.tabId,1);
   assert(f.messages.some(m=>m.id===1&&m.type==='surface-toggle'));
  });
+ test(name+': failed tab injection leaves the current controls available',async()=>{
+  const f=backgroundFixture(prefix);
+  await f.handle({type:'surface-ready'});await f.follow();
+  await f.handle({type:'surface-placement',follow:true});
+  await f.follow();
+  f.messages.length=0;
+  const send=f.ctx.chrome.tabs.sendMessage;
+  f.ctx.chrome.tabs.sendMessage=async(id,message)=>id===2&&message.type==='surface-ping'?undefined:send(id,message);
+  let attempts=0;
+  f.ctx.chrome.scripting.executeScript=async()=>{attempts++;throw Error('Site access denied');};
+  f.focus(2);await f.follow(2);
+  assert.equal(attempts,1);
+  assert(!f.messages.some(m=>m.type==='surface-suspend'));
+ });
  test(name+': private recording opens an independent HUD and removes overlays from shared tabs',async()=>{
   const f=backgroundFixture(prefix),created=[],updated=[];
   await f.handle({type:'surface-ready'});await f.follow();f.messages.length=0;

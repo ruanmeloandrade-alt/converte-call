@@ -21,7 +21,7 @@ async function surfacePlacement(tabId){
  const placement={follow,tabId,hidden:false};await chrome.storage.session.set({ccSurfacePlacement:placement});return placement;
 }
 async function anchorSurface(tab){const placement=await surfacePlacement(tab.id);placement.tabId=tab.id;placement.hidden=false;await chrome.storage.session.set({ccSurfacePlacement:placement});queueSurfaceFollow(tab.id,tab.windowId);}
-async function suspendSurfaces(except){for(const tab of await chrome.tabs.query({}))if(tab.id!==except)await chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'surface-suspend'}).catch(()=>{});}
+async function suspendSurfaces(except){const tabs=await chrome.tabs.query({});await Promise.all(tabs.filter(tab=>tab.id!==except).map(tab=>chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'surface-suspend'}).catch(()=>{})));}
 const downloads=new Map();
 chrome.downloads.onChanged.addListener(delta=>{if(['complete','interrupted'].includes(delta.state?.current)&&downloads.has(delta.id)){const token=downloads.get(delta.id);downloads.delete(delta.id);media({type:'release-url',token}).catch(()=>{});}});
 async function notify(){for(const tab of await chrome.tabs.query({})){if(tab.id)chrome.tabs.sendMessage(tab.id,{channel:'cc',type:'state-changed'}).catch(()=>{});}}
@@ -101,15 +101,16 @@ async function followActiveTab(tabId,windowId){
  const win=await chrome.windows.get(windowId);if(win.type!=='normal'||!win.focused)return;
  const active=(await chrome.tabs.query({active:true,windowId}))[0];if(active?.id!==tabId)return;
  const tab=await chrome.tabs.get(tabId);
- await suspendSurfaces(tabId);
  // Chrome blocks injection into internal pages, its store and other extensions.
- if(!/^https?:/.test(tab.url||''))return;
- try{await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-ping'});}catch{try{await chrome.scripting.executeScript({target:{tabId},files:['content.js']});}catch{return;}}
+ if(!/^https?:/.test(tab.url||'')){await suspendSurfaces(tabId);return;}
+ const ping=await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-ping'}).catch(()=>null);
+ if(!ping?.ok){try{await chrome.scripting.executeScript({target:{tabId},files:['content.js']});}catch{return;}}
  const latest=(await chrome.tabs.query({active:true,windowId}))[0];if(latest?.id!==tabId||!(await chrome.windows.get(windowId)).focused)return;
  state=(await chrome.storage.session.get('ccSurfaceState')).ccSurfaceState;
  const latestPlacement=await surfacePlacement(tabId);if(latestPlacement.hidden||(!latestPlacement.follow&&latestPlacement.tabId!==tabId))return;const target=new URL(tab.url);if(['checkout.stripe.com','billing.stripe.com'].includes(target.hostname)||(['convertecall.pro','pay.convertecall.pro'].includes(target.hostname)&&/^\/(checkout|account\/assinatura)/.test(target.pathname)))state={...state,mode:'dock'};
  const floating=await chrome.storage.session.get(['ccFloating:hud','ccFloating:dock']);if(floating['ccFloating:hud']&&state.mode==='surface'&&state.view==='hud')state={...state,mode:'dock'};
- await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-restore',state,follow:latestPlacement.follow,detachedDock:!!floating['ccFloating:dock']}).catch(()=>{});
+ const restored=await chrome.tabs.sendMessage(tabId,{channel:'cc',type:'surface-restore',state,follow:latestPlacement.follow,detachedDock:!!floating['ccFloating:dock']}).catch(()=>null);
+ if(restored?.ok)await suspendSurfaces(tabId);
 }
 chrome.tabs.onActivated.addListener(({tabId,windowId})=>queueSurfaceFollow(tabId,windowId));
 chrome.tabs.onUpdated.addListener((tabId,change,tab)=>{if(change.status==='complete'&&tab.active)queueSurfaceFollow(tabId,tab.windowId);});

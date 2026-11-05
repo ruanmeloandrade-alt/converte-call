@@ -972,3 +972,8 @@ Escopo: diagnóstico da falha de abertura do pagamento. Produção confirmou POS
 - O autosave rejeita uma revisão antiga com HTTP 409. O editor mantém as alterações em tela e só confirma o salvamento após a fila terminar.
 - Duplicação, colagem, exclusão e substituição tratam destinos de condição e os caminhos de erro correspondentes.
 - Teste local pelo mesmo endpoint do Inbox salva, rejeita a gravação atrasada, relê as conexões e envia áudio seguido pelo texto da saída condicional. A execução relatada na conta do Nardel ainda precisa ser identificada.
+
+## Revisão do vídeo ConvertCall — controle flutuante
+- A troca de aba suspendia a aba anterior antes de confirmar a instalação ou restauração do controle na aba de destino. Se a injeção falhasse, o controle anterior desaparecia.
+- A troca confirma a restauração antes de suspender os demais controles. Testes de distribuição cobrem falha de injeção, aba fixa, seguir aba, ocultação e HUD separado.
+- A validação ainda é automatizada. O restante do escopo do vídeo segue separado desta entrega.
