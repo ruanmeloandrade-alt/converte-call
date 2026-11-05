@@ -1096,3 +1096,6 @@ Atualizado em 05/11/2026. Produção anuncia a extensão 0.15.22. Os ZIPs 0.15.2
 - Arquivos principais: extension/{app,native,v4,v11}.js, extension/v11.css, extension/manifest.json; public/mobile.{js,css}; ui-source/{build.mjs,styles.css,brand-glyph.tsx,lead-timeline.ts}; InboxPage.legacy.tsx, crm.funis-de-venda.legacy.tsx, crm.produtos.legacy.tsx, routes/{pedidos,crm.estoque,crm.empresas}.tsx; test/lead-order.test.mjs; arquivos compilados em extension/slim e build/extensions; este status.
 - Semáforo: verde para build/testes e cenários locais conferidos; amarelo para aprovação visual do usuário e teste na extensão instalada. Não anunciar homologação de todo o vídeo ou envio real.
 
+
+Validação de entrega 0.15.29: ZIP único de 949422 bytes, 77 entradas verificadas por SHA256 e versão 0.15.29. Código 6bd63268d4ac581e5503ad0ca92fe4a5eef676c5 publicado com Railway SUCCESS (5b009414-fd1b-43b1-9451-e2b1c7b61c7c). health/ready 200; mobile.js e mobile.css publicados iguais aos finais. Sem publicação administrativa global do ZIP. O QA do cabeçalho nativo com iframe real confirmou abertura de ficha e retorno à lista em largura reduzida; quadro de Projetos final conferido com colunas expandindo para a largura disponível. Aprovação visual e extensão instalada continuam amarelas. Notas e lista de arquivos em outputs/ConverteCall-0.15.29-NOTAS.txt.
+
