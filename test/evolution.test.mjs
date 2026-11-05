@@ -34,7 +34,7 @@ test('legacy WhatsApp connection survives migration and the second slot stays se
   const worker=new Worker(store,evolution);
   for(const row of store.all('SELECT * FROM inbound'))worker.receive(row);
   assert.deepEqual(store.get(ws).inboxEvents.map(row=>row.connectionSlot??1).sort(),[1,2]);
-  assert.equal(store.all("SELECT * FROM jobs WHERE type='incoming'").length,1);
+  assert.equal(store.all("SELECT * FROM jobs WHERE type='incoming'").length,2);
   assert.equal(new Evolution(store).instance(ws).instance_name,'legacy');
  }finally{store.close();rmSync(dir,{recursive:true,force:true});}
 });

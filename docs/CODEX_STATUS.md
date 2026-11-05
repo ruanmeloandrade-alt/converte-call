@@ -1037,3 +1037,11 @@ Atualizado em 05/11/2026. Produção anuncia a extensão 0.15.22. Os ZIPs 0.15.2
 - O Inbox registra a conexão de cada mensagem. Envio manual por posição explícita, mídia, reações e exclusão usam a conexão correspondente. Chamadas legadas continuam na principal. A fila de automação mantém execução apenas pela principal até persistir o vínculo da conexão nos bots e nas retomadas.
 - Testes locais cobrem migração de credenciais, verificação de webhook, mensagens com mesmo ID em duas posições e envio manual pela segunda conexão. O pareamento adicional ainda não está exposto ao cliente. Faltam seletor no Inbox, vínculo da conexão nas automações, integração com equipe e checkout e homologação real.
 - Sem publicação e sem ZIP intermediário.
+
+## Revisão consolidada — execução de bots por conexão
+- Ativação manual inclui a posição escolhida na identidade da solicitação e a persiste com a execução. A leitura do motor isola execuções e mensagens por conexão. As credenciais consultadas pertencem somente à posição selecionada.
+- Retomadas por mensagem e por cronômetro mantêm essa conexão. Teste local comprovou que uma resposta recebida na conexão principal não retoma o bot da segunda conexão.
+- O seletor foi adicionado ao Inbox e ao painel de ativação no WhatsApp, aparecendo quando houver mais de uma conexão ativa. O cadastro e o pareamento de conexões adicionais continuam fora da interface até concluir os direitos de uso.
+- A atribuição de agente registra sua conexão para impedir resposta por outra posição. A mudança ainda requer teste específico de agente IA e validação visual. Eventos de funil e tracking ainda usam a conexão principal.
+- Uma regressão de teste revelou que o adaptador de aplicação de regras de etapa é usado sem Evolution. A leitura opcional da conexão foi corrigida, preservando esse caminho.
+- Sem publicação ou ZIP intermediário. Pendentes equipe, cobrança por número, cadastro de conexões e homologação real.

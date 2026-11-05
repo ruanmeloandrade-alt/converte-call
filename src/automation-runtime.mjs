@@ -7,24 +7,24 @@ const fail=(status,message)=>Object.assign(Error(message),{status});
 
 export class AutomationRuntime{
  constructor(store,evolution,{aiOptions}={}){Object.assign(this,{store,evolution,aiOptions});this.locks=new Map();}
- adapter(ws,leadId){const adapter=new SalesbotStore(this.store,this.evolution,ws);adapter.aiOptions=this.aiOptions;adapter.google=this.google;adapter.leadId=leadId;return adapter;}
+ adapter(ws,leadId,connectionSlot=1){const adapter=new SalesbotStore(this.store,this.evolution,ws,connectionSlot);adapter.aiOptions=this.aiOptions;adapter.google=this.google;adapter.leadId=leadId;return adapter;}
  async locked(ws,lead,fn){const key=ws+':'+lead,previous=this.locks.get(key)||Promise.resolve(),task=previous.catch(()=>{}).then(fn);this.locks.set(key,task);try{return await task;}finally{if(this.locks.get(key)===task)this.locks.delete(key);}}
  async dispatch(ws,input,requestId){
   if(!/^[a-f0-9-]{36}$/.test(requestId||''))throw fail(400,'Atualize a extensão para iniciar esta automação com segurança.');
-  return this.locked(ws,input.leadId,async()=>{
-   const key='dispatch:'+requestId,hash=createHash('sha256').update(JSON.stringify([input.leadId,input.kind,input.assetId])).digest('hex'),existing=this.store.one('SELECT * FROM idempotency WHERE workspace_id=? AND key=?',ws,key);
+  const connectionSlot=input.connectionSlot??1;if(!Number.isInteger(connectionSlot)||connectionSlot<1||connectionSlot>3)throw fail(400,'Conexão inválida.');return this.locked(ws,input.leadId,async()=>{
+   const key='dispatch:'+requestId,hash=createHash('sha256').update(JSON.stringify([input.leadId,input.kind,input.assetId,...(connectionSlot===1?[]:[connectionSlot])])).digest('hex'),existing=this.store.one('SELECT * FROM idempotency WHERE workspace_id=? AND key=?',ws,key);
    if(existing){if(existing.request_hash!==hash)throw fail(409,'Esta solicitação já pertence a outra automação.');const response=JSON.parse(existing.response);if(response.status==='processing')throw fail(409,'Esta execução já foi iniciada. Confira o histórico antes de tentar outra.');if(response.status==='failed')throw fail(502,response.error);return response;}
-   const d=this.store.get(ws),lead=d.leads.find(l=>l.id===input.leadId);if(!lead)throw fail(404,'Cliente não encontrado.');requireCompanyMessageTarget(d,lead);if(!['bot','agent'].includes(input.kind))throw fail(400,'Selecione bot ou agente IA.');const asset=(input.kind==='bot'?d.bots:d.agents).find(a=>a.id===input.assetId);if(!asset)throw fail(404,'Automação não encontrada nesta conta.');if(input.kind==='agent'&&(asset.isActive===false||asset.enabled===false))throw fail(400,'Ative a automação antes de iniciar.');const connection=await this.evolution.status(ws);if(connection.status!=='connected')throw fail(409,'Conecte seu WhatsApp antes de iniciar.');
+   const d=this.store.get(ws),lead=d.leads.find(l=>l.id===input.leadId);if(!lead)throw fail(404,'Cliente não encontrado.');requireCompanyMessageTarget(d,lead);if(!['bot','agent'].includes(input.kind))throw fail(400,'Selecione bot ou agente IA.');const asset=(input.kind==='bot'?d.bots:d.agents).find(a=>a.id===input.assetId);if(!asset)throw fail(404,'Automação não encontrada nesta conta.');if(input.kind==='agent'&&(asset.isActive===false||asset.enabled===false))throw fail(400,'Ative a automação antes de iniciar.');const connection=await this.evolution.status(ws,connectionSlot);if(connection.status!=='connected')throw fail(409,'Conecte seu WhatsApp antes de iniciar.');
    this.store.run('INSERT INTO idempotency VALUES(?,?,?,?,?)',ws,key,hash,JSON.stringify({status:'processing'}),Date.now());
-   try{const adapter=this.adapter(ws);let result;
+   try{const adapter=this.adapter(ws,undefined,connectionSlot);let result;
     if(input.kind==='bot'){
-     const runId=await adapter.run(()=>Original.startSalesbotRun(adapter,{workspaceId:ws,salesbotId:asset.id,leadId:lead.id,initialVariables:{trigger:'manual',requestId}}));if(!runId)throw Error('O motor não iniciou o bot. Confira o histórico.');
+     const runId=await adapter.run(()=>Original.startSalesbotRun(adapter,{workspaceId:ws,salesbotId:asset.id,leadId:lead.id,initialVariables:{trigger:'manual',requestId,connectionSlot}}));if(!runId)throw Error('O motor não iniciou o bot. Confira o histórico.');
      const run=adapter.rows('salesbot_runs').find(r=>r.id===runId),errors=adapter.rows('salesbot_run_logs').filter(r=>r.salesbot_run_id===runId&&r.status==='error');if(errors.length||run?.status==='error')throw Error(errors.at(-1)?.last_error||errors.at(-1)?.message||'A execução do bot falhou. Confira o histórico.');
      result={runId,status:run?.status==='finished'?'done':run?.status?.startsWith('waiting')?'waiting':'running'};
     }else{
      const p=String(d.providers.ai||'openai').toLowerCase(),credentials=this.store.secret(ws,p==='openai'?'openai':'ai:'+p);if(!credentials?.apiKey)throw Error('Salve sua API key em Integrações antes de ativar o agente.');
      await adapter.from('leads').update({active_conversation_agent_id:asset.id,ai_paused:false}).eq('id',lead.id);
-     const runId=this.store.one("SELECT id FROM runs WHERE workspace_id=? AND lead_id=? AND kind='agent' AND asset_id=? AND status='active' ORDER BY updated_at DESC LIMIT 1",ws,lead.id,asset.id)?.id||randomUUID(),now=new Date().toISOString();this.store.run('INSERT OR REPLACE INTO runs VALUES(?,?,?,?,?,?,?,?,?,?)',runId,ws,lead.id,'agent',asset.id,'active',null,this.store.vault.seal({provider:p,model:credentials.model||AI_DEFAULTS[p]?.model}),now,now);
+     const runId=this.store.one("SELECT id FROM runs WHERE workspace_id=? AND lead_id=? AND kind='agent' AND asset_id=? AND status='active' ORDER BY updated_at DESC LIMIT 1",ws,lead.id,asset.id)?.id||randomUUID(),now=new Date().toISOString();this.store.run('INSERT OR REPLACE INTO runs VALUES(?,?,?,?,?,?,?,?,?,?)',runId,ws,lead.id,'agent',asset.id,'active',null,this.store.vault.seal({provider:p,model:credentials.model||AI_DEFAULTS[p]?.model,connectionSlot}),now,now);
      // The next incoming message is the trigger. Activation never invents an
      // inbound message, sends a greeting or replies to an already handled turn.
      result={runId,status:'active'};
@@ -36,15 +36,28 @@ export class AutomationRuntime{
  async incoming(ws,payload){
   {const d=this.store.get(ws),l=d.leads.find(l=>l.id===payload.leadId);if(l&&!isCompanyMessageTarget(d,l))return;}
   const receivedAt=payload.receivedAt||this.store.get(ws).inboxEvents.find(e=>e.id===payload.messageId)?.at||new Date().toISOString();
-  return this.locked(ws,payload.leadId,async()=>{const adapter=this.adapter(ws);
+  return this.locked(ws,payload.leadId,async()=>{const adapter=this.adapter(ws,undefined,payload.connectionSlot??1);
    const waits=adapter.rows('salesbot_runs').filter(r=>r.lead_id===payload.leadId&&r.status==='waiting_message');
    const logs=waits.some(r=>!r.waiting_started_at)?adapter.rows('salesbot_run_logs'):[];
    const resumableRunIds=waits.filter(r=>{
     const started=r.waiting_started_at||logs.filter(l=>l.salesbot_run_id===r.id&&l.block_id===r.current_block_id&&l.status==='wait').map(l=>l.created_at).sort().at(-1)||r.created_at;
     return !started||Date.parse(started)<Date.parse(receivedAt);
    }).map(r=>r.id);
-   await adapter.run(async()=>{if(payload.isFirstMessage){await Original.dispatchLeadCreated(adapter,{workspaceId:ws,leadId:payload.leadId});await Original.enqueueLeadAutomationEvent(adapter,{workspaceId:ws,leadId:payload.leadId,event:'created',eventId:payload.messageId});}await Original.dispatchInboundMessage(adapter,{workspaceId:ws,leadId:payload.leadId,text:payload.text||'',canal:'whatsapp',isFirstMessage:!!payload.isFirstMessage,resumableRunIds,messageId:payload.messageId});if(adapter.errors.length)throw adapter.errors.at(-1);const lead=adapter.rows('leads').find(l=>l.id===payload.leadId);if(lead?.ai_paused||!lead?.active_conversation_agent_id){this.store.event(ws,{type:'automation',leadId:payload.leadId,kind:'agent',status:'done'});this.store.run("UPDATE runs SET status='done',updated_at=? WHERE workspace_id=? AND lead_id=? AND kind='agent' AND status='active'",new Date().toISOString(),ws,payload.leadId);}});});}
+   await adapter.run(async()=>{if(payload.isFirstMessage){await Original.dispatchLeadCreated(adapter,{workspaceId:ws,leadId:payload.leadId});await Original.enqueueLeadAutomationEvent(adapter,{workspaceId:ws,leadId:payload.leadId,event:'created',eventId:payload.messageId});}await Original.dispatchInboundMessage(adapter,{workspaceId:ws,leadId:payload.leadId,text:payload.text||'',canal:'whatsapp',isFirstMessage:!!payload.isFirstMessage,resumableRunIds,messageId:payload.messageId});if(adapter.errors.length)throw adapter.errors.at(-1);const lead=adapter.rows('leads').find(l=>l.id===payload.leadId);if((this.store.get(ws).leads.find(l=>l.id===payload.leadId)?.agentConnectionSlot??1)===(payload.connectionSlot??1)&&(lead?.ai_paused||!lead?.active_conversation_agent_id)){this.store.event(ws,{type:'automation',leadId:payload.leadId,kind:'agent',status:'done'});this.store.run("UPDATE runs SET status='done',updated_at=? WHERE workspace_id=? AND lead_id=? AND kind='agent' AND status='active'",new Date().toISOString(),ws,payload.leadId);}});});}
  async stage(ws,payload){{const d=this.store.get(ws),l=d.leads.find(l=>l.id===payload.leadId);if(l&&!isCompanyMessageTarget(d,l))return;}return this.locked(ws,payload.leadId,async()=>{const adapter=this.adapter(ws),lead=adapter.rows('leads').find(l=>l.id===payload.leadId);if(!lead)return;await adapter.run(async()=>{await Original.dispatchStageChange(adapter,{workspaceId:ws,leadId:lead.id,newStageId:lead.stage_id,newPipelineId:lead.pipeline_id});await Original.enqueueLeadAutomationEvent(adapter,{workspaceId:ws,leadId:lead.id,event:'moved',pipelineId:lead.pipeline_id,stageId:lead.stage_id,eventId:payload.eventId});});});}
  async trigger(ws,payload){{const d=this.store.get(ws),l=d.leads.find(l=>l.id===payload.leadId);if(l&&!isCompanyMessageTarget(d,l))return;}return this.locked(ws,payload.leadId,async()=>{const adapter=this.adapter(ws,payload.leadId);if(!adapter.rows('leads').length)return;const params={...payload,workspaceId:ws};await adapter.run(async()=>{if(payload.event==='created')await Original.dispatchLeadCreated(adapter,params);if(payload.event==='tracking')await Original.dispatchTrackingEvent(adapter,params);if(payload.event==='tag-added')await Original.dispatchTagAdded(adapter,params);if(payload.event==='field-updated')await Original.dispatchCustomFieldChanged(adapter,{...params,value:String(payload.value??'')});if(payload.event!=='tracking')await Original.enqueueLeadAutomationEvent(adapter,params);if(adapter.errors.length)throw adapter.errors.at(-1);});});}
- async tick(ws){const adapter=this.adapter(ws);await adapter.run(async()=>{await Original.tickWaitingTimers(adapter);await Original.tickStageAutomationJobs(adapter,20);});const d=this.store.get(ws);for(const lead of d.leads.filter(l=>l.agentId&&!l.aiPaused&&isCompanyMessageTarget(d,l)).slice(0,200))await this.locked(ws,lead.id,async()=>{const scoped=this.adapter(ws,lead.id);await scoped.run(async()=>{await Original.tickAiAgentTracking(scoped);await Original.tickAiAgentInactivity(scoped);if(scoped.errors.length)throw scoped.errors.at(-1);});});}
+ async tick(ws){
+  const slots=new Set([1,...this.evolution.connections(ws).map(connection=>connection.slot)]);
+  for(const slot of slots){
+   const adapter=this.adapter(ws,undefined,slot);
+   await adapter.run(async()=>{await Original.tickWaitingTimers(adapter);await Original.tickStageAutomationJobs(adapter,20);});
+  }
+  const d=this.store.get(ws);
+  for(const lead of d.leads.filter(l=>l.agentId&&!l.aiPaused&&isCompanyMessageTarget(d,l)).slice(0,200)){
+   await this.locked(ws,lead.id,async()=>{
+    const scoped=this.adapter(ws,lead.id,lead.agentConnectionSlot??1);
+    await scoped.run(async()=>{await Original.tickAiAgentTracking(scoped);await Original.tickAiAgentInactivity(scoped);if(scoped.errors.length)throw scoped.errors.at(-1);});
+   });
+  }
+ }
 }
