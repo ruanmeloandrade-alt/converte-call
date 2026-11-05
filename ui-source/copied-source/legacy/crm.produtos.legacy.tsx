@@ -1,3 +1,4 @@
+import {BrandGlyph} from '../../brand-glyph';
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -452,7 +453,7 @@ function CrmProdutosPage() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
       <AppSidebar />
-      <main className="cc-catalog-page flex-1 overflow-y-auto">
+      <main className="cc-catalog-page cc-catalog-studio flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[1400px] space-y-6 px-6 py-6">
           {/* Header */}
           <header className="cc-catalog-heading flex flex-wrap items-start justify-between gap-3">
@@ -468,7 +469,7 @@ function CrmProdutosPage() {
               )}
               <div>
                 <div className="text-[10px] font-semibold tracking-widest text-muted-foreground">
-                  CRM · {selected ? "PRODUTOS DO CATÁLOGO" : "CATÁLOGOS"}
+                  <BrandGlyph kind="catalog"/> {selected ? "SEU CATÁLOGO" : "ESTÚDIO DE PRODUTOS"}
                 </div>
                 <h1 className="mt-1 text-2xl font-semibold tracking-tight">
                   {selected ? selected.name : "Catálogos de produtos"}
@@ -548,7 +549,7 @@ function CrmProdutosPage() {
           {/* Visão geral (somente fora de um catálogo) */}
           {!selected && (
             <>
-              <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <section className="cc-catalog-summary grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <Stat icon={Layers} label="Catálogos" value={String(catalogs.length)} />
                 <Stat icon={Package} label="Produtos" value={String(totalProducts)} />
                 <Stat icon={DollarSign} label="Valor somado" value={formatBRL(totalValue)} />
@@ -883,7 +884,7 @@ function CatalogCard({
           </div>
         </div>
       </button>
-      <div className="flex items-center justify-end gap-1 border-t border-border bg-muted/20 px-3 py-2">
+      <div className="cc-catalog-actions flex items-center justify-end gap-1 border-t border-border bg-muted/20 px-3 py-2">
         <button
           onClick={onConfigure}
           className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -933,7 +934,7 @@ function ProductCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border bg-card transition-colors",
+        "cc-product-card group relative overflow-hidden rounded-2xl border bg-card transition-colors",
         product.active ? "border-border hover:border-primary/40" : "border-dashed border-border opacity-70",
       )}
     >
@@ -984,7 +985,7 @@ function ProductCard({
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-end gap-1 border-t border-border bg-muted/20 px-2.5 py-1.5">
+      <div className="cc-product-actions flex items-center justify-end gap-1 border-t border-border bg-muted/20 px-2.5 py-1.5">
         <button
           onClick={onToggle}
           className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"

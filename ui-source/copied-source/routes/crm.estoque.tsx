@@ -1,3 +1,4 @@
+import {BrandGlyph} from '../../brand-glyph';
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -59,13 +60,13 @@ function EstoquePage() {
   return (
     <div className="flex min-h-[100dvh] w-full bg-muted/20 text-foreground md:h-screen md:overflow-hidden">
       <AppSidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="cc-stock-studio flex-1 overflow-y-auto">
         <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-5 px-4 py-5 md:px-6">
           <header className="rounded-lg border border-border bg-background p-5 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                  <Package className="h-4 w-4" />
+                  <BrandGlyph kind="inventory"/>
                   Estoque
                 </div>
                 <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">Controle de estoque</h1>

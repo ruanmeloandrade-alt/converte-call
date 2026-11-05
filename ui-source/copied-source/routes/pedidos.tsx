@@ -1,3 +1,4 @@
+import {BrandGlyph} from '../../brand-glyph';
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -59,6 +60,8 @@ function PedidosPage() {
   const [discount, setDiscount] = useState("");
   const [saving, setSaving] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [orderStep,setOrderStep]=useState(0);
+  function nextOrderStep(){if(orderStep===0&&((productMode==="existing"&&!productId)||(productMode!=="existing"&&!productName.trim()))){setError("Escolha o produto ou informe a descrição da venda.");return;}if(orderStep===1&&((customerMode==="existing"&&!customerId)||(customerMode==="new"&&!customerName.trim()))){setError("Escolha ou cadastre o cliente, ou selecione Sem cadastro.");return;}setError(null);setOrderStep(value=>Math.min(3,value+1));}
   const submitLock = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -154,6 +157,7 @@ function PedidosPage() {
         },
       });
       toast.success("Pedido enviado para o funil de vendas");
+      setOrderStep(0);
       setReviewOpen(false);
       setProductId("");
       setProductName("");
@@ -165,6 +169,7 @@ function PedidosPage() {
       setCustomerAddress("");
       setDiscount("");
       await leadsQ.refetch();
+      await catalogsQ.refetch();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao registrar pedido.");
     } finally {
@@ -176,16 +181,17 @@ function PedidosPage() {
   return (
     <div className="flex min-h-[100dvh] bg-background text-foreground md:h-screen md:overflow-hidden">
       <AppSidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="cc-order-workspace flex-1 overflow-y-auto">
         <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 lg:px-8">
           <header className="rounded-lg border border-border bg-card p-5">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary"><ClipboardList className="h-4 w-4" /> Vendas</div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary"><BrandGlyph kind="orders"/> Novo pedido</div>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight">Pedidos</h1>
             <p className="mt-1 text-sm text-muted-foreground">Retire um pedido selecionando produto e cliente, ou registre venda avulsa sem cadastro.</p>
           </header>
 
-          <section className="grid gap-4 lg:grid-cols-[1.15fr_.85fr]">
-            <div className="space-y-4 rounded-lg border border-border bg-card p-4">
+          <nav className="cc-order-steps" aria-label="Etapas do pedido">{["Produto","Cliente","Entrega e pagamento","Conferência"].map((label,index)=><button key={label} type="button" disabled={index>orderStep} aria-current={index===orderStep?"step":undefined} onClick={()=>{setError(null);setOrderStep(index);}}><span>{index+1}</span>{label}</button>)}</nav>
+          <section className="cc-order-inputs">
+            <div hidden={orderStep!==0} className="cc-order-product space-y-4 rounded-lg border border-border bg-card p-4">
               <h2 className="text-sm font-semibold">Produto da venda</h2>
               <Segment value={productMode} onChange={setProductMode} options={[["existing", "Produto existente"], ["new", "Criar produto"], ["free", "Venda avulsa"]]} />
               {productMode === "existing" ? (
@@ -212,7 +218,7 @@ function PedidosPage() {
               </div>
             </div>
 
-            <div className="space-y-4 rounded-lg border border-border bg-card p-4">
+            <div hidden={orderStep!==1} className="cc-order-customer space-y-4 rounded-lg border border-border bg-card p-4">
               <h2 className="text-sm font-semibold">Cliente</h2>
               <Segment value={customerMode} onChange={setCustomerMode} options={[["existing", "Cliente cadastrado"], ["new", "Cadastrar agora"], ["none", "Sem cadastro"]]} />
               {customerMode === "existing" ? (
@@ -237,9 +243,10 @@ function PedidosPage() {
             </div>
           </section>
 
-          <section className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+          {orderStep<3&&<div className="cc-order-navigation"><Button variant="outline" disabled={orderStep===0} onClick={()=>setOrderStep(step=>step-1)}>Voltar</Button><Button onClick={nextOrderStep}>Continuar →</Button></div>}
+          <section hidden={orderStep!==3} className="cc-order-review flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Total do pedido</div>
+              <div className="cc-order-summary"><p><span>Produto</span><strong>{productMode==="existing"?selectedProduct?.name:productName}</strong><button type="button" onClick={()=>setOrderStep(0)}>Editar</button></p><p><span>Cliente</span><strong>{customerMode==="existing"?leads.find(lead=>lead.id===customerId)?.name:customerMode==="new"?customerName:"Venda avulsa"}</strong><button type="button" onClick={()=>setOrderStep(1)}>Editar</button></p></div><div className="text-xs text-muted-foreground">Total do pedido</div>
               <div className="text-3xl font-semibold tracking-tight">{formatBRL(total)}</div>
               <div className="mt-1 text-xs text-muted-foreground">Base {formatBRL(basePrice)} · desconto {formatBRL(discountValue)}</div>
             </div>

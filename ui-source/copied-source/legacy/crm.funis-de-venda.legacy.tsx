@@ -1,3 +1,4 @@
+import {useLeadTimeline,orderLeads} from '../../lead-timeline';
 import {LeadSalesPanel,isSaleLabel} from "@/components/inbox/LeadSalesPanel";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { Fragment } from "react";
@@ -405,6 +406,7 @@ function CrmFunisPage() {
   useEffect(() => {
     localStorage.setItem("saude-slim.crmView", view);
   }, [view]);
+ const timeline=useLeadTimeline();const [leadOrder,setLeadOrder]=useState("newest");
  const [query, setQuery] = useState("");
  const messageQuery = query.trim().slice(0, 160);
  const [messageMatches, setMessageMatches] = useState<{query: string; funnelId: string; ids: Set<string>}>();
@@ -526,7 +528,7 @@ function CrmFunisPage() {
         ...funnel,
         stages: stagesBase.map((s) => ({
           ...s,
-          leads: s.leads.filter((l) => {
+          leads: orderLeads(s.leads.map(lead=>{const timing=timeline[lead.id];return timing?.last?{...lead,lastMessageAt:new Date(timing.last).toISOString(),lastMessageFrom:timing.from||lead.lastMessageFrom,lastMessagePreview:timing.preview}:lead;}).filter((l) => {
             if (q) {
               const hay = [
                 l.name,
@@ -544,10 +546,10 @@ function CrmFunisPage() {
             if (onlyUnread && !(l.unreadCount && l.unreadCount > 0)) return false;
             if (!Number.isNaN(minV) && l.value < minV) return false;
             return true;
-          }),
+          }),leadOrder,timeline),
         })),
       };
-    }, [funnel, query, messageQuery, messageMatches, sourceFilters, tagFilters, onlyWaiting, onlyWithValue, onlyUnread, minValue, hideEntry]);
+    }, [funnel, query, messageQuery, messageMatches, sourceFilters, tagFilters, onlyWaiting, onlyWithValue, onlyUnread, minValue, hideEntry, leadOrder, timeline]);
 
    const availableTags = useMemo(() => {
      if (!funnel) return [] as string[];
@@ -1189,6 +1191,7 @@ function CrmFunisPage() {
  {messageSearchFailed && <span role="status" className="text-xs text-muted-foreground">Histórico de mensagens indisponível</span>}
  </div>
 
+ <label className="cc-lead-order">Ordenar leads<select aria-label="Ordenar leads" value={leadOrder} onChange={event=>setLeadOrder(event.target.value)}><option value="newest">Últimos a chegar</option><option value="oldest">Primeiros a chegar</option><option value="message">Última mensagem recebida</option></select></label>
  <LeadFiltersPopover
  sources={ALL_SOURCES}
  selectedSources={sourceFilters}
@@ -3252,6 +3255,7 @@ function LeadCard({
      <SourceIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
     </div>
 
+    {waiting&&<span className="cc-lead-message-badge">Mensagem recebida · aguardando resposta</span>}
     {lead.lastMessagePreview && (
      <div
       className={cn(

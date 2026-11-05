@@ -1,3 +1,4 @@
+import {BrandGlyph} from '../../brand-glyph';
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -144,12 +145,12 @@ function SuppliersPage() {
   return (
     <div className="flex min-h-[100dvh] bg-background text-foreground md:h-screen md:overflow-hidden">
       <AppSidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="cc-supplier-studio flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[1500px] space-y-5 px-4 py-6 lg:px-8">
           <header className="rounded-lg border border-border bg-card p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary"><Truck className="h-4 w-4" /> Vendas</div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary"><BrandGlyph kind="supplier"/> Sua rede de fornecimento</div>
                 <h1 className="mt-2 text-2xl font-semibold tracking-tight">Fornecedores</h1>
                 <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
                   Cadastro de fornecedores para associar produtos, controlar custos, comparar preços e preparar automações específicas por fornecedor.

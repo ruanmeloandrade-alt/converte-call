@@ -1,3 +1,4 @@
+import {timestamp} from '../../../lead-timeline';
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
@@ -233,6 +234,7 @@ function realtimeMessagePreview(payload: Record<string, unknown> | null, type: s
 
 export function InboxPage({ channel, selectedId }: InboxPageProps) {
   const queryClientTop = useQueryClient();
+  const navigatePanels = useNavigate();
   const [cacheScope, setCacheScope] = useState<InboxCacheScope | null>(null);
   const [cachedConversations, setCachedConversations] = useState<ChatConversation[]>([]);
   const [conversationCacheReady, setConversationCacheReady] = useState(channel !== "leads");
@@ -783,7 +785,7 @@ export function InboxPage({ channel, selectedId }: InboxPageProps) {
         }) satisfies ChatConversation,
     );
     return [...directLeads, ...groups].sort(
-      (a, b) => Date.parse(b.lastMessageAt) - Date.parse(a.lastMessageAt),
+      (a, b) => timestamp(b.lastMessageAt) - timestamp(a.lastMessageAt) || a.id.localeCompare(b.id),
     );
   }, [channel, leadConvsQuery.data, groupConvsQuery.data]);
 
@@ -868,7 +870,7 @@ export function InboxPage({ channel, selectedId }: InboxPageProps) {
     const cachedGroups = cachedConversations.filter((conversation) => conversation.isGroup);
     const liveDirect = networkConversations.filter((conversation) => !conversation.isGroup);
     return [...liveDirect, ...cachedGroups].sort(
-      (a, b) => Date.parse(b.lastMessageAt) - Date.parse(a.lastMessageAt),
+      (a, b) => timestamp(b.lastMessageAt) - timestamp(a.lastMessageAt) || a.id.localeCompare(b.id),
     );
   }, [
     channel,
@@ -1196,13 +1198,23 @@ export function InboxPage({ channel, selectedId }: InboxPageProps) {
 
   // Em mobile: mostra apenas uma "view" por vez (lista OU conversa).
   const hasSelection = Boolean(selected) || resolvingSelectedLead;
+  useEffect(()=>{
+    const receive=(event:MessageEvent)=>{
+      if(event.origin!==location.origin||event.source!==parent||event.data?.channel!=='cc-inbox-panels')return;
+      if(event.data.panel==='conversations'){if(window.matchMedia('(max-width:767px)').matches&&selected){void navigatePanels({to:'/inbox/leads'});setListCollapsed(false);setProfileOpen(false);}else setListCollapsed(value=>!value);}
+      if(event.data.panel==='profile'&&channel==='leads'&&selected&&!selected.isGroup)setProfileOpen(value=>!value);
+    };
+    window.addEventListener('message',receive);
+    parent.postMessage({channel:'cc-inbox-panel-state',profileAvailable:channel==='leads'&&!!selected&&!selected.isGroup,profileOpen,listOpen:!listCollapsed},location.origin);
+    return()=>window.removeEventListener('message',receive);
+  },[channel,selected?.id,profileOpen,listCollapsed,navigatePanels]);
+
   return (
     <div
       data-chat-surface
       className="cc-inbox-workspace flex-1 flex min-w-0 h-[100dvh] md:h-screen overflow-hidden"
       style={{ backgroundColor: "var(--chat-bg)", color: "var(--chat-text)" }}
     >
-      <nav className="cc-inbox-rail" aria-label="Painéis do Inbox"><span className="cc-inbox-mark" aria-hidden="true">CC</span><button type="button" aria-label="Mostrar ou ocultar conversas" aria-pressed={!listCollapsed} onClick={()=>setListCollapsed(v=>!v)}>☰<small>Conversas</small></button>{channel==='leads'&&selected&&!selected.isGroup&&<button type="button" aria-label="Mostrar ou ocultar ficha do cliente" aria-pressed={profileOpen} onClick={()=>setProfileOpen(v=>!v)}>◎<small>Ficha</small></button>}<span className="cc-inbox-rail-label">CONVERTE<br/>CALL</span></nav>
       {/* Lista de conversas */}
       <div
         className={cn(
@@ -1211,6 +1223,7 @@ export function InboxPage({ channel, selectedId }: InboxPageProps) {
           listCollapsed ? "w-0 md:w-0" : "w-full md:w-[360px] md:shrink-0",
         )}
       >
+        {/^https?:$/.test(location.protocol)&&<div className="cc-inbox-top-tools"><button type="button" disabled={!selected} onClick={()=>setListCollapsed(v=>!v)} aria-pressed={!listCollapsed}>Conversas</button><button type="button" disabled={!selected||selected.isGroup||channel!=='leads'} onClick={()=>setProfileOpen(v=>!v)} aria-pressed={profileOpen}>Ficha do cliente</button></div>}
         <ConversationsPanel
           meta={meta}
           conversations={filtered}
@@ -1250,7 +1263,7 @@ export function InboxPage({ channel, selectedId }: InboxPageProps) {
       {/* Painel do perfil, independente do estado da lista, sempre visível quando aberto */}
       {channel === "leads" && selected && !selected.isGroup && profileOpen && (
         <div
-          className="cc-inbox-profile hidden md:flex w-[360px] shrink-0 border-l"
+          className="cc-inbox-profile flex w-[360px] shrink-0 border-l"
           style={{ borderColor: "var(--chat-divider)" }}
         >
           <LeadProfilePanel

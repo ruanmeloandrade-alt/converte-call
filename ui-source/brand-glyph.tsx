@@ -1,0 +1,3 @@
+import React from 'react';
+const paths={catalog:'M5 6h14v13H5z M9 3v7l3-2 3 2V3 M8 14h8 M8 17h5',inventory:'M4 8l8-5 8 5v11H4z M4 8h16 M8 12v4 M12 10v6 M16 13v3',supplier:'M3 7h11v11H3z M14 11h4l3 4v3h-7 M6 7V4h5 M7 18v2 M18 18v2',orders:'M6 3h12v18H6z M9 8h6 M9 12h3 M9 16h6 M3 8h3 M3 16h3'};
+export function BrandGlyph({kind,className=''}:{kind:keyof typeof paths;className?:string}){return <svg className={'cc-brand-glyph '+className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[kind]}/><circle cx="20" cy="4" r="2" fill="currentColor" stroke="none"/></svg>;}
