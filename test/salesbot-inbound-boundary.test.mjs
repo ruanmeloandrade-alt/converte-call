@@ -8,6 +8,24 @@ import {createApp} from '../src/server.mjs';
 import {SalesbotStore} from '../src/salesbot-store.mjs';
 
 const later=()=>new Date(Date.now()+10).toISOString();
+test('stage TRACKING filter starts contact only for the matching incoming text',async()=>fixture(async({app,ws,leadId,botId,sent,adapter,runtime})=>{
+ const lead=adapter.rows('leads').find(l=>l.id===leadId);
+ app.store.mutate(ws,d=>{
+  d.bots.push({id:'tracking',nome:'TRACKING BASE',isActive:true,startBlockId:'filter',gatilhos:[],blocks:[
+   {id:'filter',kind:'condicao',condicaoModo:'ou',condicoes:[{id:'phrase',sujeito:'cliente',operador:'contem',valor:'Olá, tenho interesse!',nextBlockId:'start'},{id:'word',sujeito:'cliente',operador:'contem',valor:'interesse',nextBlockId:'start'}],falseNextBlockId:'end'},
+   {id:'start',kind:'iniciar-salesbot',destinoBotId:botId,nextBlockId:'end'},{id:'end',kind:'encerrar-bot'}]});
+  d.slimStageAutomations.push({id:lead.pipeline_id,automations:{[lead.stage_id]:[{id:'track-entry',enabled:true,config:{kind:'salesbot',botId:'tracking'},execution:{trigger:{kind:'created-or-moved'}}}]}});
+ });
+ for(const [text,expected]of [['Bom dia, amigo',0],['Olá, tenho interesse!',1],['interesse',2]]){
+  // Separate first arrivals, with their own durable lead and event.
+  const id=randomUUID();app.store.mutate(ws,d=>d.leads.push({...d.leads[0],id,phone:'5522991234568'}));
+  await runtime.incoming(ws,{leadId:id,messageId:randomUUID(),text,isFirstMessage:true,receivedAt:new Date().toISOString()});
+  assert.equal(sent.length,expected);
+  const tracking=adapter.rows('salesbot_runs').find(r=>r.lead_id===id&&r.salesbot_id==='tracking');
+  assert.equal(tracking.variables.last_message,text);
+  if(expected)assert.equal(adapter.rows('salesbot_runs').find(r=>r.lead_id===id&&r.salesbot_id===botId).status,'waiting_message');
+ }
+}));
 async function fixture(fn){
  const dir=mkdtempSync(join(tmpdir(),'cc-inbound-boundary-')),sent=[];
  const app=createApp({dir,master:'c'.repeat(64),evolutionOptions:{baseUrl:'https://evolution.example',key:'fixture',fetcher:async(url,init)=>{sent.push({text:JSON.parse(init.body).text,at:Date.now()});return Response.json({key:{id:randomUUID()}});}}});

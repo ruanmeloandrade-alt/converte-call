@@ -1099,3 +1099,13 @@ Atualizado em 05/11/2026. Produção anuncia a extensão 0.15.22. Os ZIPs 0.15.2
 
 Validação de entrega 0.15.29: ZIP único de 949422 bytes, 77 entradas verificadas por SHA256 e versão 0.15.29. Código 6bd63268d4ac581e5503ad0ca92fe4a5eef676c5 publicado com Railway SUCCESS (5b009414-fd1b-43b1-9451-e2b1c7b61c7c). health/ready 200; mobile.js e mobile.css publicados iguais aos finais. Sem publicação administrativa global do ZIP. O QA do cabeçalho nativo com iframe real confirmou abertura de ficha e retorno à lista em largura reduzida; quadro de Projetos final conferido com colunas expandindo para a largura disponível. Aprovação visual e extensão instalada continuam amarelas. Notas e lista de arquivos em outputs/ConverteCall-0.15.29-NOTAS.txt.
 
+
+
+## Reparo backend do funil e TRACKING BASE — Nardel — 06/11/2026
+- Usuário autorizou publicar o ajuste exclusivamente no backend e recuperar etapas corretas. Nenhum ZIP ou fonte da extensão alterado. Filtro de interesse preservado.
+- Diagnóstico: oito avanços comprovados foram sobrescritos pela cópia do campo stage antigo; status e data da movimentação também precisavam de preservação. Corrigido no adaptador. A mesclagem de uma edição não relacionada feita por um aplicativo desatualizado preserva a nova etapa.
+- Automações criadas pela etapa agora recebem o texto do evento de entrada, restrito ao mesmo lead e conexão. Antes o TRACKING BASE recebia last_message vazio, inclusive em entradas com interesse. As palavras e saídas configuradas no bot permanecem intactas.
+- Testes: regressão reproduzida antes e corrigida; filtro aceita Olá, tenho interesse! e interesse, ignora contato comum; mensagem inicial não libera a própria pausa; conexões e isolamento preservados. Suíte completa após correção: consultar work/backend-tests-final.log (fora do repositório).
+- Recuperação planejada e revisada: cinco Em contato e três RMKT RÁPIDO, somente destinos comprovados no log, sem movimentação manual posterior. Backup criptografado no servidor, transação, revisão incrementada e eventos marcados para não disparar bots retroativos. Não inventar etapas para contatos sem avanço comprovado.
+- Arquivos: src/salesbot-store.mjs, src/automation-runtime.mjs, test/salesbot-stage-persistence.test.mjs, test/salesbot-inbound-boundary.test.mjs, docs/CODEX_STATUS.md.
+- Publicação e verificação de produção serão confirmadas no relatório da tarefa. Nenhum envio real de teste foi autorizado a um destinatário externo.

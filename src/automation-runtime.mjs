@@ -37,7 +37,7 @@ export class AutomationRuntime{
  async incoming(ws,payload){
   {const d=this.store.get(ws),l=d.leads.find(l=>l.id===payload.leadId);if(l&&!isCompanyMessageTarget(d,l))return;}
   const receivedAt=payload.receivedAt||this.store.get(ws).inboxEvents.find(e=>e.id===payload.messageId)?.at||new Date().toISOString();
-  return this.locked(ws,payload.leadId,async()=>{const adapter=this.adapter(ws,undefined,payload.connectionSlot??1);
+  return this.locked(ws,payload.leadId,async()=>{const adapter=this.adapter(ws,undefined,payload.connectionSlot??1);adapter.inboundMessage={leadId:payload.leadId,text:payload.text||''};
    const waits=adapter.rows('salesbot_runs').filter(r=>r.lead_id===payload.leadId&&r.status==='waiting_message');
    const logs=waits.some(r=>!r.waiting_started_at)?adapter.rows('salesbot_run_logs'):[];
    const resumableRunIds=waits.filter(r=>{
